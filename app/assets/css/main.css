@@ -1,0 +1,14 @@
+nav {
+  background-color: rgb(28, 65, 143);
+}
+
+#widget {
+  border: 1px solid black;
+  height: 564;
+  width: 334px
+}
+
+.icon {
+  height: 16px;
+  width: 16px;
+}
