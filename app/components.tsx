@@ -116,7 +116,7 @@ export function Tabs(props: TabsProps) {
 // Tab {{{1
 interface TabProps {
   tabId: string;
-  title: string;
+  title: React.ReactNode;
   children?: any;
 }
 
