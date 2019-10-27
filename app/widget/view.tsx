@@ -6,40 +6,46 @@ import { render as annotateRender } from "../pages/annotate/view";
 import { render as annotationsRender } from "../pages/annotations/view";
 import { render as searchRender } from "../pages/search/view";
 import { render as profileRender } from "../pages/profile/view";
+import { User } from "../api/profile";
+import { Resource } from "../api/resource";
+import { Context } from "./context";
 
 type Page = "annotate" | "annotations" | "search" | "profile";
 
 type SetPage = (p: Page) => any;
 
-function pageReducer(page: Page) {
+function renderPage(page: Page, context: Context) {
   switch (page) {
-    case "annotate": return annotateRender; break;
-    case "annotations": return annotationsRender; break;
-    case "search": return searchRender; break;
-    case "profile": return profileRender; break;
+    case "annotate": annotateRender(context); break;
+    case "annotations": annotationsRender(); break;
+    case "search": searchRender(); break;
+    case "profile": profileRender(); break;
     default: console.error(`page ${page} not found`); return null;
   }
 }
 
 var currentPage: Page = "annotate";
 
-function switchPage(newPage: Page) {
+function switchPage(newPage: Page, context: Context) {
   const node = document.getElementById("page");
-  const componentRenderer = pageReducer(newPage);
-  if (node && componentRenderer) {
+  if (node) {
     ReactDOM.unmountComponentAtNode(node);
-    componentRenderer();
+    renderPage(newPage, context);
     currentPage = newPage;
   }
 }
 
-function Navbar(): React.FunctionComponentElement<{}> {
+interface Props {
+  context: Context;
+}
+
+function Navbar(props: Props): React.FunctionComponentElement<Context> {
   const [page, setPage] = React.useState(currentPage);
   const activeFlag = (p: Page): string => p === currentPage ? " active" : "";
 
   function pageSelected(p: Page) {
     setPage(p);
-    switchPage(p);
+    switchPage(p, props.context);
   }
 
   return (
@@ -85,21 +91,23 @@ function Navbar(): React.FunctionComponentElement<{}> {
   );
 }
 
-function Widget(): React.FunctionComponentElement<{}> {
+function Widget(props: Props): React.FunctionComponentElement<Context> {
   return (
     <div>
       <img src="img/logo.png" width="100%"/>
-      <Navbar/>
+      <Navbar context={props.context}/>
       <div id="page"></div>
     </div>
   );
 }
 
-export function render() {
+export function render(context: Context) {
   const container = document.getElementById("widget");
   if (container) {
-    ReactDOM.render(<Widget/>, container);
-    switchPage(currentPage);
+    ReactDOM.render(<Widget context={context}/>, container);
+    switchPage(currentPage, context);
+    console.log(`Logged user id="${context.user.id}" nickname="${context.user.nickname}"`);
+    console.log(`Annotating pid="${context.resource.pid}" subject="${context.resource.subject}"`);
   } else {
     console.error("widget DOM element missing");
   }

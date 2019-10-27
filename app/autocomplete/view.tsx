@@ -6,6 +6,7 @@ import * as ac from "./autocomplete";
 
 interface Props {
   id?: string;
+  onChange: (val: Array<ac.Suggestion>) => void;
 }
 
 interface State {
@@ -38,6 +39,7 @@ export class SemanticAutocomplete extends React.Component<Props, State> {
 	      });
 	    });
 	}}
+	onChange={this.props.onChange}
 	options={this.state.options}
       />
     );

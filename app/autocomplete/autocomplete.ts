@@ -44,7 +44,7 @@ export function mkSuggestions(items: Array<Item>): Array<Suggestion> {
     const g = groups[gk];
     return g.length > 1 ? aggregateGroup(g) : mkSuggestion(g[0]);
   });
-  console.log(res);
+  //console.log(res);
   return res;
 }
 
