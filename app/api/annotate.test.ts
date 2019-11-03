@@ -1,9 +1,10 @@
-import * as rq from "./request";
+import * as an from "../../shared/annotation";
+import * as rq from "./annotate";
 
 const timeStampRegex = /[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]T[0-9][0-9]:[0-9][0-9]:[0-9][0-9]\.[0-9]+/;
 
 test("timestamp is generated", () => {
-  const ts = rq.mkTimestamp();
+  const ts = an.mkTimestamp();
   expect(ts).toMatch(timeStampRegex);
 });
 
@@ -44,11 +45,11 @@ test("mkRequest works", () => {
       "name": "B2Note v2.0"
     }
   };
-  const body: rq.AnBody = rq.mkBody(["url1", "url2"]);
-  const target: rq.AnTarget = rq.mkTarget({id: "testTargetId", source: "testSource"});
-  const creator: rq.AnCreator = rq.mkCreator({id: "testCreatorID", nickname: "testCreatorNickName"});
-  const generator: rq.AnGenerator = rq.mkGenerator();
-  const req: rq.AnnotateReq = rq.mkRequest(body, target, creator, generator);
+  const body: an.AnBody = rq.mkBody(["url1", "url2"]);
+  const target: an.AnTarget = rq.mkTarget({id: "testTargetId", source: "testSource"});
+  const creator: an.AnCreator = rq.mkCreator({id: "testCreatorID", nickname: "testCreatorNickName"});
+  const generator: an.AnGenerator = rq.mkGenerator();
+  const req: an.AnRecord = rq.mkRequest(body, target, creator, generator);
   expect(req.created).toMatch(timeStampRegex);
   expect(req.generated).toMatch(timeStampRegex);
   delete req.created;

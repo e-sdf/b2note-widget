@@ -16,6 +16,8 @@ interface State {
 
 export class SemanticAutocomplete extends React.Component<Props, State> {
 
+  private typeahead: any;
+
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -24,10 +26,18 @@ export class SemanticAutocomplete extends React.Component<Props, State> {
     };
   }
 
+  public clear = () => {
+    const ta = this.typeahead;
+    if (ta) {
+      ta.getInstance().clear();
+    }
+  }
+
   public render = () => {
     return (
       <AsyncTypeahead
 	id={this.props.id}
+	ref={(typeahead) => this.typeahead = typeahead}
 	isLoading={this.state.loading}
 	onSearch={query => {
 	  this.setState({ loading: true });

@@ -4,6 +4,55 @@ import * as React from "react";
 import * as ReactDOM from "react-dom";
 //import * as panels from "./panels";
 
+
+// Alerts {{{1
+
+interface AlertProps {
+  message: React.ReactNode;
+  type: "success" | "warning" | "danger";
+}
+
+function Alert(props: AlertProps) {
+  const [show, setShow] = React.useState("show");
+  return (
+    <div 
+      className={`alert alert-${props.type} fade ${show}`}
+      style={ { marginLeft: "10px", marginRight: "10px" } }
+      role="alert"
+    >
+      {props.message}
+      <button 
+        type="button" className="close" aria-label="Close"
+        onClick={() => setShow("")}
+      >
+	<span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+  );
+}
+
+export function showAlertSuccess(domId: string, message: React.ReactNode) {
+  const dom = document.getElementById(domId);
+  if (dom) {
+    ReactDOM.unmountComponentAtNode(dom);
+    ReactDOM.render(<Alert message={message} type="success"/>, dom);
+    window.setTimeout(() => ReactDOM.unmountComponentAtNode(dom), 3000);
+  } else {
+    console.error("element not found: id=" + domId);
+  }
+}
+
+export function showAlertError(domId: string, message: React.ReactNode) {
+  const dom = document.getElementById(domId);
+  if (dom) {
+    ReactDOM.unmountComponentAtNode(dom);
+    ReactDOM.render(<Alert message={message} type="danger"/>, dom);
+  } else {
+    console.error("element not found: id=" + domId);
+  }
+}
+
+
 // Panel {{{1
 interface PanelProps {
   heading: React.ReactNode;

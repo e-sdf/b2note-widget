@@ -1,4 +1,3 @@
-
 export interface AnItem {
   source: string;
   type: string;
@@ -28,7 +27,7 @@ export interface AnTarget {
   type: string;
 }
 
-export interface AnnotateReq {
+export interface AnRecord {
   "@context": string;
   body: any;
   created: string;
@@ -55,46 +54,4 @@ export function mkTimestamp(): string {
     "T" + hh + ":" + mi + ":" + ss + "." + ms;
 }
 
-export function mkBody(sources: Array<string>): AnBody {
-  const items: Array<AnItem> = sources.map(source => ({
-    type: "SpecificResource",
-    source
-  }));
-  return {
-    items,
-    purpose: "tagging",
-    type: "Composite"
-  };
-}
 
-export function mkTarget(obj: {id: string, source: string}): AnTarget {
-  return { ...obj, type: "SpecificResource" }; 
-}
-
-export function mkCreator(obj: {id: string, nickname: string}): AnCreator {
-  return { ...obj, type: "Person" };
-}
-
-export function mkGenerator(): AnGenerator {
-  return {
-    type: "Software",
-    homepage: "https://b2note.bsc.es/b2note/",
-    name: "B2Note v2.0"
-  };
-}
-
-export function mkRequest(body: AnBody, target: AnTarget, creator: AnCreator, generator: AnGenerator): AnnotateReq {
-  const ts = mkTimestamp();
-  return {
-    "@context": "http://www.w3.org/ns/anno/jsonld",
-    body,
-    target,
-    created: ts,
-    creator,
-    generated: ts,
-    generator,
-    id: "",
-    motivation: "tagging",
-    type: "Annotation"
-  };
-}
