@@ -1,11 +1,11 @@
 import * as _ from "lodash";
 
 export interface Item {
-   short_form: string,
-   labels: string,
-   ontology_acronym: string,
-   uris: string,
-   "norm(labels)": number
+   short_form: string;
+   labels: string;
+   ontology_acronym: string;
+   uris: string;
+   "norm(labels)": number;
 }
 
 export function makeSolrUrl(query: string): string {
@@ -14,19 +14,21 @@ export function makeSolrUrl(query: string): string {
     (query.length <= 4 && _.words(query).length <= 1) ? `(labels:/${query}.*/)`
     : `(labels:"${query}"^100%20OR%20labels:${query}*^20%20OR%20text_auto:/${query}.*/^10%20OR%20labels:*${query}*)`;
   const notErrors = "%20AND%20NOT%20(labels:/Error[0-9].*/)";
-  const sort = _.words(query).length <= 1 ? "&sort=norm(labels) desc" : ""
+  const sort = _.words(query).length <= 1 ? "&sort=norm(labels) desc" : "";
   const flags = "&fl=labels,uris,ontology_acronym,short_form,synonyms,norm(labels)&wt=json&indent=true&rows=1000";
   return base + "?q=(" + q + notErrors + ")" + sort + flags;
 }
 
 export interface Suggestion {
-  label: string,
-  items: Array<Item>
+  label: string;
+  labelOrig: string;
+  items: Array<Item>;
 }
 
 function mkSuggestion(item: Item): Suggestion {
   return {
     label: item.labels + " (" + item.ontology_acronym + " " + item.short_form + ")",
+    labelOrig: item.labels,
     items: [item]
   };
 }
@@ -34,6 +36,7 @@ function mkSuggestion(item: Item): Suggestion {
 function aggregateGroup(group: Array<Item>): Suggestion {
   return {
     label: group[0].labels + " (" + group.length + ")",
+    labelOrig: group[0].labels,
     items: group 
   };
 }

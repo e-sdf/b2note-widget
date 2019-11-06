@@ -13,8 +13,6 @@ const user: User = {
   nickname: "Robert Pergl"
 };
 
-const apiURL = "https://localhost:3050/api";
-
 const context: Context = {
   user,
   resource

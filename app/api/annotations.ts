@@ -1,15 +1,22 @@
+import * as _ from "lodash";
 import axios from "axios";
 import * as secret from "../secret";
 import * as server from "./server";
-import * as an from "../../shared/annotation";
+import * as an from "../shared/annotation";
 
 const url = server.url + "/annotations";
 
-export function mkBody(sources: Array<string>): an.AnBody {
-  const items: Array<an.AnItem> = sources.map(source => ({
-    type: "SpecificResource",
-    source
-  }));
+export function mkBody(sources: Array<string>, text: string): an.AnBody {
+  const items: Array<an.AnItem> = _.concat(
+    sources.map(source => ({
+      type: "SpecificResource",
+      source
+    } as an.AnItem)),
+    {
+      type: "TextualBody",
+      value: text
+    } as an.AnItem
+  );
   return {
     items,
     purpose: "tagging",
@@ -52,4 +59,16 @@ export function mkRequest(body: an.AnBody, target: an.AnTarget, creator: an.AnCr
 export function postAnnotation(body: an.AnRecord): Promise<any> {
   const config = { headers: {'Authorization': "bearer " + secret.token} };
   return axios.post(url, body, config);
+}
+
+export function getAnnotations(): Promise<Array<an.AnRecord>> {
+  return new Promise((resolve, reject) => {
+    axios.get(url).then(res => {
+      if(res.data) {
+        resolve(res.data);
+      } else {
+        reject(new Error("Empty data"));
+      }
+    }); 
+  });
 }

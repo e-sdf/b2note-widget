@@ -1,5 +1,5 @@
-import * as an from "../../shared/annotation";
-import * as rq from "./annotate";
+import * as an from "../shared/annotation";
+import * as rq from "./annotations";
 
 const timeStampRegex = /[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]T[0-9][0-9]:[0-9][0-9]:[0-9][0-9]\.[0-9]+/;
 
@@ -18,14 +18,18 @@ test("mkRequest works", () => {
       "type": "Composite",
       "purpose": "tagging",
       "items": [
-	{
-	  "type": "SpecificResource",
-	  "source": "url1"
-	},
-	{
-	  "type": "SpecificResource",
-	  "source": "url2"
-	}
+        {
+          "type": "SpecificResource",
+          "source": "url1"
+        },
+        {
+          "type": "SpecificResource",
+          "source": "url2"
+        },
+        {
+          "type": "TextualBody",
+          "value": "text"
+        }
       ]
     },
     "target": {
@@ -45,7 +49,7 @@ test("mkRequest works", () => {
       "name": "B2Note v2.0"
     }
   };
-  const body: an.AnBody = rq.mkBody(["url1", "url2"]);
+  const body: an.AnBody = rq.mkBody(["url1", "url2"], "text");
   const target: an.AnTarget = rq.mkTarget({id: "testTargetId", source: "testSource"});
   const creator: an.AnCreator = rq.mkCreator({id: "testCreatorID", nickname: "testCreatorNickName"});
   const generator: an.AnGenerator = rq.mkGenerator();

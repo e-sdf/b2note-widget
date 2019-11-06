@@ -1,8 +1,6 @@
 // Imports {{{1
-//import { Promise } from "es6-promise";
 import * as React from "react";
 import * as ReactDOM from "react-dom";
-//import * as panels from "./panels";
 
 
 // Alerts {{{1
@@ -12,7 +10,7 @@ interface AlertProps {
   type: "success" | "warning" | "danger";
 }
 
-function Alert(props: AlertProps) {
+function Alert(props: AlertProps): React.ReactElement {
   const [show, setShow] = React.useState("show");
   return (
     <div 
@@ -25,13 +23,13 @@ function Alert(props: AlertProps) {
         type="button" className="close" aria-label="Close"
         onClick={() => setShow("")}
       >
-	<span aria-hidden="true">&times;</span>
+        <span aria-hidden="true">&times;</span>
       </button>
     </div>
   );
 }
 
-export function showAlertSuccess(domId: string, message: React.ReactNode) {
+export function showAlertSuccess(domId: string, message: React.ReactNode): void {
   const dom = document.getElementById(domId);
   if (dom) {
     ReactDOM.unmountComponentAtNode(dom);
@@ -42,7 +40,17 @@ export function showAlertSuccess(domId: string, message: React.ReactNode) {
   }
 }
 
-export function showAlertError(domId: string, message: React.ReactNode) {
+export function showAlertWarning(domId: string, message: React.ReactNode): void {
+  const dom = document.getElementById(domId);
+  if (dom) {
+    ReactDOM.unmountComponentAtNode(dom);
+    ReactDOM.render(<Alert message={message} type="warning"/>, dom);
+  } else {
+    console.error("element not found: id=" + domId);
+  }
+}
+
+export function showAlertError(domId: string, message: React.ReactNode): void {
   const dom = document.getElementById(domId);
   if (dom) {
     ReactDOM.unmountComponentAtNode(dom);
@@ -60,7 +68,7 @@ interface PanelProps {
   children?: React.ReactNode;
 }
 
-export function Panel(props: PanelProps) {
+export function Panel(props: PanelProps): React.ReactElement {
   return (
     <div className="card">
       <div className="card-body">
@@ -128,7 +136,7 @@ interface TabsProps {
   children?: any;
 }
 
-function activeCls(tab: React.ReactElement, props: TabsProps) {
+function activeCls(tab: React.ReactElement, props: TabsProps): string {
   if (tab) {
     const first: boolean = !props.children ? false : tab.props.tabId === props.children[0].props.tabId;
     return first ? " active" : "";
@@ -137,7 +145,7 @@ function activeCls(tab: React.ReactElement, props: TabsProps) {
   }
 }
 
-export function Tabs(props: TabsProps) {
+export function Tabs(props: TabsProps): React.ReactElement {
   return (
     <div>
       <ul className="nav nav-tabs" id={props.id} role="tablist">
@@ -169,7 +177,7 @@ interface TabProps {
   children?: any;
 }
 
-export function Tab(props: TabProps) {
+export function Tab(props: TabProps): React.ReactElement {
   return (
     <div>
       {props.children}
