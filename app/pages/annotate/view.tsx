@@ -13,6 +13,20 @@ type TabType = "semantic" | "keyword" | "comment";
 
 const alertId = "anAlert";
 
+function mkTarget(context: Context): an.AnTarget {
+  return api.mkTarget({
+      id: context.resource.pid, 
+      source: context.resource.subject
+    });
+}
+
+function mkCreator(context: Context): an.AnCreator {
+  return api.mkCreator({
+      id: context.user.id, 
+      nickname: context.user.nickname
+    });
+}
+
 interface Props {
   context: Context;
 }
@@ -28,19 +42,13 @@ function Semantic(props: Props): React.FunctionComponentElement<Context> {
   }
 
   function annotate(): void {
-    const body: an.AnBody = api.mkBody(uris, label);
-    const target: an.AnTarget = api.mkTarget({
-      id: props.context.resource.pid, 
-      source: props.context.resource.subject
-    });
-    const creator: an.AnCreator = api.mkCreator({
-      id: props.context.user.id, 
-      nickname: props.context.user.nickname
-    });
+    const body: an.AnBody = api.mkBody(uris, an.PurposeType.TAGGING, label);
+    const target: an.AnTarget = mkTarget(props.context);
+    const creator: an.AnCreator = mkCreator(props.context);
     const generator: an.AnGenerator = api.mkGenerator();
-    const req: an.AnRecord = api.mkRequest(body, target, creator, generator);
+    const req: an.AnRecord = api.mkRequest(body, target, creator, generator, an.PurposeType.TAGGING);
     api.postAnnotation(req)
-      .then(() => showAlertSuccess(alertId, "Annotation created"))
+      .then(() => showAlertSuccess(alertId, "Semantic annotation created"))
       .catch(error => {
         if (error.response.data && error.response.data.message) {
           showAlertWarning(alertId, error.response.data.message);
@@ -57,6 +65,7 @@ function Semantic(props: Props): React.FunctionComponentElement<Context> {
         onChange={gotSuggestion}
       />
       <button type="button" className="btn btn-primary"
+        disabled={label.length === 0}
         onClick={() => {
           annotate();
           if (ref) {
@@ -68,20 +77,76 @@ function Semantic(props: Props): React.FunctionComponentElement<Context> {
   );
 }
 
-function Keyword(): React.FunctionComponentElement<{}> {
+function Keyword(props: Props): React.FunctionComponentElement<{}> {
+  const [label, setLabel] = React.useState("");
+
+  function annotate(): void {
+    const body: an.AnBody = api.mkBody([], an.PurposeType.TAGGING, label);
+    const target: an.AnTarget = mkTarget(props.context);
+    const creator: an.AnCreator = mkCreator(props.context);
+    const generator: an.AnGenerator = api.mkGenerator();
+    const req: an.AnRecord = api.mkRequest(body, target, creator, generator, an.PurposeType.TAGGING);
+    api.postAnnotation(req)
+    .then(() => {
+      showAlertSuccess(alertId, "Keyword annotation created");
+      setLabel("");
+    })
+      .catch(error => {
+        if (error.response.data?.message) {
+          showAlertWarning(alertId, error.response.data.message);
+        } else {
+          showAlertError(alertId, "Failed: server error");
+        }
+      });
+  }
+
   return (
     <div className="b2-container d-flex flex-row">
-      <input className="form-control"/>
-      <button type="button" className="btn btn-primary"><FaPlus/></button>
+      <input className="form-control"
+        value={label}
+        onChange={ev => setLabel(ev.target?.value || "")} 
+      />
+      <button type="button" className="btn btn-primary"
+        disabled={label.length === 0}
+        onClick={annotate}
+      ><FaPlus/></button>
     </div>
   );
 }
 
-function Comment(): React.FunctionComponentElement<{}> {
+function Comment(props: Props): React.FunctionComponentElement<{}> {
+  const [comment, setComment] = React.useState("");
+
+  function annotate(): void {
+    const body: an.AnBody = api.mkBody([], an.PurposeType.COMMENTING, comment);
+    const target: an.AnTarget = mkTarget(props.context);
+    const creator: an.AnCreator = mkCreator(props.context);
+    const generator: an.AnGenerator = api.mkGenerator();
+    const req: an.AnRecord = api.mkRequest(body, target, creator, generator, an.PurposeType.COMMENTING);
+    api.postAnnotation(req)
+    .then(() => {
+      showAlertSuccess(alertId, "Comment created");
+      setComment("");
+    })
+      .catch(error => {
+        if (error.response.data?.message) {
+          showAlertWarning(alertId, error.response.data.message);
+        } else {
+          showAlertError(alertId, "Failed: server error");
+        }
+      });
+  }
+
   return (
     <div className="b2-container d-flex flex-row">
-      <textarea className="form-control"/>
-      <button type="button" className="btn btn-primary"><FaPlus/></button>
+      <textarea className="form-control"
+        value={comment}
+        onChange={ev => setComment(ev.target?.value || "")} 
+      />
+      <button type="button" className="btn btn-primary"
+        disabled={comment.length === 0}
+        onClick={annotate}
+      ><FaPlus/></button>
     </div>
   );
 }
@@ -94,10 +159,10 @@ export function Annotate(props: Props): React.FunctionComponentElement<Context> 
           <Semantic context={props.context}/>
         </Tab>
         <Tab tabId={"keyword" as TabType} title={<span>Fee-text<br/>keyword</span>}>
-          <Keyword/>
+          <Keyword context={props.context}/>
         </Tab>
         <Tab tabId={"comment" as TabType} title={<span>Comment<br/>&nbsp;</span>}>
-          <Comment/>
+          <Comment context={props.context}/>
         </Tab>
       </Tabs>
       <div id={alertId}></div>
