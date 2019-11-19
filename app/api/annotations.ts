@@ -2,6 +2,7 @@ import * as _ from "lodash";
 import axios from "axios";
 import * as secret from "../secret";
 import * as server from "./server";
+import { Context } from "../widget/context";
 import * as an from "../shared/annotation";
 
 const url = server.url + "/v1/annotations";
@@ -57,13 +58,13 @@ export function mkRequest(body: an.AnBody, target: an.AnTarget, creator: an.AnCr
 }
 
 export function postAnnotation(body: an.AnRecord): Promise<any> {
-  const config = { headers: {'Authorization': "bearer " + secret.token} };
+  const config = { headers: {'Creatorization': "bearer " + secret.token} };
   return axios.post(url, body, config);
 }
 
 export interface Filters {
   allFilesFilter: boolean;
-  ownerFilter: [boolean, boolean];
+  creatorFilter: [boolean, boolean];
   typeFilter: [boolean, boolean, boolean];
 }
 
@@ -73,13 +74,14 @@ function mkFilterArray(filterEnum: Record<string, string>, flags: Array<boolean>
   return res;
 }
 
-export function getAnnotations(f: Filters): Promise<Array<an.AnRecord>> {
-  //TODO: files filter
-  const ownerParam = mkFilterArray(an.OwnerFilter, f.ownerFilter);
+export function getAnnotations(context: Context, f: Filters): Promise<Array<an.AnRecord>> {
+  const creatorParam = mkFilterArray(an.CreatorFilter, f.creatorFilter);
   const typeParam = mkFilterArray(an.TypeFilter, f.typeFilter);
-  const params = {};
-  if (ownerParam.length > 0) { Object.assign(params, { owner: ownerParam }); }
-  if (typeParam.length > 0) { Object.assign(params, { type: typeParam }); }
+  //TODO: make params type safe
+  const params = { user: context.user.id };
+  if (!f.allFilesFilter) { Object.assign(params, { "target-source": context.resource.source }); }
+  if (creatorParam.length > 0) { Object.assign(params, { "creator-filter": creatorParam }); }
+  if (typeParam.length > 0) { Object.assign(params, { "type-filter": typeParam }); }
 
   return new Promise((resolve, reject) => {
     axios.get(url, { params }).then(res => {

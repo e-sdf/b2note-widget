@@ -16,8 +16,7 @@ const alertId = "anAlert";
 function mkTarget(context: Context): an.AnTarget {
   return api.mkTarget({
       id: context.resource.pid, 
-      source: context.resource.subject
-    });
+      source: context.resource.source});
 }
 
 function mkCreator(context: Context): an.AnCreator {

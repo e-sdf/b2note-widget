@@ -1,8 +1,10 @@
+import * as _ from "lodash";
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 import * as icons from "react-icons/fa";
 import * as an from "../../shared/annotation";
 import * as api from "../../api/annotations";
+import { Context } from "../../widget/context";
 import { showAlertError } from "../../components"; 
 
 const QuestionIcon = icons.FaQuestionCircle;
@@ -13,11 +15,15 @@ const SemanticIcon = icons.FaCode;
 const KeywordIcon = icons.FaQuoteRight;
 const CommentIcon = icons.FaCommentDots;
 const EditIcon = icons.FaEdit;
-const DeleteIcon = icons.FaTimes;
+const DeleteIcon = icons.FaTrashAlt;
 
 const alertId = "anlAlert";
 
-export function Annotations(): React.FunctionComponentElement<{}> {
+interface Props {
+  context: Context;
+}
+
+export function Annotations(props: Props): React.FunctionComponentElement<{}> {
   const [allFilesFilter, setAllFilesFilter] = React.useState(false);
   const [mineFilter, setMineFilter] = React.useState(true);
   const [othersFilter, setOthersFilter] = React.useState(false);
@@ -25,15 +31,33 @@ export function Annotations(): React.FunctionComponentElement<{}> {
   const [keywordFilter, setKeywordFilter] = React.useState(true);
   const [commentFilter, setCommentFilter] = React.useState(true);
   const [annotations, setAnnotations] = React.useState([] as Array<an.AnRecord>);
+  const [activeItem, setActiveItem] = React.useState(null as string|null);
+  const [noOfMine, setNoOfMine] = React.useState(null as number|null);
+  const [noOfOthers, setNoOfOthers] = React.useState(null as number|null);
+  const [noOfSematic, setNoOfSemantic] = React.useState(null as number|null);
+  const [noOfKeyword, setNoOfKeyword] = React.useState(null as number|null);
+  const [noOfComment, setNoOfComment] = React.useState(null as number|null);
+
+
+  function sort(ans: Array<an.AnRecord>): Array<an.AnRecord> {
+    return _.sortBy(ans, (a) => an.getLabel(a));
+  }
   
   React.useEffect(() => {
     const filters: api.Filters = { 
       allFilesFilter, 
-      ownerFilter: [mineFilter, othersFilter],
+      creatorFilter: [mineFilter, othersFilter],
       typeFilter: [semanticFilter, keywordFilter, commentFilter]
     };
-    api.getAnnotations(filters).then(
-      annotations => setAnnotations(annotations),
+    api.getAnnotations(props.context, filters).then(
+      annotations => {
+        setAnnotations(sort(annotations));
+        setNoOfMine(annotations.filter(a => a.creator.id === props.context.user.id).length);
+        setNoOfOthers(annotations.filter(a => a.creator.id !== props.context.user.id).length);
+        setNoOfSemantic(annotations.filter(an.isSemantic).length);
+        setNoOfKeyword(annotations.filter(an.isKeyword).length);
+        setNoOfComment(annotations.filter(an.isComment).length);
+      },
       error => { console.log(error); showAlertError(alertId, "Failed getting annotations"); }
     );
   }, [allFilesFilter, mineFilter, othersFilter, semanticFilter, keywordFilter, commentFilter]);
@@ -74,17 +98,17 @@ export function Annotations(): React.FunctionComponentElement<{}> {
       );
     }
 
-    function renderOwnerSelection(): React.ReactElement {
+    function renderCreatorSelection(): React.ReactElement {
       return (
-        <div className="btn-group mr-2" role="group" aria-label="Owner Filter">
+        <div className="btn-group mr-2" role="group" aria-label="Creator Filter">
           <button type="button"
             className={`btn btn-${btnState(mineFilter)}secondary`}
-            data-toggle="tooltip" data-placement="bottom" title="My annotations"
+            data-toggle="tooltip" data-placement="bottom" title={"My annotations" + (noOfMine ? ` (${noOfMine})` : "")}
             onClick={() => setMineFilter(!mineFilter)}
           ><MineIcon/></button>
           <button type="button"
             className={`btn btn-${btnState(othersFilter)}secondary`}
-            data-toggle="tooltip" data-placement="bottom" title="Other's annotations"
+            data-toggle="tooltip" data-placement="bottom" title={"Other's annotations /displayed in italic/" + (noOfOthers ? ` (${noOfOthers})` : "")}
             onClick={() => setOthersFilter(!othersFilter)}
           ><OthersIcon/></button>
         </div>
@@ -96,17 +120,17 @@ export function Annotations(): React.FunctionComponentElement<{}> {
         <div className="btn-group" role="group" aria-label="Type Filter">
           <button type="button"
             className={`btn btn-${btnState(semanticFilter)}secondary`}
-            data-toggle="tooltip" data-placement="bottom" title="Sematic tags"
+            data-toggle="tooltip" data-placement="bottom" title={"Sematic tags" + (noOfSematic ? ` (${noOfSematic})` : "")}
             onClick={() => setSemanticFilter(!semanticFilter)}
           ><SemanticIcon/></button>
           <button type="button"
             className={`btn btn-${btnState(keywordFilter)}secondary`}
-            data-toggle="tooltip" data-placement="bottom" title="Free-text keywords"
+            data-toggle="tooltip" data-placement="bottom" title={"Free-text keywords" + (noOfKeyword ? ` (${noOfKeyword})` : "")}
             onClick={() => setKeywordFilter(!keywordFilter)}
           ><KeywordIcon/></button>
           <button type="button"
             className={`btn btn-${btnState(commentFilter)}secondary`}
-            data-toggle="tooltip" data-placement="bottom" title="Comments"
+            data-toggle="tooltip" data-placement="bottom" title={"Comments" +  (noOfComment ? ` (${noOfComment})` : "")}
             onClick={() => setCommentFilter(!commentFilter)}
           ><CommentIcon/></button>
         </div>
@@ -120,7 +144,7 @@ export function Annotations(): React.FunctionComponentElement<{}> {
           <div className="col-sm">
             <div className="btn-toolbar" role="toolbar" aria-label="Filters toolbar">
               {renderFileSelection()}
-              {renderOwnerSelection()}
+              {renderCreatorSelection()}
               {renderTypeSelection()}
             </div>
           </div>
@@ -130,8 +154,24 @@ export function Annotations(): React.FunctionComponentElement<{}> {
   }
 
   function renderAnListRow(): React.ReactElement {
+    const shorten = (lbl: string, lng: number): string => lbl.length > lng ? lbl.substring(0, lng) + "..." : lbl;
 
-    const shorten = (lbl: string): string => lbl.length > 14 ? lbl.substring(0, 14) + "..." : lbl;
+    function renderActionButtons(): React.ReactElement {
+      return (
+        <React.Fragment>
+          <button type="button"
+            className="btn btn-sm btn-outline-primary anl-action-button mr-2"
+            data-toggle="tooltip" data-placement="bottom" title="Edit"
+          ><EditIcon/>
+          </button>
+          <button type="button"
+            className="btn btn-sm btn-outline-primary anl-action-button"
+            data-toggle="tooltip" data-placement="bottom" title="Delete"
+          ><DeleteIcon/>
+          </button>
+        </React.Fragment>
+      );
+    }
 
     function renderAnItem(anRecord: an.AnRecord): React.ReactElement {
       const label = an.getLabel(anRecord);
@@ -140,30 +180,32 @@ export function Annotations(): React.FunctionComponentElement<{}> {
           <CommentIcon/> : 
           anRecord.body.items.find((i: an.AnItem) => i.type === an.BodyItemType.SPECIFIC_RESOURCE) ?
             <SemanticIcon/> : <KeywordIcon/>;
+      const itemStyle = anRecord.creator.id === props.context.user.id ? {} : { fontStyle: "italic" };
       return (
-        <tr key={label}>
+        <tr key={label} 
+          onMouseOver={() => setActiveItem(label)}
+          onMouseLeave={() => setActiveItem(null)}>
           <td style={{whiteSpace: "nowrap"}}>
             {icon}<span> </span>
-            {shorten(label) === label ? label :
+            {shorten(label, 14) === label ? label :
               <span
+                style={itemStyle}
                 data-toggle="tooltip" data-placement="bottom" title={label}
-              >{shorten(label)}</span>}
+              >{shorten(label, 14)}</span>}
+            {anRecord.target.source === props.context.resource.source ? "" : 
+              <div data-toggle="tooltip" data-placement="bottom" title={anRecord.target.source}>
+                <a href={anRecord.target.id}>{shorten(anRecord.target.source, 14)}</a>
+              </div>}
           </td>
           <td>
             <span className="badge badge-secondary">666</span>
           </td>
-          <td style={{whiteSpace: "nowrap"}}>
-            <button type="button"
-              className="btn btn-sm btn-outline-primary mr-2"
-              data-toggle="tooltip" data-placement="bottom" title="Edit"
-            ><EditIcon/>
-            </button>
-            <button type="button"
-              className="btn btn-sm btn-outline-primary"
-              data-toggle="tooltip" data-placement="bottom" title="Delete"
-            ><DeleteIcon/>
-            </button>
-          </td>
+          { activeItem === label ?
+            <td style={{whiteSpace: "nowrap"}}>
+              {renderActionButtons()}
+            </td>
+              : <td></td>
+          }
         </tr>
       );
     }
@@ -194,10 +236,10 @@ export function Annotations(): React.FunctionComponentElement<{}> {
   );
 }
 
-export function render(): void {
+export function render(context: Context): void {
   const container = document.getElementById("page");
   if (container) {
-    ReactDOM.render(<Annotations/>, container);
+    ReactDOM.render(<Annotations context={context}/>, container);
   } else {
     console.error("#page element missing");
   }

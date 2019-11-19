@@ -14,7 +14,7 @@ type SetPage = (p: Page) => any;
 function renderPage(page: Page, context: Context): void {
   switch (page) {
     case "annotate": annotateRender(context); break;
-    case "annotations": annotationsRender(); break;
+    case "annotations": annotationsRender(context); break;
     case "search": searchRender(); break;
     case "profile": profileRender(); break;
     default: console.error(`page ${page} not found`); 
@@ -104,7 +104,7 @@ export function render(context: Context): void {
     ReactDOM.render(<Widget context={context}/>, container);
     switchPage(currentPage, context);
     console.log(`Logged user id="${context.user.id}" nickname="${context.user.nickname}"`);
-    console.log(`Annotating pid="${context.resource.pid}" subject="${context.resource.subject}"`);
+    console.log(`Annotating pid="${context.resource.pid}" source="${context.resource.source}"`);
   } else {
     console.error("widget DOM element missing");
   }
