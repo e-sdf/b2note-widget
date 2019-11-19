@@ -68,8 +68,8 @@ export interface Filters {
   typeFilter: [boolean, boolean, boolean];
 }
 
-function mkFilterArray(filterEnum: Record<string, string>, flags: Array<boolean>): Array<string> {
-  const res: Array<string> = [];
+function mkFilterArray<T>(filterEnum: Record<string, T>, flags: Array<boolean>): Array<T> {
+  const res: Array<T> = [];
   Object.keys(filterEnum).map((k, i) => { if (flags[i]) { res.push(filterEnum[k]); } });
   return res;
 }
@@ -77,11 +77,12 @@ function mkFilterArray(filterEnum: Record<string, string>, flags: Array<boolean>
 export function getAnnotations(context: Context, f: Filters): Promise<Array<an.AnRecord>> {
   const creatorParam = mkFilterArray(an.CreatorFilter, f.creatorFilter);
   const typeParam = mkFilterArray(an.TypeFilter, f.typeFilter);
-  //TODO: make params type safe
-  const params = { user: context.user.id };
-  if (!f.allFilesFilter) { Object.assign(params, { "target-source": context.resource.source }); }
-  if (creatorParam.length > 0) { Object.assign(params, { "creator-filter": creatorParam }); }
-  if (typeParam.length > 0) { Object.assign(params, { "type-filter": typeParam }); }
+  const params: an.GetQuery = {
+    user: context.user.id,
+    "target-source": f.allFilesFilter ? undefined : context.resource.source,
+    "creator-filter": creatorParam.length > 0 ? creatorParam : undefined,
+    "type-filter": typeParam.length > 0 ? typeParam : undefined
+  };
 
   return new Promise((resolve, reject) => {
     axios.get(url, { params }).then(res => {
