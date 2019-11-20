@@ -16,11 +16,19 @@ const KeywordIcon = icons.FaQuoteRight;
 const CommentIcon = icons.FaCommentDots;
 const EditIcon = icons.FaEdit;
 const DeleteIcon = icons.FaTrashAlt;
+const ShowFilesIcon = icons.FaChevronRight;
+const HideFilesIcon = icons.FaChevronDown;
 
 const alertId = "anlAlert";
 
 interface Props {
   context: Context;
+}
+
+interface AnItem {
+  anRecord: an.AnRecord;
+  files: Array<string>;
+  showFilesFlag: boolean;
 }
 
 export function Annotations(props: Props): React.FunctionComponentElement<{}> {
@@ -30,14 +38,13 @@ export function Annotations(props: Props): React.FunctionComponentElement<{}> {
   const [semanticFilter, setSemanticFilter] = React.useState(true);
   const [keywordFilter, setKeywordFilter] = React.useState(true);
   const [commentFilter, setCommentFilter] = React.useState(true);
-  const [annotations, setAnnotations] = React.useState([] as Array<an.AnRecord>);
+  const [annotations, setAnnotations] = React.useState([] as Array<AnItem>);
   const [activeItem, setActiveItem] = React.useState(null as string|null);
   const [noOfMine, setNoOfMine] = React.useState(null as number|null);
   const [noOfOthers, setNoOfOthers] = React.useState(null as number|null);
   const [noOfSematic, setNoOfSemantic] = React.useState(null as number|null);
   const [noOfKeyword, setNoOfKeyword] = React.useState(null as number|null);
   const [noOfComment, setNoOfComment] = React.useState(null as number|null);
-
 
   function sort(ans: Array<an.AnRecord>): Array<an.AnRecord> {
     return _.sortBy(ans, (a) => an.getLabel(a));
@@ -51,17 +58,30 @@ export function Annotations(props: Props): React.FunctionComponentElement<{}> {
     };
     api.getAnnotations(props.context, filters).then(
       annotations => {
-        setAnnotations(sort(annotations));
-        setNoOfMine(annotations.filter(a => a.creator.id === props.context.user.id).length);
-        setNoOfOthers(annotations.filter(a => a.creator.id !== props.context.user.id).length);
-        setNoOfSemantic(annotations.filter(an.isSemantic).length);
-        setNoOfKeyword(annotations.filter(an.isKeyword).length);
-        setNoOfComment(annotations.filter(an.isComment).length);
+        const anl = sort(_.uniqBy(annotations, (a: an.AnRecord) => an.getLabel(a)));
+        const filesPms = anl.map(a => api.getFiles(an.getLabel(a)));
+        Promise.all(filesPms).then(files => {
+          setAnnotations(anl.map((an, i) => ({ 
+            anRecord: an,
+            files: files[i],
+            showFilesFlag: false
+          })));
+          setNoOfMine(annotations.filter(a => a.creator.id === props.context.user.id).length);
+          setNoOfOthers(annotations.filter(a => a.creator.id !== props.context.user.id).length);
+          setNoOfSemantic(annotations.filter(an.isSemantic).length);
+          setNoOfKeyword(annotations.filter(an.isKeyword).length);
+          setNoOfComment(annotations.filter(an.isComment).length);
+        });
       },
       error => { console.log(error); showAlertError(alertId, "Failed getting annotations"); }
     );
   }, [allFilesFilter, mineFilter, othersFilter, semanticFilter, keywordFilter, commentFilter]);
 
+  function toggleShowFilesFlag(anItem: AnItem): void {
+    const anl2 = annotations.map(a => _.isEqual(a, anItem) ? { ...a, showFilesFlag: !a.showFilesFlag } : a);
+    setAnnotations(anl2);
+  }
+  
   function renderLabel(): React.ReactElement {
     return (
       <div className="row">
@@ -156,57 +176,95 @@ export function Annotations(props: Props): React.FunctionComponentElement<{}> {
   function renderAnListRow(): React.ReactElement {
     const shorten = (lbl: string, lng: number): string => lbl.length > lng ? lbl.substring(0, lng) + "..." : lbl;
 
-    function renderActionButtons(): React.ReactElement {
-      return (
-        <React.Fragment>
-          <button type="button"
-            className="btn btn-sm btn-outline-primary anl-action-button mr-2"
-            data-toggle="tooltip" data-placement="bottom" title="Edit"
-          ><EditIcon/>
-          </button>
-          <button type="button"
-            className="btn btn-sm btn-outline-primary anl-action-button"
-            data-toggle="tooltip" data-placement="bottom" title="Delete"
-          ><DeleteIcon/>
-          </button>
-        </React.Fragment>
-      );
-    }
-
-    function renderAnItem(anRecord: an.AnRecord): React.ReactElement {
+    function renderAnItem(anItem: AnItem): React.ReactElement {
+      const anRecord: an.AnRecord = anItem.anRecord;
       const label = an.getLabel(anRecord);
-      const icon = 
-        anRecord.motivation === an.PurposeType.COMMENTING ?
-          <CommentIcon/> : 
-          anRecord.body.items.find((i: an.AnItem) => i.type === an.BodyItemType.SPECIFIC_RESOURCE) ?
-            <SemanticIcon/> : <KeywordIcon/>;
-      const itemStyle = anRecord.creator.id === props.context.user.id ? {} : { fontStyle: "italic" };
-      return (
-        <tr key={label} 
-          onMouseOver={() => setActiveItem(label)}
-          onMouseLeave={() => setActiveItem(null)}>
-          <td style={{whiteSpace: "nowrap"}}>
+
+      function renderLabel(): React.ReactElement {
+        const icon = 
+          anRecord.motivation === an.PurposeType.COMMENTING ?
+            <CommentIcon className="text-secondary"/> : 
+            anRecord.body.items.find((i: an.AnItem) => i.type === an.BodyItemType.SPECIFIC_RESOURCE) ?
+              <SemanticIcon className="text-secondary"/> : <KeywordIcon className="text-secondary"/>;
+        const itemStyle = anRecord.creator.id === props.context.user.id ? {} : { fontStyle: "italic" };
+        return (
+          <React.Fragment>
             {icon}<span> </span>
-            {shorten(label, 14) === label ? label :
+            {shorten(label, 17) === label ? label :
               <span
                 style={itemStyle}
                 data-toggle="tooltip" data-placement="bottom" title={label}
-              >{shorten(label, 14)}</span>}
-            {anRecord.target.source === props.context.resource.source ? "" : 
-              <div data-toggle="tooltip" data-placement="bottom" title={anRecord.target.source}>
-                <a href={anRecord.target.id}>{shorten(anRecord.target.source, 14)}</a>
-              </div>}
-          </td>
-          <td>
-            <span className="badge badge-secondary">666</span>
-          </td>
-          { activeItem === label ?
-            <td style={{whiteSpace: "nowrap"}}>
+              >{shorten(label, 17)}</span>}
+          </React.Fragment>
+        );
+      }
+
+      function renderFilesBadge(): React.ReactElement {
+        return (
+          <React.Fragment>
+            <span className="badge badge-secondary" style={{verticalAlign: "middle"}}
+              data-toggle="tooltip" data-placement="bottom" title="Number of files with this annotation"
+            >{anItem.files.length}</span>
+            <button type="button" 
+              className="btn btn-sm btn-outline-secondary anl-action-button"
+              style={{padding: "0 4px 3px 0"}}
+              onClick={() => toggleShowFilesFlag(anItem)}>
+              {anItem.showFilesFlag ? <HideFilesIcon/> : <ShowFilesIcon/>}
+            </button>
+          </React.Fragment>
+        );
+      }
+
+      function renderActionButtons(): React.ReactElement {
+        return (
+          <React.Fragment>
+            <button type="button"
+              className="btn btn-sm btn-outline-primary anl-action-button mr-1"
+              data-toggle="tooltip" data-placement="bottom" title="Edit"
+            ><EditIcon/>
+            </button>
+            <button type="button"
+              className="btn btn-sm btn-outline-primary anl-action-button"
+              data-toggle="tooltip" data-placement="bottom" title="Delete"
+            ><DeleteIcon/>
+            </button>
+          </React.Fragment>
+        );
+      }
+
+      function renderFiles(): React.ReactElement {
+        return (
+          <div>
+            {anItem.files.map(f =>
+              <div key={f}
+                data-toggle="tooltip" data-placement="bottom" title={f}>
+                <a href={f}>{shorten(f, 38)}</a>
+              </div>)}
+          </div>
+        );
+      }
+
+      const visibility = activeItem === label ? "visible" : "hidden";
+      return (
+        <React.Fragment>
+          <tr key={label} onMouseOver={() => setActiveItem(label)} onMouseLeave={() => setActiveItem(null)}>
+            <td style={{verticalAlign: "middle", whiteSpace: "nowrap"}}>
+              {renderLabel()}
+            </td>
+            <td style={{paddingLeft: 0}}>
+              {renderFilesBadge()}
+            </td>
+            <td style={{whiteSpace: "nowrap", paddingLeft: 0, paddingRight: 0, visibility}}>
               {renderActionButtons()}
             </td>
-              : <td></td>
-          }
-        </tr>
+          </tr>
+          {anItem.showFilesFlag ? 
+            <tr>
+              <td colSpan={3} style={{borderTop: "none", paddingTop: 0}}>
+                {renderFiles()}
+              </td>
+            </tr> : ""}
+        </React.Fragment>
       );
     }
           
@@ -214,7 +272,7 @@ export function Annotations(props: Props): React.FunctionComponentElement<{}> {
       <div className="row mt-2">
         <table className="table anl-table">
           <tbody>
-            {annotations.map(anRecord => renderAnItem(anRecord))}
+            {annotations.map(anItem=> renderAnItem(anItem))}
           </tbody>
         </table>
       </div>

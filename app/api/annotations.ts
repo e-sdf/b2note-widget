@@ -5,7 +5,9 @@ import * as server from "./server";
 import { Context } from "../widget/context";
 import * as an from "../shared/annotation";
 
-const url = server.url + "/v1/annotations";
+//TODO: make type safe
+const annotationsUrl = server.url + "/v1/annotations";
+const filesUrl = server.url + "/v1/files";
 
 export function mkBody(sources: Array<string>, purpose: an.PurposeType, text: string): an.AnBody {
   const items: Array<an.AnItem> = _.concat(
@@ -59,7 +61,7 @@ export function mkRequest(body: an.AnBody, target: an.AnTarget, creator: an.AnCr
 
 export function postAnnotation(body: an.AnRecord): Promise<any> {
   const config = { headers: {'Creatorization': "bearer " + secret.token} };
-  return axios.post(url, body, config);
+  return axios.post(annotationsUrl, body, config);
 }
 
 export interface Filters {
@@ -85,7 +87,7 @@ export function getAnnotations(context: Context, f: Filters): Promise<Array<an.A
   };
 
   return new Promise((resolve, reject) => {
-    axios.get(url, { params }).then(res => {
+    axios.get(annotationsUrl, { params }).then(res => {
       if(res.data) {
         resolve(res.data);
       } else {
@@ -95,3 +97,18 @@ export function getAnnotations(context: Context, f: Filters): Promise<Array<an.A
     error => reject(error));
   });
 }
+
+export function getFiles(tag: string): Promise<Array<string>> {
+  const params: an.FilesQuery = { tag };
+  return new Promise((resolve, reject) => {
+    axios.get(filesUrl, { params }).then(res => {
+      if(res.data) {
+        resolve(res.data);
+      } else {
+        reject(new Error("Empty data"));
+      }
+    },
+    error => reject(error));
+  });
+}
+

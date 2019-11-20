@@ -79,6 +79,10 @@ export interface GetQuery {
   "type-filter"?: Array<TypeFilter> | undefined;
 }
 
+export interface FilesQuery {
+  tag: string;
+}
+
 // Record Accessing {{{1
 
 export function getLabel(anRecord: AnRecord): string {
