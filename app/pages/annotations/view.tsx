@@ -2,7 +2,7 @@ import * as _ from "lodash";
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 import * as icons from "react-icons/fa";
-import * as an from "../../shared/annotation";
+import * as anModel from "../../shared/annotationsModel";
 import * as api from "../../api/annotations";
 import { Context } from "../../widget/context";
 import { showAlertError } from "../../components"; 
@@ -26,7 +26,7 @@ interface Props {
 }
 
 interface AnItem {
-  anRecord: an.AnRecord;
+  anRecord: anModel.AnRecord;
   files: Array<string>;
   showFilesFlag: boolean;
 }
@@ -46,8 +46,8 @@ export function Annotations(props: Props): React.FunctionComponentElement<{}> {
   const [noOfKeyword, setNoOfKeyword] = React.useState(null as number|null);
   const [noOfComment, setNoOfComment] = React.useState(null as number|null);
 
-  function sort(ans: Array<an.AnRecord>): Array<an.AnRecord> {
-    return _.sortBy(ans, (a) => an.getLabel(a));
+  function sort(ans: Array<anModel.AnRecord>): Array<anModel.AnRecord> {
+    return _.sortBy(ans, (a) => anModel.getLabel(a));
   }
   
   React.useEffect(() => {
@@ -58,8 +58,8 @@ export function Annotations(props: Props): React.FunctionComponentElement<{}> {
     };
     api.getAnnotations(props.context, filters).then(
       annotations => {
-        const anl = sort(_.uniqBy(annotations, (a: an.AnRecord) => an.getLabel(a)));
-        const filesPms = anl.map(a => api.getFiles(an.getLabel(a)));
+        const anl = sort(_.uniqBy(annotations, (a: anModel.AnRecord) => anModel.getLabel(a)));
+        const filesPms = anl.map(a => api.getFiles(anModel.getLabel(a)));
         Promise.all(filesPms).then(files => {
           setAnnotations(anl.map((an, i) => ({ 
             anRecord: an,
@@ -68,9 +68,9 @@ export function Annotations(props: Props): React.FunctionComponentElement<{}> {
           })));
           setNoOfMine(annotations.filter(a => a.creator.id === props.context.user.id).length);
           setNoOfOthers(annotations.filter(a => a.creator.id !== props.context.user.id).length);
-          setNoOfSemantic(annotations.filter(an.isSemantic).length);
-          setNoOfKeyword(annotations.filter(an.isKeyword).length);
-          setNoOfComment(annotations.filter(an.isComment).length);
+          setNoOfSemantic(annotations.filter(anModel.isSemantic).length);
+          setNoOfKeyword(annotations.filter(anModel.isKeyword).length);
+          setNoOfComment(annotations.filter(anModel.isComment).length);
         });
       },
       error => { console.log(error); showAlertError(alertId, "Failed getting annotations"); }
@@ -177,14 +177,14 @@ export function Annotations(props: Props): React.FunctionComponentElement<{}> {
     const shorten = (lbl: string, lng: number): string => lbl.length > lng ? lbl.substring(0, lng) + "..." : lbl;
 
     function renderAnItem(anItem: AnItem): React.ReactElement {
-      const anRecord: an.AnRecord = anItem.anRecord;
-      const label = an.getLabel(anRecord);
+      const anRecord: anModel.AnRecord = anItem.anRecord;
+      const label = anModel.getLabel(anRecord);
 
       function renderLabel(): React.ReactElement {
         const icon = 
-          anRecord.motivation === an.PurposeType.COMMENTING ?
+          anRecord.motivation === anModel.PurposeType.COMMENTING ?
             <CommentIcon className="text-secondary"/> : 
-            anRecord.body.items.find((i: an.AnItem) => i.type === an.BodyItemType.SPECIFIC_RESOURCE) ?
+            anRecord.body.items.find((i: anModel.AnItem) => i.type === anModel.BodyItemType.SPECIFIC_RESOURCE) ?
               <SemanticIcon className="text-secondary"/> : <KeywordIcon className="text-secondary"/>;
         const itemStyle = anRecord.creator.id === props.context.user.id ? {} : { fontStyle: "italic" };
         return (

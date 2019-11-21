@@ -1,4 +1,4 @@
-import * as an from "../shared/annotation";
+import * as an from "../shared/annotationsModel";
 import * as rq from "./annotations";
 
 test("mkRequest works", () => {

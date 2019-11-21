@@ -4,7 +4,7 @@ import { FaPlus } from "react-icons/fa";
 import { Tabs, Tab } from "../../components";
 import { SemanticAutocomplete } from "../../autocomplete/view";
 import * as ac from "../../autocomplete/autocomplete";
-import * as an from "../../shared/annotation";
+import * as anModel from "../../shared/annotationsModel";
 import * as api from "../../api/annotations";
 import { Context } from "../../widget/context";
 import { showAlertSuccess, showAlertWarning, showAlertError } from "../../components"; 
@@ -13,13 +13,13 @@ type TabType = "semantic" | "keyword" | "comment";
 
 const alertId = "anAlert";
 
-function mkTarget(context: Context): an.AnTarget {
+function mkTarget(context: Context): anModel.AnTarget {
   return api.mkTarget({
       id: context.resource.pid, 
       source: context.resource.source});
 }
 
-function mkCreator(context: Context): an.AnCreator {
+function mkCreator(context: Context): anModel.AnCreator {
   return api.mkCreator({
       id: context.user.id, 
       nickname: context.user.nickname
@@ -41,11 +41,11 @@ function Semantic(props: Props): React.FunctionComponentElement<Context> {
   }
 
   function annotate(): void {
-    const body: an.AnBody = api.mkBody(uris, an.PurposeType.TAGGING, label);
-    const target: an.AnTarget = mkTarget(props.context);
-    const creator: an.AnCreator = mkCreator(props.context);
-    const generator: an.AnGenerator = api.mkGenerator();
-    const req: an.AnRecord = api.mkRequest(body, target, creator, generator, an.PurposeType.TAGGING);
+    const body: anModel.AnBody = api.mkBody(uris, anModel.PurposeType.TAGGING, label);
+    const target: anModel.AnTarget = mkTarget(props.context);
+    const creator: anModel.AnCreator = mkCreator(props.context);
+    const generator: anModel.AnGenerator = api.mkGenerator();
+    const req: anModel.AnRecord = api.mkRequest(body, target, creator, generator, anModel.PurposeType.TAGGING);
     api.postAnnotation(req)
       .then(() => showAlertSuccess(alertId, "Semantic annotation created"))
       .catch(error => {
@@ -80,11 +80,11 @@ function Keyword(props: Props): React.FunctionComponentElement<{}> {
   const [label, setLabel] = React.useState("");
 
   function annotate(): void {
-    const body: an.AnBody = api.mkBody([], an.PurposeType.TAGGING, label);
-    const target: an.AnTarget = mkTarget(props.context);
-    const creator: an.AnCreator = mkCreator(props.context);
-    const generator: an.AnGenerator = api.mkGenerator();
-    const req: an.AnRecord = api.mkRequest(body, target, creator, generator, an.PurposeType.TAGGING);
+    const body: anModel.AnBody = api.mkBody([], anModel.PurposeType.TAGGING, label);
+    const target: anModel.AnTarget = mkTarget(props.context);
+    const creator: anModel.AnCreator = mkCreator(props.context);
+    const generator: anModel.AnGenerator = api.mkGenerator();
+    const req: anModel.AnRecord = api.mkRequest(body, target, creator, generator, anModel.PurposeType.TAGGING);
     api.postAnnotation(req)
     .then(() => {
       showAlertSuccess(alertId, "Keyword annotation created");
@@ -117,11 +117,11 @@ function Comment(props: Props): React.FunctionComponentElement<{}> {
   const [comment, setComment] = React.useState("");
 
   function annotate(): void {
-    const body: an.AnBody = api.mkBody([], an.PurposeType.COMMENTING, comment);
-    const target: an.AnTarget = mkTarget(props.context);
-    const creator: an.AnCreator = mkCreator(props.context);
-    const generator: an.AnGenerator = api.mkGenerator();
-    const req: an.AnRecord = api.mkRequest(body, target, creator, generator, an.PurposeType.COMMENTING);
+    const body: anModel.AnBody = api.mkBody([], anModel.PurposeType.COMMENTING, comment);
+    const target: anModel.AnTarget = mkTarget(props.context);
+    const creator: anModel.AnCreator = mkCreator(props.context);
+    const generator: anModel.AnGenerator = api.mkGenerator();
+    const req: anModel.AnRecord = api.mkRequest(body, target, creator, generator, anModel.PurposeType.COMMENTING);
     api.postAnnotation(req)
     .then(() => {
       showAlertSuccess(alertId, "Comment created");

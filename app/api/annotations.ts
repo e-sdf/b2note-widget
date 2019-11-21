@@ -3,22 +3,22 @@ import axios from "axios";
 import * as secret from "../secret";
 import * as server from "./server";
 import { Context } from "../widget/context";
-import * as an from "../shared/annotation";
+import * as anModel from "../shared/annotationsModel";
 
 //TODO: make type safe
 const annotationsUrl = server.url + "/v1/annotations";
 const filesUrl = server.url + "/v1/files";
 
-export function mkBody(sources: Array<string>, purpose: an.PurposeType, text: string): an.AnBody {
-  const items: Array<an.AnItem> = _.concat(
+export function mkBody(sources: Array<string>, purpose: anModel.PurposeType, text: string): anModel.AnBody {
+  const items: Array<anModel.AnItem> = _.concat(
     sources.map(source => ({
-      type: an.BodyItemType.SPECIFIC_RESOURCE,
+      type: anModel.BodyItemType.SPECIFIC_RESOURCE,
       source
-    } as an.AnItem)),
+    } as anModel.AnItem)),
     {
-      type: an.BodyItemType.TEXTUAL_BODY,
+      type: anModel.BodyItemType.TEXTUAL_BODY,
       value: text
-    } as an.AnItem
+    } as anModel.AnItem
   );
   return {
     items,
@@ -27,15 +27,15 @@ export function mkBody(sources: Array<string>, purpose: an.PurposeType, text: st
   };
 }
 
-export function mkTarget(obj: {id: string; source: string}): an.AnTarget {
-  return { ...obj, type: an.BodyItemType.SPECIFIC_RESOURCE }; 
+export function mkTarget(obj: {id: string; source: string}): anModel.AnTarget {
+  return { ...obj, type: anModel.BodyItemType.SPECIFIC_RESOURCE }; 
 }
 
-export function mkCreator(obj: {id: string; nickname: string}): an.AnCreator {
+export function mkCreator(obj: {id: string; nickname: string}): anModel.AnCreator {
   return { ...obj, type: "Person" };
 }
 
-export function mkGenerator(): an.AnGenerator {
+export function mkGenerator(): anModel.AnGenerator {
   return {
     type: "Software",
     homepage: "https://b2note.bsc.es/b2note/",
@@ -43,8 +43,8 @@ export function mkGenerator(): an.AnGenerator {
   };
 }
 
-export function mkRequest(body: an.AnBody, target: an.AnTarget, creator: an.AnCreator, generator: an.AnGenerator, motivation: an.PurposeType): an.AnRecord {
-  const ts = an.mkTimestamp();
+export function mkRequest(body: anModel.AnBody, target: anModel.AnTarget, creator: anModel.AnCreator, generator: anModel.AnGenerator, motivation: anModel.PurposeType): anModel.AnRecord {
+  const ts = anModel.mkTimestamp();
   return {
     "@context": "http://www.w3.org/ns/anno/jsonld",
     body,
@@ -59,7 +59,7 @@ export function mkRequest(body: an.AnBody, target: an.AnTarget, creator: an.AnCr
   };
 }
 
-export function postAnnotation(body: an.AnRecord): Promise<any> {
+export function postAnnotation(body: anModel.AnRecord): Promise<any> {
   const config = { headers: {'Creatorization': "bearer " + secret.token} };
   return axios.post(annotationsUrl, body, config);
 }
@@ -76,10 +76,10 @@ function mkFilterArray<T>(filterEnum: Record<string, T>, flags: Array<boolean>):
   return res;
 }
 
-export function getAnnotations(context: Context, f: Filters): Promise<Array<an.AnRecord>> {
-  const creatorParam = mkFilterArray(an.CreatorFilter, f.creatorFilter);
-  const typeParam = mkFilterArray(an.TypeFilter, f.typeFilter);
-  const params: an.GetQuery = {
+export function getAnnotations(context: Context, f: Filters): Promise<Array<anModel.AnRecord>> {
+  const creatorParam = mkFilterArray(anModel.CreatorFilter, f.creatorFilter);
+  const typeParam = mkFilterArray(anModel.TypeFilter, f.typeFilter);
+  const params: anModel.GetQuery = {
     user: context.user.id,
     "target-source": f.allFilesFilter ? undefined : context.resource.source,
     "creator-filter": creatorParam.length > 0 ? creatorParam : undefined,
@@ -99,7 +99,7 @@ export function getAnnotations(context: Context, f: Filters): Promise<Array<an.A
 }
 
 export function getFiles(tag: string): Promise<Array<string>> {
-  const params: an.FilesQuery = { tag };
+  const params: anModel.FilesQuery = { tag };
   return new Promise((resolve, reject) => {
     axios.get(filesUrl, { params }).then(res => {
       if(res.data) {
