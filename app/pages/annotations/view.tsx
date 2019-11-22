@@ -45,12 +45,13 @@ export function Annotations(props: Props): React.FunctionComponentElement<{}> {
   const [noOfSematic, setNoOfSemantic] = React.useState(null as number|null);
   const [noOfKeyword, setNoOfKeyword] = React.useState(null as number|null);
   const [noOfComment, setNoOfComment] = React.useState(null as number|null);
+  const [pendingDeleteId, setPendingDeleteId] = React.useState(null as string|null);
 
   function sort(ans: Array<anModel.AnRecord>): Array<anModel.AnRecord> {
     return _.sortBy(ans, (a) => anModel.getLabel(a));
   }
-  
-  React.useEffect(() => {
+
+  function loadAnnotations(): void {
     const filters: api.Filters = { 
       allFilesFilter, 
       creatorFilter: [mineFilter, othersFilter],
@@ -75,6 +76,10 @@ export function Annotations(props: Props): React.FunctionComponentElement<{}> {
       },
       error => { console.log(error); showAlertError(alertId, "Failed getting annotations"); }
     );
+  }
+  
+  React.useEffect(() => {
+    loadAnnotations();
   }, [allFilesFilter, mineFilter, othersFilter, semanticFilter, keywordFilter, commentFilter]);
 
   function toggleShowFilesFlag(anItem: AnItem): void {
@@ -187,14 +192,24 @@ export function Annotations(props: Props): React.FunctionComponentElement<{}> {
             anRecord.body.items.find((i: anModel.AnItem) => i.type === anModel.BodyItemType.SPECIFIC_RESOURCE) ?
               <SemanticIcon className="text-secondary"/> : <KeywordIcon className="text-secondary"/>;
         const itemStyle = anRecord.creator.id === props.context.user.id ? {} : { fontStyle: "italic" };
+        const shortened = shorten(label, 17);
         return (
           <React.Fragment>
             {icon}<span> </span>
-            {shorten(label, 17) === label ? label :
+            {shortened === label ? 
+              <span
+                data-toggle="tooltip" data-placement="bottom" title={anRecord.id}>
+                {label}
+              </span>
+              :
               <span
                 style={itemStyle}
-                data-toggle="tooltip" data-placement="bottom" title={label}
-              >{shorten(label, 17)}</span>}
+                data-toggle="tooltip" data-placement="bottom" title={label}>
+                <span
+                  data-toggle="tooltip" data-placement="bottom" title={anRecord.id}>
+                  {shortened}
+                </span>
+              </span>}
           </React.Fragment>
         );
       }
@@ -206,7 +221,7 @@ export function Annotations(props: Props): React.FunctionComponentElement<{}> {
               data-toggle="tooltip" data-placement="bottom" title="Number of files with this annotation"
             >{anItem.files.length}</span>
             <button type="button" 
-              className="btn btn-sm btn-outline-secondary anl-action-button"
+              className="btn btn-sm btn-outline-primary anl-action-button"
               style={{padding: "0 4px 3px 0"}}
               onClick={() => toggleShowFilesFlag(anItem)}>
               {anItem.showFilesFlag ? <HideFilesIcon/> : <ShowFilesIcon/>}
@@ -226,6 +241,7 @@ export function Annotations(props: Props): React.FunctionComponentElement<{}> {
             <button type="button"
               className="btn btn-sm btn-outline-primary anl-action-button"
               data-toggle="tooltip" data-placement="bottom" title="Delete"
+              onClick={() => setPendingDeleteId(anRecord.id)}
             ><DeleteIcon/>
             </button>
           </React.Fragment>
@@ -235,19 +251,54 @@ export function Annotations(props: Props): React.FunctionComponentElement<{}> {
       function renderFiles(): React.ReactElement {
         return (
           <div>
-            {anItem.files.map(f =>
-              <div key={f}
-                data-toggle="tooltip" data-placement="bottom" title={f}>
-                <a href={f}>{shorten(f, 38)}</a>
-              </div>)}
+            {anItem.files.map(f => {
+              const thisFile = f === props.context.resource.source;
+              return (
+                <div key={f}>
+                  <a 
+                    data-toggle="tooltip" data-placement="bottom" title={f + (thisFile ? " (this file)" : "")}
+                    href={f}>
+                    <span className={thisFile ? "" : "font-italic"}>{shorten(f, 36)}</span>
+                  </a>
+                </div>
+              );
+            })}
           </div>
+        );
+      }
+
+      function renderDeleteConfirmation(): React.ReactElement {
+        return (
+          <td colSpan={3} className="alert alert-danger" style={{borderTop: "none", borderRight: "none"}}>
+          <span className="font-italic">Really delete the annotation?</span>
+          <button type="button" 
+            className="btn btn-sm btn-danger"
+            style={{marginLeft: "5px", marginRight: "5px"}}
+            onClick={() => {
+              if (pendingDeleteId) {
+                api.deleteAnnotation(pendingDeleteId).then(
+                  () => loadAnnotations(),
+                  error => { console.log(error); showAlertError(alertId, "Deleting failed"); }
+                );
+                setPendingDeleteId(null);
+              }
+            }}>
+            Yes
+          </button>
+            <button type="button"
+              className="btn btn-sm btn-success"
+              style={{marginLeft: "5px"}}
+              onClick={() => setPendingDeleteId(null)}>
+              No
+            </button>
+          </td>
         );
       }
 
       const visibility = activeItem === label ? "visible" : "hidden";
       return (
-        <React.Fragment>
-          <tr key={label} onMouseOver={() => setActiveItem(label)} onMouseLeave={() => setActiveItem(null)}>
+        <React.Fragment key={label} >
+          <tr onMouseOver={() => setActiveItem(label)} onMouseLeave={() => setActiveItem(null)}>
             <td style={{verticalAlign: "middle", whiteSpace: "nowrap"}}>
               {renderLabel()}
             </td>
@@ -258,6 +309,10 @@ export function Annotations(props: Props): React.FunctionComponentElement<{}> {
               {renderActionButtons()}
             </td>
           </tr>
+          {pendingDeleteId === anRecord.id ? 
+            <tr>
+              {renderDeleteConfirmation()}
+            </tr> : ""}
           {anItem.showFilesFlag ? 
             <tr>
               <td colSpan={3} style={{borderTop: "none", paddingTop: 0}}>

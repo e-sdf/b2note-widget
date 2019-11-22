@@ -1,13 +1,12 @@
 import * as _ from "lodash";
 import axios from "axios";
 import * as secret from "../secret";
-import * as server from "./server";
+import { endpointUrl } from "./server";
 import { Context } from "../widget/context";
 import * as anModel from "../shared/annotationsModel";
 
-//TODO: make type safe
-const annotationsUrl = server.url + "/v1/annotations";
-const filesUrl = server.url + "/v1/files";
+const annotationsUrl = endpointUrl + anModel.annotationsUrl;
+const filesUrl = endpointUrl + anModel.filesUrl;
 
 export function mkBody(sources: Array<string>, purpose: anModel.PurposeType, text: string): anModel.AnBody {
   const items: Array<anModel.AnItem> = _.concat(
@@ -96,6 +95,14 @@ export function getAnnotations(context: Context, f: Filters): Promise<Array<anMo
     },
     error => reject(error));
   });
+}
+
+function makeLocalUrl(url: string): string {
+  return url.replace("https://b2note.bsc.es", "http://localhost:3050");
+}
+
+export function deleteAnnotation(anIdUrl: string): Promise<any> {
+  return axios.delete(makeLocalUrl(anIdUrl));
 }
 
 export function getFiles(tag: string): Promise<Array<string>> {
