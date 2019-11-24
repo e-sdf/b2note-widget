@@ -38,7 +38,7 @@ export function mkGenerator(): anModel.AnGenerator {
   return {
     type: "Software",
     homepage: "https://b2note.bsc.es/b2note/",
-    name: "B2Note v2.0"
+    name: "B2Note v3.0"
   };
 }
 

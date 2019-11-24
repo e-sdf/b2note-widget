@@ -1,4 +1,5 @@
 import * as _ from "lodash";
+import { solrUrl } from "../api/solr";
 
 export interface Item {
    short_form: string;
@@ -9,14 +10,15 @@ export interface Item {
 }
 
 export function makeSolrUrl(query: string): string {
-  const base = "https://b2note.bsc.es/solr/cleanup_test/select";
   const q = 
     (query.length <= 4 && _.words(query).length <= 1) ? `(labels:/${query}.*/)`
     : `(labels:"${query}"^100%20OR%20labels:${query}*^20%20OR%20text_auto:/${query}.*/^10%20OR%20labels:*${query}*)`;
   const notErrors = "%20AND%20NOT%20(labels:/Error[0-9].*/)";
   const sort = _.words(query).length <= 1 ? "&sort=norm(labels) desc" : "";
   const flags = "&fl=labels,uris,ontology_acronym,short_form,synonyms,norm(labels)&wt=json&indent=true&rows=1000";
-  return base + "?q=(" + q + notErrors + ")" + sort + flags;
+  const res = solrUrl + "?q=(" + q + notErrors + ")" + sort + flags;
+  console.log(res);
+  return res;
 }
 
 export interface Suggestion {

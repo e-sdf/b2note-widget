@@ -39,7 +39,7 @@ test("mkRequest works", () => {
     "generator": {
       "type": "Software",
       "homepage": "https://b2note.bsc.es/b2note/",
-      "name": "B2Note v2.0"
+      "name": "B2Note v3.0"
     }
   };
   const body: an.AnBody = rq.mkBody(["url1", "url2"], an.PurposeType.TAGGING, "text");
