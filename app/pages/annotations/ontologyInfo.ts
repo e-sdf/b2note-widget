@@ -3,12 +3,41 @@ import { solrUrl } from "../../api/solr";
 
 export interface OntologyInfo {
   label: string;
+  description: string;
   shortForm: string;
   ontologyName: string;
   ontologyAcronym: string;
+  synonyms: string;
+  uris: string;
 }
 
-export function getInfo(uri: string): Promise<OntologyInfo> {
-  const queryUrl = solrUrl + '?q=uris:("' + uri + '")&rows=100&wt=json';
-  return axios.get(queryUrl);
+// SOLR requires a non-standard encoding where just # and " are encoded
+function encodeSolrQuery(uri: string): string {
+  return uri.replace(/#/g, "%23").replace(/"/g, "%22");
+}
+
+export function getInfo(ontologyUri: string): Promise<OntologyInfo> {
+  return new Promise((resolve, reject) => {
+    const queryUrl = encodeSolrQuery(solrUrl + '?q=uris:("' + ontologyUri + '")&rows=100&wt=json');
+    axios.get(queryUrl).then(
+      res => {
+        if (res?.data?.response?.docs?.length > 0) {
+          const info = res.data.response.docs[0];
+          //console.log(info);
+          resolve({
+            label: info.labels || "",
+            description: info.description || "",
+            shortForm: info.short_form || "",
+            ontologyName: info.ontology_name || "",
+            ontologyAcronym: info.ontology_acronym || "",
+            synonyms: info.synonyms || "",
+            uris: info.uris || ""
+          });
+        } else {
+          reject("SOLR query returned 0 results for " + queryUrl);
+        }
+      },
+      error => reject(error)
+    ).catch(error => reject(error));
+  });
 }

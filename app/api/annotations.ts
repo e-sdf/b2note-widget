@@ -9,15 +9,15 @@ const annotationsUrl = endpointUrl + anModel.annotationsUrl;
 const filesUrl = endpointUrl + anModel.filesUrl;
 
 export function mkBody(sources: Array<string>, purpose: anModel.PurposeType, text: string): anModel.AnBody {
-  const items: Array<anModel.AnItem> = _.concat(
+  const items: Array<anModel.AnBodyItem> = _.concat(
     sources.map(source => ({
       type: anModel.BodyItemType.SPECIFIC_RESOURCE,
       source
-    } as anModel.AnItem)),
+    } as anModel.AnBodyItem)),
     {
       type: anModel.BodyItemType.TEXTUAL_BODY,
       value: text
-    } as anModel.AnItem
+    } as anModel.AnBodyItem
   );
   return {
     items,
