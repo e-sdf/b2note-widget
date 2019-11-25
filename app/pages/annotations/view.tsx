@@ -67,13 +67,15 @@ export function Annotations(props: Props): React.FunctionComponentElement<Props>
       const shortened = shorten(label, 14);
 
       function renderSemanticLabel(): React.ReactElement {
+        const ontologiesNo = anModel.getNoOfTargets(anRecord);
         return (
           <a
             href="#"
             style={itemStyle}
-            data-toggle="tooltip" data-placement="bottom" title={label}
+            data-toggle="tooltip" data-placement="bottom" 
+            title={`${label} (present in ${ontologiesNo} ${ontologiesNo > 1 ? "ontologies" : "ontology"})`}
             onClick={() => loadOntologiesInfo(anRecord)}
-            >{`${shortened} (${anModel.getNoOfTargets(anRecord)})`}
+            >{`${shortened} (${ontologiesNo})`}
           </a>
         );
       }
