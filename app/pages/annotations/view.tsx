@@ -9,11 +9,9 @@ import { Context } from "../../widget/context";
 import { showAlertError } from "../../components"; 
 import { LoaderFilter, AnItem } from "./loader";
 import * as ontology from "./ontologyInfo";
+import { SemanticIcon, KeywordIcon, CommentIcon } from "../icons";
 import { InfoPanel } from "./infoPanel";
 
-const SemanticIcon = icons.FaCode;
-const KeywordIcon = icons.FaQuoteRight;
-const CommentIcon = icons.FaCommentDots;
 const EditIcon = icons.FaEdit;
 const DeleteIcon = icons.FaTrashAlt;
 const ShowFilesIcon = icons.FaChevronRight;

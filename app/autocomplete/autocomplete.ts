@@ -17,7 +17,6 @@ export function makeSolrUrl(query: string): string {
   const sort = _.words(query).length <= 1 ? "&sort=norm(labels) desc" : "";
   const flags = "&fl=labels,uris,ontology_acronym,short_form,synonyms,norm(labels)&wt=json&indent=true&rows=1000";
   const res = solrUrl + "?q=(" + q + notErrors + ")" + sort + flags;
-  console.log(res);
   return res;
 }
 
