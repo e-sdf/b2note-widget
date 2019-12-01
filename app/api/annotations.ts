@@ -58,9 +58,9 @@ export function mkRequest(body: anModel.AnBody, target: anModel.AnTarget, creato
   };
 }
 
-export function postAnnotation(body: anModel.AnRecord): Promise<any> {
+export function postAnnotation(anRecord: anModel.AnRecord): Promise<any> {
   const config = { headers: {'Creatorization': "bearer " + secret.token} };
-  return axios.post(annotationsUrl, body, config);
+  return axios.post(annotationsUrl, anRecord, config);
 }
 
 export interface Filters {
@@ -99,6 +99,11 @@ export function getAnnotations(context: Context, f: Filters): Promise<Array<anMo
 
 function makeLocalUrl(url: string): string {
   return url.replace("https://b2note.bsc.es", "http://localhost:3050");
+}
+
+export function patchAnnotationBody(anIdUrl: string, body: anModel.AnBody): Promise<any> {
+  const config = { headers: {'Creatorization': "bearer " + secret.token} };
+  return axios.patch(makeLocalUrl(anIdUrl), { body }, config);
 }
 
 export function deleteAnnotation(anIdUrl: string): Promise<any> {

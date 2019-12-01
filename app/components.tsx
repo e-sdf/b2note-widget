@@ -8,20 +8,20 @@ import * as ReactDOM from "react-dom";
 interface AlertProps {
   message: React.ReactNode;
   type: "success" | "warning" | "danger";
+  closeHandle(): void;
 }
 
 function Alert(props: AlertProps): React.ReactElement {
-  const [show, setShow] = React.useState("show");
   return (
     <div 
-      className={`alert alert-${props.type} fade ${show}`}
+      className={`alert alert-${props.type} fade show` }
       style={ { marginLeft: "10px", marginRight: "10px" } }
       role="alert"
     >
       {props.message}
       <button 
         type="button" className="close" aria-label="Close"
-        onClick={() => setShow("")}
+        onClick={() => props.closeHandle()}
       >
         <span aria-hidden="true">&times;</span>
       </button>
@@ -29,12 +29,17 @@ function Alert(props: AlertProps): React.ReactElement {
   );
 }
 
+function close(dom: Element, timeout?: any): void {
+  ReactDOM.unmountComponentAtNode(dom);
+  window.clearTimeout(timeout);
+}
+
 export function showAlertSuccess(domId: string, message: React.ReactNode): void {
   const dom = document.getElementById(domId);
   if (dom) {
     ReactDOM.unmountComponentAtNode(dom);
-    ReactDOM.render(<Alert message={message} type="success"/>, dom);
-    window.setTimeout(() => ReactDOM.unmountComponentAtNode(dom), 3000);
+    const timeout = window.setTimeout(() => close(dom), 2000);
+    ReactDOM.render(<Alert message={message} type="success" closeHandle={() => close(dom, timeout)}/>, dom);
   } else {
     console.error("element not found: id=" + domId);
   }
@@ -44,7 +49,7 @@ export function showAlertWarning(domId: string, message: React.ReactNode): void 
   const dom = document.getElementById(domId);
   if (dom) {
     ReactDOM.unmountComponentAtNode(dom);
-    ReactDOM.render(<Alert message={message} type="warning"/>, dom);
+    ReactDOM.render(<Alert message={message} type="warning" closeHandle={() => close(dom)}/>, dom);
   } else {
     console.error("element not found: id=" + domId);
   }
@@ -54,7 +59,7 @@ export function showAlertError(domId: string, message: React.ReactNode): void {
   const dom = document.getElementById(domId);
   if (dom) {
     ReactDOM.unmountComponentAtNode(dom);
-    ReactDOM.render(<Alert message={message} type="danger"/>, dom);
+    ReactDOM.render(<Alert message={message} type="danger" closeHandle={() => close(dom)}/>, dom);
   } else {
     console.error("element not found: id=" + domId);
   }

@@ -6,6 +6,7 @@ import * as ac from "./autocomplete";
 
 interface Props {
   id?: string;
+  defaultInputValue?: string;
   onChange: (val: Array<ac.Suggestion>) => void;
 }
 
@@ -33,24 +34,32 @@ export class SemanticAutocomplete extends React.Component<Props, State> {
     }
   }
 
+  public focus = () => {
+    const ta = this.typeahead;
+    if (ta) {
+      ta.getInstance().focus();
+    }
+  }
+
   public render = () => {
     return (
       <AsyncTypeahead
-	id={this.props.id}
-	ref={(typeahead) => this.typeahead = typeahead}
-	isLoading={this.state.loading}
-	onSearch={query => {
-	  this.setState({ loading: true });
-	  axios.get(ac.makeSolrUrl(query))
-	    .then((resp) => {
-	      this.setState({ 
-		loading: false,
-	        options: ac.mkSuggestions(resp.data.response.docs)
-	      });
-	    });
-	}}
-	onChange={this.props.onChange}
-	options={this.state.options}
+        id={this.props.id}
+        ref={(typeahead) => this.typeahead = typeahead}
+        defaultInputValue={this.props.defaultInputValue}
+        isLoading={this.state.loading}
+        onSearch={query => {
+          this.setState({ loading: true });
+          axios.get(ac.makeSolrUrl(query))
+            .then((resp) => {
+              this.setState({ 
+                loading: false,
+                options: ac.mkSuggestions(resp.data.response.docs)
+              });
+            });
+        }}
+        onChange={this.props.onChange}
+        options={this.state.options}
       />
     );
   }

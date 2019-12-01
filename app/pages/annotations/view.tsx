@@ -6,8 +6,10 @@ import * as icons from "react-icons/fa";
 import * as anModel from "../../shared/annotationsModel";
 import * as api from "../../api/annotations";
 import { Context } from "../../widget/context";
-import { showAlertError } from "../../components"; 
+import { showAlertSuccess, showAlertWarning, showAlertError } from "../../components"; 
 import { LoaderFilter, AnItem } from "./loader";
+import * as ac from "../../autocomplete/autocomplete";
+import { SemanticAutocomplete } from "../../autocomplete/view";
 import * as ontology from "./ontologyInfo";
 import { SemanticIcon, KeywordIcon, CommentIcon } from "../icons";
 import { InfoPanel } from "./infoPanel";
@@ -16,6 +18,8 @@ const EditIcon = icons.FaEdit;
 const DeleteIcon = icons.FaTrashAlt;
 const ShowFilesIcon = icons.FaChevronRight;
 const HideFilesIcon = icons.FaChevronDown;
+const SaveIcon = icons.FaSave;
+const CancelIcon = icons.FaTimes;
 
 const alertId = "anlAlert";
 
@@ -23,10 +27,86 @@ interface Props {
   context: Context;
 }
 
+interface TagEditorProps {
+  anRecord: anModel.AnRecord;
+  doneHandler(): void;
+}
+
+function TagEditor(props: TagEditorProps): React.FunctionComponentElement<TagEditorProps> {
+  const [uris, setUris] = React.useState([] as Array<string>);
+  const [label, setLabel] = React.useState(anModel.getLabel(props.anRecord));
+  const [ref, setRef] = React.useState(null as any);
+
+  function gotSuggestion(suggestions: Array<ac.Suggestion>): void {
+    setUris(suggestions[0].items.map((i: ac.Item) => i.uris));
+    setLabel(suggestions[0].labelOrig);
+  }
+
+  function update(): void {
+    const body: anModel.AnBody = api.mkBody(uris, anModel.PurposeType.TAGGING, label);
+    console.log(props.anRecord.id)
+    api.patchAnnotationBody(props.anRecord.id, body)
+    .then(() => {
+      showAlertSuccess(alertId, "Annotation updated");
+      props.doneHandler();
+    })
+    .catch(error => {
+      if (error.response.data && error.response.data.message) {
+        showAlertWarning(alertId, error.response.data.message);
+      } else {
+        showAlertError(alertId, "Failed: server error");
+      }
+    });
+  }
+
+  React.useEffect(() => {
+    console.log("trying to focus");
+    if (ref) {
+      ref.focus();
+      console.log("focused");
+    }
+  }, [ref]);
+
+  return (
+    <tr>
+      <td colSpan={3}>
+        <div className="d-flex flex-row">
+          {anModel.isSemantic(props.anRecord) ?
+            <SemanticAutocomplete 
+              ref={(comp) => setRef(comp)} 
+              defaultInputValue={label}
+              onChange={gotSuggestion}
+            />
+          : <input type="text" className="form-control"
+              value={label} 
+              onChange={ev => setLabel(ev.target.value)}
+            />
+          }
+          <button type="button" className="btn btn-primary"
+            disabled={label.length === 0}
+            onClick={() => {
+              update();
+              if (ref) {
+                ref.clear();
+              }
+            }}>
+            <SaveIcon/>
+          </button>
+          <button type="button" className="btn btn-danger"
+            onClick={() => props.doneHandler()}>
+            <CancelIcon/>
+          </button>
+        </div>
+        </td>
+    </tr>
+  );
+}
+
 export function Annotations(props: Props): React.FunctionComponentElement<Props> {
   const loaderRef = React.useRef(null as any);
   const [annotations, setAnnotations] = React.useState([] as Array<AnItem>);
   const [activeItem, setActiveItem] = React.useState(null as string|null);
+  const [editedRecordId, setEditedRecordId] = React.useState(null as string|null);
   const [pendingDeleteId, setPendingDeleteId] = React.useState(null as string|null);
   const [ontologyInfos, setOntologyInfos] = React.useState(null as Array<ontology.OntologyInfo>|null);
 
@@ -45,7 +125,7 @@ export function Annotations(props: Props): React.FunctionComponentElement<Props>
     );
   }
 
-  function closeOntologiesInfo() {
+  function closeOntologiesInfo(): void {
     setOntologyInfos(null);
   }
 
@@ -125,6 +205,7 @@ export function Annotations(props: Props): React.FunctionComponentElement<Props>
           <button type="button"
             className="btn btn-sm btn-outline-primary anl-action-button mr-1"
             data-toggle="tooltip" data-placement="bottom" title="Edit"
+            onClick={() => setEditedRecordId(anRecord.id)}
           ><EditIcon/>
           </button>
           <button type="button"
@@ -186,29 +267,45 @@ export function Annotations(props: Props): React.FunctionComponentElement<Props>
       );
     }
 
-    return (
-      <React.Fragment key={label} >
-        <tr onMouseOver={() => setActiveItem(label)} onMouseLeave={() => setActiveItem(null)}>
-          <td style={{verticalAlign: "middle", whiteSpace: "nowrap"}}>
-            {renderLabel()}
-          </td>
-          <td style={{paddingLeft: 0}}>
-            {renderFilesBadge()}
-          </td>
-          <td style={{whiteSpace: "nowrap", paddingLeft: 0, paddingRight: 0, visibility}}>
-            {renderActionButtons()}
-          </td>
-        </tr>
-        {pendingDeleteId === anRecord.id ? 
-          <tr>
-            {renderDeleteConfirmation()}
-          </tr> : ""}
-        {anItem.showFilesFlag ? 
-          <tr>
-            <td colSpan={3} style={{borderTop: "none", paddingTop: 0}}>
-              {renderFiles()}
+    function renderNormalRow(): React.ReactElement {
+      return (
+        <React.Fragment>
+          <tr onMouseOver={() => setActiveItem(label)} onMouseLeave={() => setActiveItem(null)}>
+            <td style={{verticalAlign: "middle", whiteSpace: "nowrap"}}>
+              {renderLabel()}
             </td>
-          </tr> : ""}
+            <td style={{paddingLeft: 0}}>
+              {renderFilesBadge()}
+            </td>
+            <td style={{whiteSpace: "nowrap", paddingLeft: 0, paddingRight: 0, visibility}}>
+              {renderActionButtons()}
+            </td>
+          </tr>
+          {pendingDeleteId === anRecord.id ? 
+            <tr>
+              {renderDeleteConfirmation()}
+            </tr> : ""}
+          {anItem.showFilesFlag ? 
+            <tr>
+              <td colSpan={3} style={{borderTop: "none", paddingTop: 0}}>
+                {renderFiles()}
+              </td>
+            </tr> : ""}
+        </React.Fragment>
+      );
+    }
+    
+    function reload(): void {
+      setEditedRecordId(null);
+      if (loaderRef.current) { loaderRef.current.loadAnnotations(); }
+    }
+
+    return (
+      <React.Fragment key={anRecord.id}>
+        {anRecord.id === editedRecordId ?
+          <TagEditor anRecord={anRecord} doneHandler={reload}/>
+        : renderNormalRow()
+        }
       </React.Fragment>
     );
   }
