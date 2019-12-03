@@ -1,7 +1,6 @@
 import * as React from "react";
-import * as ReactDOM from "react-dom";
 import axios from "axios";
-import { AsyncTypeahead, TypeaheadLabelKey } from "react-bootstrap-typeahead";
+import { AsyncTypeahead } from "react-bootstrap-typeahead";
 import * as ac from "./autocomplete";
 
 interface Props {

@@ -60,10 +60,8 @@ function TagEditor(props: TagEditorProps): React.FunctionComponentElement<TagEdi
   }
 
   React.useEffect(() => {
-    console.log("trying to focus");
     if (ref) {
       ref.focus();
-      console.log("focused");
     }
   }, [ref]);
 

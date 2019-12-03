@@ -9,96 +9,130 @@ import { SemanticAutocomplete } from "../../autocomplete/view";
 
 const AddIcon = icons.FaPlus;
 const SearchIcon = icons.FaSearch;
+const DeleteIcon = icons.FaTrashAlt;
 
-type SemanticInputComp = React.FunctionComponentElement<{}>;
-type KeywordInputComp = React.FunctionComponentElement<{}>;
-type CommentInputComp = React.FunctionComponentElement<{}>;
-type InputComp = SemanticInputComp | KeywordInputComp | CommentInputComp;
+interface TermCompProps {
+  isFirst: boolean;
+  deleteHandle(): void;
+}
 
-type SearchItemComp = React.FunctionComponentElement<{}>;
+enum OperatorType { AND = "AND", OR = "OR", AND_NOT = "AND_NOT", XOR = "XOR" }
 
-function SearchItem(): SearchItemComp {
+type OperatorComp = React.FunctionComponentElement<{}>;
+
+type TermComp = React.FunctionComponentElement<TermCompProps>;
+
+function TermComp(props: TermCompProps): TermComp {
+  const [operation, setOperation] = React.useState(OperatorType.AND);
   const [inputType, setInputType] = React.useState(TypeFilter.SEMANTIC);
-  const [ref, setRef] = React.useState(null as any);
   const [label, setLabel] = React.useState("");
 
   function gotSuggestion(suggestions: Array<ac.Suggestion>): void {
     setLabel(suggestions[0].labelOrig);
   }
 
+  function renderOperation(): React.ReactElement {
+    return (
+      <select className="form-control"
+        value={operation}
+        onChange={(ev) => setOperation(ev.target.value as OperatorType)}>
+        {Object.keys(OperatorType).map(opKey => {
+          const op: OperatorType = OperatorType[opKey as OperatorType];
+          return <option key={op} value={op}>{op}</option>;
+        })}
+      </select>
+    );
+  }
+
   return (
-        <div className="form-group">
-          <select className="form-control"
-            value={inputType}
-            onChange={(ev) => {
-              const val = ev.target.value;
-              setInputType(val as TypeFilter);
-              if (val === TypeFilter.SEMANTIC) { setLabel(""); }
-            }}>
-            <option value={TypeFilter.SEMANTIC}>Semantic tag</option>
-            <option value={TypeFilter.KEYWORD}>Free-text keyword</option>
-            <option value={TypeFilter.COMMENT}>Comment</option>
-          </select>
-          {inputType === TypeFilter.SEMANTIC ? 
-            <SemanticAutocomplete 
-              ref={(comp) => setRef(comp)} 
-              onChange={gotSuggestion}
-            />
-          : <input type="text" className="form-control"
-              value={label} 
-              onChange={ev => setLabel(ev.target.value)}
-            />
-          }
-        </div>
+    <div className="form-group">
+      {props.isFirst ? "" : renderOperation()}
+      <select className="form-control"
+        value={inputType}
+        onChange={(ev) => {
+          const val = ev.target.value;
+          setInputType(val as TypeFilter);
+          if (val === TypeFilter.SEMANTIC) { setLabel(""); }
+        }}>
+        <option value={TypeFilter.SEMANTIC}>Semantic tag</option>
+        <option value={TypeFilter.KEYWORD}>Free-text keyword</option>
+        <option value={TypeFilter.COMMENT}>Comment</option>
+      </select>
+      {inputType === TypeFilter.SEMANTIC ? 
+        <SemanticAutocomplete 
+          onChange={gotSuggestion}
+        />
+        : <input type="text" className="form-control"
+          value={label} 
+          onChange={ev => setLabel(ev.target.value)}
+        />
+      }
+      {props.isFirst ? "" :
+        <button type="button" className="btn btn-sm btn-danger"
+          onClick={() => props.deleteHandle()}>
+          <DeleteIcon/>
+        </button>
+      }
+    </div>
   );
 }
 
-enum OperationType { AND = "AND", OR = "OR", NOT = "NOT", XOR = "XOR" }
-
-type OperationComp = React.FunctionComponentElement<{}>;
-
-function Operation(): OperationComp {
-  const [operation, setOperation] = React.useState(OperationType.AND);
-  return (
-    <select className="form-control"
-      value={operation}
-      onChange={(ev) => setOperation(ev.target.value as OperationType)}>
-      {Object.keys(OperationType).map(opKey => {
-        const op: OperationType = OperationType[opKey as OperationType];
-        return <option key={op} value={op}>{op}</option>;
-      })}
-    </select>
-  );
+interface ExpressionItem {
+  operation?: OperatorType;
+  type: TypeFilter;
+  label: string;
 }
 
-interface Field {
-  sOperation?: OperationComp;
-  sItemComp: SearchItemComp;
+type Expression = Array<ExpressionItem>;
+
+//function fieldsToExpression(fields: Array<Field>): Expression {
+  //return fields.map(field => ({
+    //operation: field.operationComp.
+  //});
+//}
+
+interface TermItem {
+  id: number;
+  termComp: TermComp;
 }
 
 export function SearchPage(): React.FunctionComponentElement<{}> {
-  const firstField: Field = {
-    sItemComp: <SearchItem/>
-  };
-  const [fields, setFields] = React.useState([firstField] as Array<Field>);
+
+  function mkTermItem(isFirst: boolean): TermItem {
+    const id = Date.now();
+    return {
+      id,
+      termComp: <TermComp isFirst={isFirst} deleteHandle={() => deleteTerm(id)}/>
+    };
+  }
+
+  const firstTerm = mkTermItem(true);
+  const [terms, setTerms] = React.useState([firstTerm] as Array<TermItem>);
   const [includeSynonyms, setIncludeSynonyms] = React.useState(false);
 
-  function addField(): void {
-    const newField: Field = {
-      sOperation: <Operation/>,
-      sItemComp: <SearchItem/>
-    };
-    setFields(_.concat(fields, newField));
+  function addTerm(): void {
+    const newTerm = mkTermItem(false);
+    setTerms(_.concat(terms, newTerm));
   }
+
+  function deleteTerm(id: number): void {
+    console.log(id);
+    console.log(terms);
+    const newTerms = terms.filter(t => {console.log (t.id !== id); return t.id !== id;});
+    setTerms(newTerms);
+  }
+
+  React.useEffect(() => {
+    console.log(terms);
+  }, [terms]);
 
   return (
     <div className="container-fluid search-panel">
       <form>
-        {fields.map((field, i) =>
-          <div key={i}>
-            {field.sOperation}
-            {field.sItemComp}
-          </div>
+        {terms.map((term, i) =>
+          <React.Fragment key={i}>
+            {term.termComp}
+          </React.Fragment>
         )}
         <div className="form-group">
           <div className="form-check">
@@ -114,7 +148,7 @@ export function SearchPage(): React.FunctionComponentElement<{}> {
         <div className="form-group">
           <button type="button" className="btn btn-secondary"
             data-toggle="tooltip" data-placement="bottom" title="Add another expression"
-            onClick={() => addField()}>
+            onClick={() => addTerm()}>
             <AddIcon/> 
           </button>
           <button type="button" className="btn btn-primary" style={{marginLeft: "10px"}}
