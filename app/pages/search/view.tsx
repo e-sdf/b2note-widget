@@ -2,7 +2,6 @@ import * as _ from "lodash";
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 import * as icons from "react-icons/fa";
-import { SemanticIcon, KeywordIcon, CommentIcon } from "../icons";
 import { TypeFilter } from "../../shared/annotationsModel";
 import * as ac from "../../autocomplete/autocomplete";
 import { SemanticAutocomplete } from "../../autocomplete/view";
@@ -11,31 +10,40 @@ const AddIcon = icons.FaPlus;
 const SearchIcon = icons.FaSearch;
 const DeleteIcon = icons.FaTrashAlt;
 
+enum OperatorType { AND = "AND", OR = "OR", AND_NOT = "AND_NOT", XOR = "XOR" }
+
 interface TermCompProps {
   isFirst: boolean;
-  deleteHandle(): void;
+  updateOperatorHandle(operator: OperatorType): void;
+  updateAnTypeHandle(anType: TypeFilter): void;
+  updateLabelHandle(label: string): void;
+  deleteHandle?(): void;
 }
-
-enum OperatorType { AND = "AND", OR = "OR", AND_NOT = "AND_NOT", XOR = "XOR" }
 
 type OperatorComp = React.FunctionComponentElement<{}>;
 
 type TermComp = React.FunctionComponentElement<TermCompProps>;
 
 function TermComp(props: TermCompProps): TermComp {
-  const [operation, setOperation] = React.useState(OperatorType.AND);
+  const [operator, setOperator] = React.useState(OperatorType.AND);
   const [inputType, setInputType] = React.useState(TypeFilter.SEMANTIC);
   const [label, setLabel] = React.useState("");
 
   function gotSuggestion(suggestions: Array<ac.Suggestion>): void {
-    setLabel(suggestions[0].labelOrig);
+    const val = suggestions[0].labelOrig;
+    setLabel(val);
+    props.updateLabelHandle(val);
   }
 
-  function renderOperation(): React.ReactElement {
+  function renderOperator(): React.ReactElement {
     return (
       <select className="form-control"
-        value={operation}
-        onChange={(ev) => setOperation(ev.target.value as OperatorType)}>
+        value={operator}
+        onChange={(ev) => {
+          const val = ev.target.value as OperatorType;
+          setOperator(val);
+          props.updateOperatorHandle(val);
+        }}>
         {Object.keys(OperatorType).map(opKey => {
           const op: OperatorType = OperatorType[opKey as OperatorType];
           return <option key={op} value={op}>{op}</option>;
@@ -46,13 +54,17 @@ function TermComp(props: TermCompProps): TermComp {
 
   return (
     <div className="form-group">
-      {props.isFirst ? "" : renderOperation()}
+      {props.isFirst ? "" : renderOperator()}
       <select className="form-control"
         value={inputType}
         onChange={(ev) => {
-          const val = ev.target.value;
-          setInputType(val as TypeFilter);
-          if (val === TypeFilter.SEMANTIC) { setLabel(""); }
+          const val = ev.target.value as TypeFilter;
+          setInputType(val);
+          props.updateAnTypeHandle(val);
+          if (val === TypeFilter.SEMANTIC) {
+            setLabel("");
+            props.updateLabelHandle("");
+          }
         }}>
         <option value={TypeFilter.SEMANTIC}>Semantic tag</option>
         <option value={TypeFilter.KEYWORD}>Free-text keyword</option>
@@ -64,12 +76,15 @@ function TermComp(props: TermCompProps): TermComp {
         />
         : <input type="text" className="form-control"
           value={label} 
-          onChange={ev => setLabel(ev.target.value)}
-        />
+          onChange={ev => {
+            const val: string = ev.target.value;
+            setLabel(val);
+            props.updateLabelHandle(val);
+          }}/>
       }
       {props.isFirst ? "" :
         <button type="button" className="btn btn-sm btn-danger"
-          onClick={() => props.deleteHandle()}>
+          onClick={() => { if (props.deleteHandle) { props.deleteHandle(); } }}>
           <DeleteIcon/>
         </button>
       }
@@ -77,62 +92,87 @@ function TermComp(props: TermCompProps): TermComp {
   );
 }
 
-interface ExpressionItem {
-  operation?: OperatorType;
-  type: TypeFilter;
-  label: string;
-}
-
-type Expression = Array<ExpressionItem>;
-
-//function fieldsToExpression(fields: Array<Field>): Expression {
-  //return fields.map(field => ({
-    //operation: field.operationComp.
-  //});
-//}
-
 interface TermItem {
   id: number;
+  operator?: OperatorType;
+  anType: TypeFilter;
+  label: string;
   termComp: TermComp;
 }
 
+enum TermsActionType { 
+  ADD = "ADD",
+  UPDATE_OPERATOR = "UPDATE_OPERATOR",
+  UPDATE_ANTYPE = "UPDATE_ANTYPE",
+  UPDATE_LABEL = "UPDATE_LABEL",
+  DELETE = "DELETE"
+}
+
+function mkTermId(): number {
+  return Date.now();
+}
+
+function mkTermItem(id: number, isFirst: boolean, dispatch: React.Dispatch<TermsAction>): TermItem {
+  return {
+    id,
+    anType: TypeFilter.SEMANTIC,
+    label: "",
+    termComp: <TermComp 
+      isFirst={isFirst} 
+      updateOperatorHandle={(operator: OperatorType): void => dispatch({ type: TermsActionType.UPDATE_OPERATOR, termId: id, operator })}
+      updateAnTypeHandle={(anType: TypeFilter): void => dispatch({ type: TermsActionType.UPDATE_ANTYPE, termId: id, anType })}
+      updateLabelHandle={(label: string): void => dispatch({ type: TermsActionType.UPDATE_LABEL, termId: id, label })}
+      deleteHandle={() => dispatch({ type: TermsActionType.DELETE, termId: id })}/>
+  };
+}
+
+interface TermsAction {
+  type: TermsActionType;
+  termId: number;
+  newTerm?: TermItem;
+  operator?: OperatorType;
+  anType?: TypeFilter;
+  label?: string;
+}
+
+function reducer(terms: Array<TermItem>, action: TermsAction): Array<TermItem> {
+  console.log(terms);
+  console.log(action);
+  const res: Array<TermItem> = (
+     action.type === TermsActionType.ADD ?
+       _.concat(terms, action.newTerm ? action.newTerm : [])
+     : action.type === TermsActionType.UPDATE_OPERATOR ?
+       terms.map(t => t.id === action.termId ? { ...t, operator: action.operator ? action.operator : t.operator } : t) 
+     : action.type === TermsActionType.UPDATE_ANTYPE ?
+       terms.map(t => t.id === action.termId ? { ...t, anType: action.anType ? action.anType : t.anType } : t) 
+     : action.type === TermsActionType.UPDATE_LABEL ?
+       terms.map(t => t.id === action.termId ? { ...t, label: action.label ? action.label : t.label } : t) 
+     : action.type === TermsActionType.DELETE ?
+       terms.filter(t => t.id !== action.termId)
+     : (() => { console.error("Unknown term action"); return terms; })()
+   );
+   console.log(res);
+   return res;
+}
+
 export function SearchPage(): React.FunctionComponentElement<{}> {
-
-  function mkTermItem(isFirst: boolean): TermItem {
-    const id = Date.now();
-    return {
-      id,
-      termComp: <TermComp isFirst={isFirst} deleteHandle={() => deleteTerm(id)}/>
-    };
-  }
-
-  const firstTerm = mkTermItem(true);
-  const [terms, setTerms] = React.useState([firstTerm] as Array<TermItem>);
+  const [terms, dispatch] = React.useReducer(reducer, [] as Array<TermItem>);
   const [includeSynonyms, setIncludeSynonyms] = React.useState(false);
 
-  function addTerm(): void {
-    const newTerm = mkTermItem(false);
-    setTerms(_.concat(terms, newTerm));
-  }
-
-  function deleteTerm(id: number): void {
-    console.log(id);
-    console.log(terms);
-    const newTerms = terms.filter(t => {console.log (t.id !== id); return t.id !== id;});
-    setTerms(newTerms);
-  }
-
   React.useEffect(() => {
-    console.log(terms);
-  }, [terms]);
+    const firstTerm = mkTermItem(0, true, dispatch);
+    dispatch({ type: TermsActionType.ADD, termId: firstTerm.id, newTerm: firstTerm });
+  }, []);
 
   return (
     <div className="container-fluid search-panel">
       <form>
-        {terms.map((term, i) =>
-          <React.Fragment key={i}>
+        {terms.map((term: TermItem , i: number) => {
+          console.log(term);
+          return <React.Fragment key={i}>
             {term.termComp}
-          </React.Fragment>
+          </React.Fragment>;
+        }
         )}
         <div className="form-group">
           <div className="form-check">
@@ -148,7 +188,16 @@ export function SearchPage(): React.FunctionComponentElement<{}> {
         <div className="form-group">
           <button type="button" className="btn btn-secondary"
             data-toggle="tooltip" data-placement="bottom" title="Add another expression"
-            onClick={() => addTerm()}>
+            onClick={() => {
+              const termId = mkTermId();
+              const newTerm = mkTermItem(termId, false, dispatch);
+              dispatch({ 
+                type: TermsActionType.ADD,
+                termId,
+                newTerm
+              });
+            }
+            }>
             <AddIcon/> 
           </button>
           <button type="button" className="btn btn-primary" style={{marginLeft: "10px"}}
@@ -161,7 +210,7 @@ export function SearchPage(): React.FunctionComponentElement<{}> {
   );
 }
 
-export function render() {
+export function render(): void {
   const container = document.getElementById("page");
   if (container) {
     ReactDOM.render(<SearchPage/>, container);
