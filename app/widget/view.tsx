@@ -1,27 +1,29 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 import { FaEdit, FaList, FaSearch, FaQuestionCircle, FaSignInAlt } from "react-icons/fa";
+import { Page } from "../pages/pages";
 import { render as annotateRender } from "../pages/annotate/view";
 import { render as annotationsRender } from "../pages/annotations/view";
 import { render as searchRender } from "../pages/search/view";
+import { render as helpRender } from "../pages/help/view";
 import { render as profileRender } from "../pages/profile/view";
 import { Context } from "./context";
 
-type Page = "annotate" | "annotations" | "search" | "profile";
-
 type SetPage = (p: Page) => any;
+
+let currentPage: Page = "annotate";
+let helpPage: Page = "annotate";
 
 function renderPage(page: Page, context: Context): void {
   switch (page) {
     case "annotate": annotateRender(context); break;
     case "annotations": annotationsRender(context); break;
     case "search": searchRender(); break;
+    case "help": helpRender(helpPage); break;
     case "profile": profileRender(); break;
     default: console.error(`page ${page} not found`); 
   }
 }
-
-var currentPage: Page = "annotate";
 
 function switchPage(newPage: Page, context: Context): void {
   const node = document.getElementById("page");
@@ -29,6 +31,7 @@ function switchPage(newPage: Page, context: Context): void {
     ReactDOM.unmountComponentAtNode(node);
     renderPage(newPage, context);
     currentPage = newPage;
+    helpPage = currentPage === "help" ? helpPage : currentPage;
   }
 }
 
@@ -47,7 +50,7 @@ function Navbar(props: Props): React.FunctionComponentElement<Context> {
 
   return (
     <nav className="navbar navbar-expand navbar-dark">
-      <ul className="navbar-nav">
+      <ul className="navbar-nav" style={{width: "100%"}}>
         <li className="nav-item">
           <a
             className={"nav-link" + activeFlag("annotate")} href="#" 
@@ -73,9 +76,12 @@ function Navbar(props: Props): React.FunctionComponentElement<Context> {
           </a>
         </li>
         <li className="nav-item">
-          <a className="nav-link" href="#"data-toggle="tooltip" data-placement="bottom" title="Help"><FaQuestionCircle/></a>
+          <a className="nav-link" href="#"data-toggle="tooltip" 
+             data-placement="bottom" title="Context Help"
+            onClick={() => pageSelected("help")}
+          ><FaQuestionCircle/></a>
         </li>
-        <li className="nav-item">
+        <li className="nav-item ml-auto">
           <a
             className={"nav-link" + activeFlag("profile")} href="#" 
             data-toggle="tooltip" data-placement="bottom" title="Login"

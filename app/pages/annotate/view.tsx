@@ -8,6 +8,7 @@ import * as anModel from "../../shared/annotationsModel";
 import * as api from "../../api/annotations";
 import { Context } from "../../widget/context";
 import { showAlertSuccess, showAlertWarning, showAlertError } from "../../components"; 
+import { HelpIcon } from "../icons";
 
 type TabType = "semantic" | "keyword" | "comment";
 
@@ -150,7 +151,7 @@ function Comment(props: Props): React.FunctionComponentElement<{}> {
   );
 }
 
-export function Annotate(props: Props): React.FunctionComponentElement<Context> {
+export function AnnotatePage(props: Props): React.FunctionComponentElement<Context> {
   return (
     <div>
       <Tabs id="annotateTabs" activeTab={"semantic" as TabType}>
@@ -172,7 +173,7 @@ export function Annotate(props: Props): React.FunctionComponentElement<Context> 
 export function render(context: Context): void {
   const container = document.getElementById("page");
   if (container) {
-    ReactDOM.render(<Annotate context={context}/>, container);
+    ReactDOM.render(<AnnotatePage context={context}/>, container);
   } else {
     console.error("#page element missing");
   }

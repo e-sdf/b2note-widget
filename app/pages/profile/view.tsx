@@ -1,7 +1,7 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 
-export function Profile(): React.FunctionComponentElement<{}> {
+export function ProfilePage(): React.FunctionComponentElement<{}> {
   return (
     <div>
       Profile
@@ -9,10 +9,10 @@ export function Profile(): React.FunctionComponentElement<{}> {
   );
 }
 
-export function render() {
+export function render(): void {
   const container = document.getElementById("page");
   if (container) {
-    ReactDOM.render(<Profile/>, container);
+    ReactDOM.render(<ProfilePage/>, container);
   } else {
     console.error("#page element missing");
   }
