@@ -118,6 +118,7 @@ function mkTermItem(id: number, isFirst: boolean, dispatch: React.Dispatch<Terms
     anType: TypeFilter.SEMANTIC,
     label: "",
     termComp: <TermComp 
+      key={id}
       isFirst={isFirst} 
       updateOperatorHandle={(operator: OperatorType): void => dispatch({ type: TermsActionType.UPDATE_OPERATOR, termId: id, operator })}
       updateAnTypeHandle={(anType: TypeFilter): void => dispatch({ type: TermsActionType.UPDATE_ANTYPE, termId: id, anType })}
@@ -167,13 +168,7 @@ export function SearchPage(): React.FunctionComponentElement<{}> {
   return (
     <div className="container-fluid search-panel">
       <form>
-        {terms.map((term: TermItem , i: number) => {
-          console.log(term);
-          return <React.Fragment key={i}>
-            {term.termComp}
-          </React.Fragment>;
-        }
-        )}
+        {terms.map((term: TermItem) => term.termComp)}
         <div className="form-group">
           <div className="form-check">
             <input className="form-check-input" type="checkbox"

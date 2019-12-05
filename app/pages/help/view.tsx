@@ -75,7 +75,7 @@ export function HelpPage(props: HelpPageProps): React.FunctionComponentElement<H
     <div className="container-fluid">
       <ToC/>
       <div className="row">
-        <div className="col-sm" style={{height: "440px", overflow: "auto"}}>
+        <div className="col-sm" style={{height: "422px", overflow: "auto"}}>
           {renderSection(props.section)}
         </div>
       </div>
