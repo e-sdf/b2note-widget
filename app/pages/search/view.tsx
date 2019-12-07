@@ -3,14 +3,17 @@ import * as React from "react";
 import * as ReactDOM from "react-dom";
 import * as icons from "react-icons/fa";
 import { TypeFilter } from "../../shared/annotationsModel";
+import { OperatorType, SearchTerm, SearchQuery } from "../../shared/searchModel";
 import * as ac from "../../autocomplete/autocomplete";
 import { SemanticAutocomplete } from "../../autocomplete/view";
+import * as api from "../../api/annotations";
+import { showAlertWarning, showAlertError } from "../../components"; 
 
 const AddIcon = icons.FaPlus;
 const SearchIcon = icons.FaSearch;
 const DeleteIcon = icons.FaTrashAlt;
 
-enum OperatorType { AND = "AND", OR = "OR", AND_NOT = "AND_NOT", XOR = "XOR" }
+const alertId = "searchAlert";
 
 interface TermCompProps {
   isFirst: boolean;
@@ -115,6 +118,7 @@ function mkTermId(): number {
 function mkTermItem(id: number, isFirst: boolean, dispatch: React.Dispatch<TermsAction>): TermItem {
   return {
     id,
+    operator: isFirst ? undefined : OperatorType.AND,
     anType: TypeFilter.SEMANTIC,
     label: "",
     termComp: <TermComp 
@@ -137,8 +141,6 @@ interface TermsAction {
 }
 
 function reducer(terms: Array<TermItem>, action: TermsAction): Array<TermItem> {
-  console.log(terms);
-  console.log(action);
   const res: Array<TermItem> = (
      action.type === TermsActionType.ADD ?
        _.concat(terms, action.newTerm ? action.newTerm : [])
@@ -152,9 +154,9 @@ function reducer(terms: Array<TermItem>, action: TermsAction): Array<TermItem> {
        terms.filter(t => t.id !== action.termId)
      : (() => { console.error("Unknown term action"); return terms; })()
    );
-   console.log(res);
    return res;
 }
+
 
 export function SearchPage(): React.FunctionComponentElement<{}> {
   const [terms, dispatch] = React.useReducer(reducer, [] as Array<TermItem>);
@@ -164,6 +166,29 @@ export function SearchPage(): React.FunctionComponentElement<{}> {
     const firstTerm = mkTermItem(0, true, dispatch);
     dispatch({ type: TermsActionType.ADD, termId: firstTerm.id, newTerm: firstTerm });
   }, []);
+
+  function submitQuery(): void {
+    const sTerms: Array<SearchTerm> = terms.map(t => ({
+      operator: t.operator,
+      type: t.anType,
+      label: t.label
+    }));
+    const expr: SearchQuery = {
+      terms: sTerms,
+      includeSynonyms: includeSynonyms
+    };
+    api.searchAnnotations(expr)
+    .then((files) => {
+      console.log(files);
+    })
+    .catch(error => {
+      if (error.response.data && error.response.data.message) {
+        showAlertWarning(alertId, error.response.data.message);
+      } else {
+        showAlertError(alertId, "Failed: server error");
+      }
+    });
+  }
 
   return (
     <div className="container-fluid search-panel">
@@ -196,9 +221,15 @@ export function SearchPage(): React.FunctionComponentElement<{}> {
             <AddIcon/> 
           </button>
           <button type="button" className="btn btn-primary" style={{marginLeft: "10px"}}
-            data-toggle="tooltip" data-placement="bottom" title="Make search">
+            data-toggle="tooltip" data-placement="bottom" title="Make search"
+            onClick={submitQuery}>
             <SearchIcon/> 
           </button>
+        </div>
+        <div className="row mt-2">
+          <div className="col-sm">
+            <div id={alertId}></div>
+          </div>
         </div>
       </form>
     </div>
