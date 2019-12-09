@@ -43,8 +43,12 @@ function TagEditor(props: TagEditorProps): React.FunctionComponentElement<TagEdi
   }
 
   function update(): void {
-    const body: anModel.AnBody = api.mkBody(uris, anModel.PurposeType.TAGGING, label);
-    console.log(props.anRecord.id)
+   const body = 
+     anModel.isSemantic(props.anRecord) ?
+       anModel.mkSemanticAnBody(uris, label)
+     : anModel.isKeyword(props.anRecord) ?
+       anModel.mkKeywordAnBody(label)
+     : anModel.mkCommentAnBody(label);
     api.patchAnnotationBody(props.anRecord.id, body)
     .then(() => {
       showAlertSuccess(alertId, "Annotation updated");
@@ -111,8 +115,7 @@ export function Annotations(props: Props): React.FunctionComponentElement<Props>
   const shorten = (lbl: string, lng: number): string => lbl.length > lng ? lbl.substring(0, lng) + "..." : lbl;
 
   function loadOntologiesInfo(anRecord: anModel.AnRecord): void {
-    const iris = anRecord.body.items.filter((i: anModel.AnBodyItem) => i.type === anModel.BodyItemType.SPECIFIC_RESOURCE)
-      .map((i: anModel.AnBodyItem) => i.source);
+    const iris = anModel.getSources(anRecord);
     const infoPms = iris.map((iri: string) => ontology.getInfo(iri));
     allSettled<ontology.OntologyInfo>(infoPms).then(
       (results) => {
@@ -143,7 +146,7 @@ export function Annotations(props: Props): React.FunctionComponentElement<Props>
       const shortened = shorten(label, 14);
 
       function renderSemanticLabel(): React.ReactElement {
-        const ontologiesNo = anModel.getNoOfTargets(anRecord);
+        const ontologiesNo = anModel.getSources(anRecord).length;
         return (
           <a
             href="#"

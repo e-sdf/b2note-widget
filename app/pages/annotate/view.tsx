@@ -8,20 +8,20 @@ import * as anModel from "../../shared/annotationsModel";
 import * as api from "../../api/annotations";
 import { Context } from "../../widget/context";
 import { showAlertSuccess, showAlertWarning, showAlertError } from "../../components"; 
-import { HelpIcon } from "../icons";
 
 type TabType = "semantic" | "keyword" | "comment";
 
 const alertId = "anAlert";
 
 function mkTarget(context: Context): anModel.AnTarget {
-  return api.mkTarget({
+  return anModel.mkTarget({
       id: context.resource.pid, 
-      source: context.resource.source});
+      source: context.resource.source
+  });
 }
 
 function mkCreator(context: Context): anModel.AnCreator {
-  return api.mkCreator({
+  return anModel.mkCreator({
       id: context.user.id, 
       nickname: context.user.nickname
     });
@@ -42,11 +42,11 @@ function Semantic(props: Props): React.FunctionComponentElement<Context> {
   }
 
   function annotate(): void {
-    const body: anModel.AnBody = api.mkBody(uris, anModel.PurposeType.TAGGING, label);
-    const target: anModel.AnTarget = mkTarget(props.context);
-    const creator: anModel.AnCreator = mkCreator(props.context);
-    const generator: anModel.AnGenerator = api.mkGenerator();
-    const req: anModel.AnRecord = api.mkRequest(body, target, creator, generator, anModel.PurposeType.TAGGING);
+    const body = anModel.mkSemanticAnBody(uris, label);
+    const target = mkTarget(props.context);
+    const creator = mkCreator(props.context);
+    const generator = anModel.mkGenerator();
+    const req = anModel.mkAnRecord(body, target, creator, generator, anModel.PurposeType.TAGGING);
     api.postAnnotation(req)
       .then(() => showAlertSuccess(alertId, "Semantic annotation created"))
       .catch(error => {
@@ -81,11 +81,11 @@ function Keyword(props: Props): React.FunctionComponentElement<{}> {
   const [label, setLabel] = React.useState("");
 
   function annotate(): void {
-    const body: anModel.AnBody = api.mkBody([], anModel.PurposeType.TAGGING, label);
-    const target: anModel.AnTarget = mkTarget(props.context);
-    const creator: anModel.AnCreator = mkCreator(props.context);
-    const generator: anModel.AnGenerator = api.mkGenerator();
-    const req: anModel.AnRecord = api.mkRequest(body, target, creator, generator, anModel.PurposeType.TAGGING);
+    const body = anModel.mkKeywordAnBody(label);
+    const target = mkTarget(props.context);
+    const creator = mkCreator(props.context);
+    const generator = anModel.mkGenerator();
+    const req = anModel.mkAnRecord(body, target, creator, generator, anModel.PurposeType.TAGGING);
     api.postAnnotation(req)
     .then(() => {
       showAlertSuccess(alertId, "Keyword annotation created");
@@ -118,11 +118,11 @@ function Comment(props: Props): React.FunctionComponentElement<{}> {
   const [comment, setComment] = React.useState("");
 
   function annotate(): void {
-    const body: anModel.AnBody = api.mkBody([], anModel.PurposeType.COMMENTING, comment);
-    const target: anModel.AnTarget = mkTarget(props.context);
-    const creator: anModel.AnCreator = mkCreator(props.context);
-    const generator: anModel.AnGenerator = api.mkGenerator();
-    const req: anModel.AnRecord = api.mkRequest(body, target, creator, generator, anModel.PurposeType.COMMENTING);
+    const body = anModel.mkCommentAnBody(comment);
+    const target = mkTarget(props.context);
+    const creator = mkCreator(props.context);
+    const generator = anModel.mkGenerator();
+    const req = anModel.mkAnRecord(body, target, creator, generator, anModel.PurposeType.COMMENTING);
     api.postAnnotation(req)
     .then(() => {
       showAlertSuccess(alertId, "Comment created");

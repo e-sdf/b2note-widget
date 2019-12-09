@@ -10,56 +10,6 @@ const annotationsUrl = endpointUrl + anModel.annotationsUrl;
 const filesUrl = endpointUrl + anModel.filesUrl;
 const searchUrl = endpointUrl + sModel.searchUrl;
 
-export function mkBody(sources: Array<string>, purpose: anModel.PurposeType, text: string): anModel.AnBody {
-  const items: Array<anModel.AnBodyItem> = _.concat(
-    sources.map(source => ({
-      type: anModel.BodyItemType.SPECIFIC_RESOURCE,
-      source
-    } as anModel.AnBodyItem)),
-    {
-      type: anModel.BodyItemType.TEXTUAL_BODY,
-      value: text
-    } as anModel.AnBodyItem
-  );
-  return {
-    items,
-    purpose,
-    type: "Composite"
-  };
-}
-
-export function mkTarget(obj: {id: string; source: string}): anModel.AnTarget {
-  return { ...obj, type: anModel.BodyItemType.SPECIFIC_RESOURCE }; 
-}
-
-export function mkCreator(obj: {id: string; nickname: string}): anModel.AnCreator {
-  return { ...obj, type: "Person" };
-}
-
-export function mkGenerator(): anModel.AnGenerator {
-  return {
-    type: "Software",
-    homepage: "https://b2note.bsc.es/b2note/",
-    name: "B2Note v3.0"
-  };
-}
-
-export function mkRequest(body: anModel.AnBody, target: anModel.AnTarget, creator: anModel.AnCreator, generator: anModel.AnGenerator, motivation: anModel.PurposeType): anModel.AnRecord {
-  const ts = anModel.mkTimestamp();
-  return {
-    "@context": "http://www.w3.org/ns/anno/jsonld",
-    body,
-    target,
-    created: ts,
-    creator,
-    generated: ts,
-    generator,
-    id: "",
-    motivation,
-    type: "Annotation"
-  };
-}
-
 export function postAnnotation(anRecord: anModel.AnRecord): Promise<any> {
   const config = { headers: {'Creatorization': "bearer " + secret.token} };
   return axios.post(annotationsUrl, anRecord, config);
