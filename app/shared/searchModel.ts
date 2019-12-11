@@ -2,7 +2,7 @@ import { TypeFilter } from "./annotationsModel";
 
 export const searchUrl = "/search";
 
-export enum OperatorType { AND = "AND", OR = "OR", AND_NOT = "AND_NOT", XOR = "XOR" }
+export enum OperatorType { AND = "AND", OR = "OR", XOR = "XOR", NOT = "NOT" }
 
 export interface SearchTerm {
   operator?: OperatorType;
