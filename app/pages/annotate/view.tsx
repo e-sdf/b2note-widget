@@ -9,8 +9,6 @@ import * as api from "../../api/annotations";
 import { Context } from "../../widget/context";
 import { showAlertSuccess, showAlertWarning, showAlertError } from "../../components"; 
 
-type TabType = "semantic" | "keyword" | "comment";
-
 const alertId = "anAlert";
 
 function mkTarget(context: Context): anModel.AnTarget {
@@ -151,9 +149,11 @@ function Comment(props: Props): React.FunctionComponentElement<{}> {
   );
 }
 
+type TabType = "semantic" | "keyword" | "comment";
+
 export function AnnotatePage(props: Props): React.FunctionComponentElement<Context> {
   return (
-    <div>
+    <>
       <Tabs id="annotateTabs" activeTab={"semantic" as TabType}>
         <Tab tabId={"semantic" as TabType} title={<span>Semantic<br/>tag</span>}>
           <Semantic context={props.context}/>
@@ -166,7 +166,7 @@ export function AnnotatePage(props: Props): React.FunctionComponentElement<Conte
         </Tab>
       </Tabs>
       <div id={alertId}></div>
-    </div>
+    </>
   );
 }
 
