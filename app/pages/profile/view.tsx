@@ -1,7 +1,12 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
+import { Context } from "../../widget/context";
 
-export function ProfilePage(): React.FunctionComponentElement<{}> {
+interface ProfileProps {
+  context: Context;
+}
+
+export function ProfilePage(props: ProfileProps): React.FunctionComponentElement<ProfileProps> {
   return (
     <div>
       Profile
@@ -9,10 +14,10 @@ export function ProfilePage(): React.FunctionComponentElement<{}> {
   );
 }
 
-export function render(): void {
+export function render(context: Context): void {
   const container = document.getElementById("page");
   if (container) {
-    ReactDOM.render(<ProfilePage/>, container);
+    ReactDOM.render(<ProfilePage context={context}/>, container);
   } else {
     console.error("#page element missing");
   }

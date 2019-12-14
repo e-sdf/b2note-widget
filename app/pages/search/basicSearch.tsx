@@ -2,6 +2,7 @@ import * as _ from "lodash";
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 import * as icons from "react-icons/fa";
+import { Context } from "../../widget/context";
 import { Tabs, Tab } from "../../components";
 import * as anModel from "../../shared/annotationsModel";
 import * as ac from "../../autocomplete/autocomplete";
@@ -16,6 +17,7 @@ const SearchIcon = icons.FaSearch;
 const alertId = "basic-search-alert";
 
 export interface BasicSearchProps {
+  context: Context;
   resultsHandle(results: Array<anModel.AnRecord>): void;
 }
 
@@ -31,10 +33,29 @@ export function BasicSearch(props: BasicSearchProps): React.FunctionComponentEle
   }
 
   function submitQuery(): void {
+    const filters: api.Filters = { 
+      allFiles: true,
+      creator: {
+        mine: true,
+        others: true
+      },
+      type: {
+        semantic: inputType === SearchType.SEMANTIC,
+        keyword: inputType === SearchType.KEYWORD,
+        comment: inputType === SearchType.COMMENT,
+      },
+      value: label
+    };
+    api.getAnnotations(props.context, filters).then(
+      annotations => {
+        console.log(annotations);
+        props.resultsHandle(annotations);
+      }
+    );
   }
 
   return (
-    <div className="container-fluid search-panel">
+    <div className="container-fluid">
       <form>
         <div className="form-group">
           <select className="form-control"

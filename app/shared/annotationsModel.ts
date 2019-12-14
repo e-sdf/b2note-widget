@@ -5,6 +5,11 @@ export const filesUrl = "/files";
 
 // Types {{{1
 
+export interface Target {
+  pid: string;
+  source: string;
+}
+
 export enum AnBodyItemType {
   COMPOSITE = "Composite",
   SPECIFIC_RESOURCE = "SpecificResource",
@@ -158,11 +163,6 @@ export function mkTimestamp(): string {
 
 // Requests parameters {{{1
 
-export enum CreatorFilter {
-  MINE = "mine",
-  OTHERS = "others"
-}
-
 export enum TypeFilter {
   SEMANTIC = "semantic",
   KEYWORD = "keyword",
@@ -170,10 +170,11 @@ export enum TypeFilter {
 }
 
 export interface GetQuery {
-  user?: string;
+  type?: Array<TypeFilter>;
+  creator?: string;
   "target-source"?: string;
-  "creator-filter"?: Array<CreatorFilter> | undefined;
-  "type-filter"?: Array<TypeFilter> | undefined;
+  value?: string;
+  expression?: string;
 }
 
 export interface FilesQuery {

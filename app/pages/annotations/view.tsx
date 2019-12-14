@@ -223,7 +223,7 @@ export function Annotations(props: Props): React.FunctionComponentElement<Props>
       return (
         <div>
           {anItem.files.map(f => {
-            const thisFile = f === props.context.resource.source;
+            const thisFile = f === props.context.target.source;
             return (
               <div key={f}>
                 <a 

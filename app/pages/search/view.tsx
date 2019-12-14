@@ -1,13 +1,9 @@
-import * as _ from "lodash";
 import * as React from "react";
 import * as ReactDOM from "react-dom";
-import * as icons from "react-icons/fa";
+import { Context } from "../../widget/context";
 import { Tabs, Tab } from "../../components";
-import { TypeFilter } from "../../shared/annotationsModel";
-import { OperatorType, SearchTerm, SearchQuery } from "../../shared/searchModel";
 import * as anModel from "../../shared/annotationsModel";
 import * as ac from "../../autocomplete/autocomplete";
-import { SemanticAutocomplete } from "../../autocomplete/view";
 import * as api from "../../api/annotations";
 import { showAlertWarning, showAlertError } from "../../components"; 
 import { BasicSearch } from "./basicSearch";
@@ -18,11 +14,14 @@ interface ResultsProps {
 }
 
 function Results(props: ResultsProps): React.FunctionComponentElement<ResultsProps> {
+  const res = props.results;
+
   return (
     <div>
-      {props.results ? (
-        props.results.length === 0 ? "No results" : props.results)
-      : ""}
+      {res ? (
+        res.length === 0 ? "No results" 
+        : res.map(r => r.target.source)
+      ) : ""}
     </div>
   );
 
@@ -30,15 +29,21 @@ function Results(props: ResultsProps): React.FunctionComponentElement<ResultsPro
 
 type TabType = "basic" | "advanced";
 
-export function SearchPage(): React.FunctionComponentElement<{}> {
+interface SearchProps {
+  context: Context;
+}
+
+export function SearchPage(props: SearchProps): React.FunctionComponentElement<SearchProps> {
   const [resultsBasic, setResultsBasic] = React.useState(null as Array<anModel.AnRecord>|null);
   const [resultsAdv, setResultsAdv] = React.useState(null as Array<anModel.AnRecord>|null);
+
+  React.useEffect(() => console.log(resultsBasic), [resultsBasic]);
 
   return (
     <>
       <Tabs id="searchTabs" activeTab={"basic" as TabType}>
         <Tab tabId={"basic" as TabType} title="Basic Search">
-          <BasicSearch resultsHandle={setResultsBasic}/>
+          <BasicSearch context={props.context} resultsHandle={setResultsBasic}/>
           <Results results={resultsBasic}/>
         </Tab>
         <Tab tabId={"advanced" as TabType} title="Advanced Search">
@@ -50,10 +55,10 @@ export function SearchPage(): React.FunctionComponentElement<{}> {
   );
 }
 
-export function render(): void {
+export function render(context: Context): void {
   const container = document.getElementById("page");
   if (container) {
-    ReactDOM.render(<SearchPage/>, container);
+    ReactDOM.render(<SearchPage context={context}/>, container);
   } else {
     console.error("#page element missing");
   }

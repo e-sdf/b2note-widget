@@ -51,9 +51,16 @@ export const LoaderFilter = React.forwardRef((props: LoaderProps, ref: React.Ref
 
   function loadAnnotations(): void {
     const filters: api.Filters = { 
-      allFilesFilter, 
-      creatorFilter: [mineFilter, othersFilter],
-      typeFilter: [semanticFilter, keywordFilter, commentFilter]
+      allFiles: allFilesFilter, 
+      creator: {
+        mine: mineFilter,
+        others: othersFilter
+      },
+      type: {
+        semantic: semanticFilter,
+        keyword: keywordFilter,
+        comment: commentFilter
+      }
     };
     api.getAnnotations(props.context, filters).then(
       annotations => {

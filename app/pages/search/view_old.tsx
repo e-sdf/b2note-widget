@@ -8,7 +8,6 @@ import * as ac from "../../autocomplete/autocomplete";
 import { SemanticAutocomplete } from "../../autocomplete/view";
 import * as api from "../../api/annotations";
 import { showAlertWarning, showAlertError } from "../../components"; 
-import * as queryParser from "./queryParser";
 
 const AddIcon = icons.FaPlus;
 const SearchIcon = icons.FaSearch;

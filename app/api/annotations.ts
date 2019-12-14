@@ -16,31 +16,57 @@ export function postAnnotation(anRecord: anModel.AnRecord): Promise<any> {
 }
 
 export interface Filters {
-  allFilesFilter: boolean;
-  creatorFilter: [boolean, boolean];
-  typeFilter: [boolean, boolean, boolean];
+  allFiles: boolean;
+  creator: {
+    mine: boolean;
+    others: boolean;
+  };
+  type: {
+    semantic: boolean;
+    keyword: boolean;
+    comment: boolean;
+  };
+  value?: string;
 }
 
-function mkFilterArray<T>(filterEnum: Record<string, T>, flags: Array<boolean>): Array<T> {
-  const res: Array<T> = [];
-  Object.keys(filterEnum).map((k, i) => { if (flags[i]) { res.push(filterEnum[k]); } });
-  return res;
+type Query = Record<string, any>;
+
+function mkTypeFilter(f: Filters): Query {
+  return {
+    type: [ 
+    ...(f.type.semantic ? [anModel.TypeFilter.SEMANTIC]: []), 
+    ...(f.type.keyword ? [anModel.TypeFilter.KEYWORD]: []), 
+    ...(f.type.comment ? [anModel.TypeFilter.COMMENT]: []) 
+    ]
+  };
+}
+
+function mkCreatorFilter(context: Context, f: Filters): Query {
+  return !f.creator.others ? { creator: context.user.id } : {};
+}
+
+function mkTargetSourceFilter(context: Context, f: Filters): Query {
+  return !f.allFiles ? { "target-source": context.target.source } : {};
+}
+
+function mkValueFilter(f: Filters): Query {
+  return f.value ? { value: f.value } : {};
 }
 
 export function getAnnotations(context: Context, f: Filters): Promise<Array<anModel.AnRecord>> {
-  const creatorParam = mkFilterArray(anModel.CreatorFilter, f.creatorFilter);
-  const typeParam = mkFilterArray(anModel.TypeFilter, f.typeFilter);
-  const params: anModel.GetQuery = {
-    user: context.user.id,
-    "target-source": f.allFilesFilter ? undefined : context.resource.source,
-    "creator-filter": creatorParam.length > 0 ? creatorParam : undefined,
-    "type-filter": typeParam.length > 0 ? typeParam : undefined
+  const params: Query = {
+    ...mkTypeFilter(f),
+    ...mkCreatorFilter(context, f),
+    ...mkTargetSourceFilter(context, f),
+    ...mkValueFilter(f)
   };
-
   return new Promise((resolve, reject) => {
     axios.get(annotationsUrl, { params }).then(res => {
       if(res.data) {
-        resolve(res.data);
+        const cleaned = !f.creator.mine ? 
+          res.data.filter((r: anModel.AnRecord) => r.creator.id !== context.user.id)
+        : res.data;
+        resolve(cleaned);
       } else {
         reject(new Error("Empty data"));
       }

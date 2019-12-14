@@ -13,8 +13,8 @@ const alertId = "anAlert";
 
 function mkTarget(context: Context): anModel.AnTarget {
   return anModel.mkTarget({
-      id: context.resource.pid, 
-      source: context.resource.source
+      id: context.target.pid, 
+      source: context.target.source
   });
 }
 
