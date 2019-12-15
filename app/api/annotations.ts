@@ -4,11 +4,9 @@ import * as secret from "../secret";
 import { endpointUrl } from "./server";
 import { Context } from "../widget/context";
 import * as anModel from "../shared/annotationsModel";
-import * as sModel from "../shared/searchModel";
 
 const annotationsUrl = endpointUrl + anModel.annotationsUrl;
 const filesUrl = endpointUrl + anModel.filesUrl;
-const searchUrl = endpointUrl + sModel.searchUrl;
 
 export function postAnnotation(anRecord: anModel.AnRecord): Promise<any> {
   const config = { headers: {'Creatorization': "bearer " + secret.token} };
@@ -91,19 +89,6 @@ export function deleteAnnotation(anIdUrl: string): Promise<any> {
 export function getFiles(tag: string): Promise<Array<string>> {
   return new Promise((resolve, reject) => {
     axios.get(filesUrl, { params: { tag } }).then(res => {
-      if(res.data) {
-        resolve(res.data);
-      } else {
-        reject(new Error("Empty data"));
-      }
-    },
-    error => reject(error));
-  });
-}
-
-export function searchAnnotations(query: sModel.SearchQuery): Promise<Array<string>> {
-  return new Promise((resolve, reject) => {
-    axios.get(searchUrl, { params: { query: JSON.stringify(query) } }).then(res => {
       if(res.data) {
         resolve(res.data);
       } else {

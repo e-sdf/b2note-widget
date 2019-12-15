@@ -1,16 +1,22 @@
-import { TypeFilter } from "./annotationsModel";
-
-export const searchUrl = "/search";
+export enum SearchType { SEMANTIC = "semantic", KEYWORD = "keyword", COMMENT = "comment", REGEX = "regex" };
 
 export enum OperatorType { AND = "AND", OR = "OR", XOR = "XOR", NOT = "NOT" }
 
-export interface SearchTerm {
-  operator?: OperatorType;
-  type: TypeFilter;
-  label: string;
+export interface BiOperatorExpr {
+  operator: OperatorType.AND | OperatorType.OR | OperatorType.XOR;
+  lexpr: Sexpr;
+  rexpr: Sexpr;
 }
 
-export interface SearchQuery {
-  terms: Array<SearchTerm>;
-  includeSynonyms: boolean;
+export interface UnOperatorExpr {
+  operator: OperatorType.NOT;
+  expr: Sexpr;
 }
+
+export interface TagExpr {
+  type: SearchType;
+  value: string;
+}
+
+export type Sexpr = BiOperatorExpr | UnOperatorExpr | TagExpr;
+

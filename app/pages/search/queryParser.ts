@@ -1,24 +1,5 @@
 import * as peg from "pegjs";
-import { TypeFilter } from "../../shared/annotationsModel";
-import { OperatorType } from "../../shared/searchModel";
-
-export interface BiOperatorExpr {
-  operator: OperatorType.AND | OperatorType.OR | OperatorType.XOR;
-  lexpr: Expression;
-  rexpr: Expression;
-}
-
-export interface UnOperatorExpr {
-  operator: OperatorType.NOT;
-  expr: Expression;
-}
-
-export type Expression = BiOperatorExpr | UnOperatorExpr | TagExpr;
-
-export interface TagExpr {
-  type: TypeFilter;
-  value: string;
-}
+import { SearchType, Sexpr, OperatorType } from "../../shared/searchModel";
 
 export interface ParseError {
   message: string;
@@ -27,7 +8,7 @@ export interface ParseError {
 
 export interface ParseResult {
   error?: ParseError;
-  result?: Expression;
+  result?: Sexpr;
 }
 
 const grammar = `
@@ -46,9 +27,10 @@ expr
   / "(" query:query ")" { return query; }
 
 tag
-  = "s:" identifier:identifier { return { type: "${TypeFilter.SEMANTIC}", identifier }; }
-  / "k:" value:value { return { type: "${TypeFilter.KEYWORD}", value }; }
-  / "c:" value:value { return { type: "${TypeFilter.COMMENT}", value }; }
+  = "s:" identifier:identifier { return { type: "${SearchType.SEMANTIC}", identifier }; }
+  / "k:" value:value { return { type: "${SearchType.KEYWORD}", value }; }
+  / "c:" value:value { return { type: "${SearchType.COMMENT}", value }; }
+  / "r:/" value:value "/" { return { type: "${SearchType.REGEX}", value }; }
 
 identifier
   = identifier:[a-zA-Z0-9]+ { return identifier.join(""); }
@@ -59,7 +41,6 @@ value
 
 white
   = [  ]*
-
 `;
 
 //  / expr [  ]*"OR"i[  ]* expr

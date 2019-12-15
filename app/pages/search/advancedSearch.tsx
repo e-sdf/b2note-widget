@@ -67,7 +67,7 @@ export function AdvancedSearch(props: AdvancedSearchProps): React.FunctionCompon
     return (
       <p className="query-syntax-text text-secondary">
         Example query:<br/>
-        <span style={{fontFamily: "monospace"}}>s:semantic1 AND (k:keyword1 OR c:&quot;comment words&quot;)</span><br/>
+        <span style={{fontFamily: "monospace"}}>s:semantic1 AND (k:keyword1 OR c:&quot;comment words&quot;) XOR r:/regex/</span><br/>
         Binary operators: <span style={{fontFamily: "monospace"}}>AND</span>, <span style={{fontFamily: "monospace"}}>OR</span>, <span style={{fontFamily: "monospace"}}>XOR</span><br/>
         Unary operator: <span style={{fontFamily: "monospace"}}>NOT</span>
       </p>
