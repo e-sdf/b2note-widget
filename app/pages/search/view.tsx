@@ -37,13 +37,11 @@ export function SearchPage(props: SearchProps): React.FunctionComponentElement<S
   const [resultsBasic, setResultsBasic] = React.useState(null as Array<anModel.AnRecord>|null);
   const [resultsAdv, setResultsAdv] = React.useState(null as Array<anModel.AnRecord>|null);
 
-  React.useEffect(() => console.log(resultsBasic), [resultsBasic]);
-
   return (
     <>
       <Tabs id="searchTabs" activeTab={"basic" as TabType}>
         <Tab tabId={"basic" as TabType} title="Basic Search">
-          <BasicSearch context={props.context} resultsHandle={setResultsBasic}/>
+          <BasicSearch resultsHandle={setResultsBasic}/>
           <Results results={resultsBasic}/>
         </Tab>
         <Tab tabId={"advanced" as TabType} title="Advanced Search">

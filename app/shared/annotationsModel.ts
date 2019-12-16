@@ -1,6 +1,9 @@
+import * as sModel from "./searchModel";
+
 // Endpoints {{{1
 
 export const annotationsUrl = "/annotations";
+export const searchUrl = "/search";
 export const filesUrl = "/files";
 
 // Types {{{1
@@ -174,11 +177,14 @@ export interface GetQuery {
   creator?: string;
   "target-source"?: string;
   value?: string;
-  expression?: string;
 }
 
 export interface FilesQuery {
   tag: string;
+}
+
+export interface SearchQuery {
+  expression: string;
 }
 
 // Querying {{{1

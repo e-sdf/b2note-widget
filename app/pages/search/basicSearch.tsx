@@ -1,21 +1,26 @@
 import * as _ from "lodash";
 import * as React from "react";
 import * as icons from "react-icons/fa";
-import { AnRecord } from "../../shared/annotationsModel";
+import { AnRecord, SearchQuery, TypeFilter} from "../../shared/annotationsModel";
 import { Context } from "../../widget/context";
-import { SearchType, Sexpr } from "../../shared/searchModel";
 import * as ac from "../../autocomplete/autocomplete";
 import { SemanticAutocomplete } from "../../autocomplete/view";
+import { SearchType, BiOperatorType, BiOperatorExpr, TagExpr, Sexpr } from "../../shared/searchModel";
+import * as queryParser from "../../shared/searchQueryParser";
 import * as api from "../../api/annotations";
+import { showAlertWarning, showAlertError } from "../../components"; 
 
 const AddIcon = icons.FaPlus;
 const SearchIcon = icons.FaSearch;
 const DeleteIcon = icons.FaTrashAlt;
 
+const alertId = "basic-search-alert";
+
 interface TermCompProps {
   isFirst: boolean;
   updateAnTypeHandle(sType: SearchType): void;
   updateLabelHandle(label: string): void;
+  updateSynonymsHandle(flag: boolean): void;
   deleteHandle?(): void;
 }
 
@@ -57,7 +62,11 @@ function TermComp(props: TermCompProps): TermComp {
             <div className="form-check">
               <input className="form-check-input" type="checkbox"
                 checked={includeSynonyms} 
-                onChange={ev => setIncludeSynonyms(ev.target.checked)}
+                onChange={ev => {
+                  const val = ev.target.checked;
+                  setIncludeSynonyms(val);
+                  props.updateSynonymsHandle(val);
+                }}
               />
               <label className="form-check-label">
                 Include synonym matches
@@ -87,6 +96,7 @@ interface TermItem {
   id: number;
   sType: SearchType;
   label: string;
+  includeSynonyms: boolean; //Relevant just for SEMANTIC
   termComp: TermComp;
 }
 
@@ -94,6 +104,7 @@ enum TermsActionType {
   ADD = "ADD",
   UPDATE_STYPE = "UPDATE_STYPE",
   UPDATE_LABEL = "UPDATE_LABEL",
+  UPDATE_SYNONYMS_FLAG = "UPDATE_SYNONYMS_FLAG",
   DELETE = "DELETE"
 }
 
@@ -104,13 +115,15 @@ function mkTermId(): number {
 function mkTermItem(id: number, isFirst: boolean, dispatch: React.Dispatch<TermsAction>): TermItem {
   return {
     id,
-    sType: SearchType.SEMANTIC,
+    sType: SearchType.REGEX,
     label: "",
+    includeSynonyms: false,
     termComp: <TermComp 
       key={id}
       isFirst={isFirst} 
       updateAnTypeHandle={(sType: SearchType): void => dispatch({ type: TermsActionType.UPDATE_STYPE, termId: id, sType })}
       updateLabelHandle={(label: string): void => dispatch({ type: TermsActionType.UPDATE_LABEL, termId: id, label })}
+      updateSynonymsHandle={(flag: boolean): void => dispatch({ type: TermsActionType.UPDATE_SYNONYMS_FLAG, termId: id, includeSynonyms: flag })}
       deleteHandle={() => dispatch({ type: TermsActionType.DELETE, termId: id })}/>
   };
 }
@@ -121,6 +134,7 @@ interface TermsAction {
   newTerm?: TermItem;
   sType?: SearchType;
   label?: string;
+  includeSynonyms?: boolean;
 }
 
 function reducer(terms: Array<TermItem>, action: TermsAction): Array<TermItem> {
@@ -131,6 +145,8 @@ function reducer(terms: Array<TermItem>, action: TermsAction): Array<TermItem> {
        terms.map(t => t.id === action.termId ? { ...t, sType: action.sType ? action.sType : t.sType } : t) 
      : action.type === TermsActionType.UPDATE_LABEL ?
        terms.map(t => t.id === action.termId ? { ...t, label: action.label ? action.label : t.label } : t) 
+     : action.type === TermsActionType.UPDATE_SYNONYMS_FLAG ?
+       terms.map(t => t.id === action.termId ? { ...t, includeSynonyms: action.includeSynonyms ? action.includeSynonyms : t.includeSynonyms } : t) 
      : action.type === TermsActionType.DELETE ?
        terms.filter(t => t.id !== action.termId)
      : (() => { console.error("Unknown term action"); return terms; })()
@@ -139,7 +155,6 @@ function reducer(terms: Array<TermItem>, action: TermsAction): Array<TermItem> {
 }
 
 export interface BasicSearchProps {
-  context: Context;
   resultsHandle(results: Array<AnRecord>): void;
 }
 
@@ -164,27 +179,46 @@ export function BasicSearch(props: BasicSearchProps): React.FunctionComponentEle
     });
   }
 
+  function mkValue(term: TermItem): string {
+    const delim = term.sType === SearchType.REGEX ? "/" : '"';
+    const synonyms = term.sType === SearchType.SEMANTIC && term.includeSynonyms ? "+s" : "";
+    return `${queryParser.type2marker(term.sType)}:${delim}${term.label}${delim}${synonyms}`;
+  }
+
+  function mkExpression(operator: BiOperatorType, terms: Array<TermItem> ): string {
+    return (
+      terms.length > 2 ?
+        `${mkValue(terms[0])} ${operator} ${mkExpression(operator, _.tail(terms))}`
+      : `${mkValue(terms[0])} ${operator} ${mkValue(terms[1])}`
+    );
+  }
+
+  function sType2anType(sType: SearchType): TypeFilter {
+    switch (sType) {
+      case SearchType.SEMANTIC: return TypeFilter.SEMANTIC;
+      case SearchType.KEYWORD: return TypeFilter.KEYWORD;
+      case SearchType.COMMENT: return TypeFilter.COMMENT;
+      default: throw new Error("Other TypeFilter values invalid here");
+    }
+  }
+
   function submitQuery(): void {
-    //const sTerms: Array<SearchTerm> = terms.map(t => ({
-      //operator: t.operator,
-      //type: t.sType,
-      //label: t.label
-    //}));
-    //const expr: SearchQuery = {
-      //terms: sTerms,
-      //includeSynonyms: includeSynonyms
-    //};
-    //api.searchAnnotations(expr)
-    //.then((files) => {
-      //console.log(files);
-    //})
-    //.catch(error => {
-      //if (error.response.data && error.response.data.message) {
-        //showAlertWarning(alertId, error.response.data.message);
-      //} else {
-        //showAlertError(alertId, "Failed: server error");
-      //}
-    //});
+    const operator = mode === SearchMode.ANY ? BiOperatorType.OR : BiOperatorType.AND;
+    const query: SearchQuery = 
+      terms.length > 1 ? { expression: mkExpression(operator, terms) } : { expression: mkValue(terms[0]) };
+    api.searchAnnotations(query)
+    .then((anl: Array<AnRecord>) => {
+      console.log(anl);
+      props.resultsHandle(anl);
+    })
+    .catch((error: any) => {
+      console.error(error);
+      if (error?.response?.data?.message) {
+        showAlertWarning(alertId, error.response.data.message);
+      } else {
+        showAlertError(alertId, "Failed: server error");
+      }
+    });
   }
 
   function renderModeSelection(): React.ReactElement {
@@ -224,6 +258,7 @@ export function BasicSearch(props: BasicSearchProps): React.FunctionComponentEle
           </button>
         </div>
       </form>
+      <div id={alertId}></div>
     </div>
   );
 }

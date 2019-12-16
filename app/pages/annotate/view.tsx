@@ -89,13 +89,14 @@ function Keyword(props: Props): React.FunctionComponentElement<{}> {
       showAlertSuccess(alertId, "Keyword annotation created");
       setLabel("");
     })
-      .catch(error => {
-        if (error.response.data?.message) {
-          showAlertWarning(alertId, error.response.data.message);
-        } else {
-          showAlertError(alertId, "Failed: server error");
-        }
-      });
+    .catch((error: any) => {
+      console.error(error);
+      if (error?.response?.data?.message) {
+        showAlertWarning(alertId, error.response.data.message);
+      } else {
+        showAlertError(alertId, "Failed: server error");
+      }
+    });
   }
 
   return (

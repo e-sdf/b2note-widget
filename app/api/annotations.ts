@@ -4,9 +4,11 @@ import * as secret from "../secret";
 import { endpointUrl } from "./server";
 import { Context } from "../widget/context";
 import * as anModel from "../shared/annotationsModel";
+import * as searchQueryParser from "../shared/searchQueryParser";
 
 const annotationsUrl = endpointUrl + anModel.annotationsUrl;
 const filesUrl = endpointUrl + anModel.filesUrl;
+const searchUrl = endpointUrl + anModel.searchUrl;
 
 export function postAnnotation(anRecord: anModel.AnRecord): Promise<any> {
   const config = { headers: {'Creatorization': "bearer " + secret.token} };
@@ -98,4 +100,21 @@ export function getFiles(tag: string): Promise<Array<string>> {
     error => reject(error));
   });
 }
+
+export function searchAnnotations(query: anModel.SearchQuery): Promise<Array<anModel.AnRecord>> {
+  const res = searchQueryParser.parse(query.expression);
+  if (res.error) { throw new Error("Query expression parse error: " + res.error); }
+  return new Promise((resolve, reject) => {
+    axios.get(searchUrl, { params: query }).then(res => {
+      if(res.data) {
+        resolve(res.data);
+      } else {
+        reject(new Error("Empty data"));
+      }
+    },
+    error => reject(error));
+  });
+}
+
+
 

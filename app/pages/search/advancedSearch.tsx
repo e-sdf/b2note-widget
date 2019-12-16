@@ -7,7 +7,7 @@ import * as ac from "../../autocomplete/autocomplete";
 import { SemanticAutocomplete } from "../../autocomplete/view";
 import * as api from "../../api/annotations";
 import { showAlertWarning, showAlertError } from "../../components"; 
-import * as queryParser from "./queryParser";
+import * as queryParser from "../../shared/searchQueryParser";
 
 const OKIcon = icons.FaCheck;
 const ErrorIcon = icons.FaExclamation;
@@ -23,7 +23,7 @@ export function AdvancedSearch(props: AdvancedSearchProps): React.FunctionCompon
   const [queryStr, setQueryStr] = React.useState("");
   const [queryError, setQueryError] = React.useState(null as queryParser.ParseError|null);
   const [semanticTagsList, setSemanticTagsList] = React.useState([] as Array<string>);
-  const [semanticTagsDict, setSemanticTagsDict] = React.useState({});
+  const [semanticTagsDict, setSemanticTagsDict] = React.useState({} as Record<string, string>);
 
   function queryChanged(query: string): void {
     setQueryStr(query);
@@ -31,6 +31,7 @@ export function AdvancedSearch(props: AdvancedSearchProps): React.FunctionCompon
     setQueryError(res.error ? res.error : null);
     const tags = query.match(/s:[a-zA-Z0-9]+/g)?.map(m => m.substring(2, m.length));
     setSemanticTagsList(!res.error && tags ? tags : []);
+    // TODO: synchronize semanticTagsDict
   }
   
   function tagFilled(tag: string, suggestions: Array<ac.Suggestion>): void {
@@ -38,29 +39,29 @@ export function AdvancedSearch(props: AdvancedSearchProps): React.FunctionCompon
     setSemanticTagsDict({ ...semanticTagsDict, [tag]: value });
   }
 
-  React.useEffect(() => console.log(semanticTagsDict), [semanticTagsDict]);
+  //React.useEffect(() => console.log(semanticTagsDict), [semanticTagsDict]);
+  //React.useEffect(() => console.log(semanticTagsList), [semanticTagsList]);
+
+  function fillIdentifiers(query: string): string {
+    return semanticTagsList.reduce((acc, ident) => acc.replace(ident, semanticTagsDict[ident]), query);
+  }
 
   function submitQuery(): void {
-    //const sTerms: Array<SearchTerm> = terms.map(t => ({
-      //operator: t.operator,
-      //type: t.anType,
-      //label: t.label
-    //}));
-    //const expr: SearchQuery = {
-      //terms: sTerms,
-      //includeSynonyms: includeSynonyms
-    //};
-    //api.searchAnnotations(expr)
-    //.then((files) => {
-      //console.log(files);
-    //})
-    //.catch(error => {
-      //if (error.response.data && error.response.data.message) {
-        //showAlertWarning(alertId, error.response.data.message);
-      //} else {
-        //showAlertError(alertId, "Failed: server error");
-      //}
-    //});
+    const query = fillIdentifiers(queryStr);
+    //console.log(query);
+    api.searchAnnotations({ expression: query })
+    .then((anl: Array<anModel.AnRecord>) => {
+      console.log(anl);
+      props.resultsHandle(anl);
+    })
+    .catch((error: any) => {
+      console.error(error);
+      if (error?.response?.data?.message) {
+        showAlertWarning(alertId, error.response.data.message);
+      } else {
+        showAlertError(alertId, "Failed: server error");
+      }
+    });
   }
 
   function Help(): React.FunctionComponentElement<{}> {
@@ -104,6 +105,7 @@ export function AdvancedSearch(props: AdvancedSearchProps): React.FunctionCompon
           </button>
         </div>
       </form>
+      <div id={alertId}></div>
     </div>
   );
 }
