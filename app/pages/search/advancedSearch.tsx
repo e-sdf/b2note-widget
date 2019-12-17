@@ -76,7 +76,7 @@ export function AdvancedSearch(props: AdvancedSearchProps): React.FunctionCompon
   }
 
   return (
-    <div className="container-fluid search-panel">
+    <div className="container-fluid">
       <form>
         <Help/>
         <div className="form-group d-flex flex-row">

@@ -4,3 +4,4 @@ export const HelpIcon = icons.FaQuestionCircle;
 export const SemanticIcon = icons.FaCode;
 export const KeywordIcon = icons.FaQuoteRight;
 export const CommentIcon = icons.FaCommentDots;
+export const DownloadIcon = icons.FaDownload;

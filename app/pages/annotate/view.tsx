@@ -35,8 +35,13 @@ function Semantic(props: Props): React.FunctionComponentElement<Context> {
   const [ref, setRef] = React.useState(null as any);
 
   function gotSuggestion(suggestions: Array<ac.Suggestion>): void {
-    setUris(suggestions[0].items.map((i: ac.Item) => i.uris));
-    setLabel(suggestions[0].labelOrig);
+    if (suggestions.length > 0) {
+      setLabel(suggestions[0].labelOrig);
+      setUris(suggestions[0].items.map((i: ac.Item) => i.uris));
+    } else {
+      setLabel("");
+      setUris([]);
+    }
   }
 
   function annotate(): void {

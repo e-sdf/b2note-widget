@@ -19,7 +19,7 @@ const alertId = "basic-search-alert";
 interface TermCompProps {
   isFirst: boolean;
   updateAnTypeHandle(sType: SearchType): void;
-  updateLabelHandle(label: string): void;
+  updateValueHandle(value: string): void;
   updateSynonymsHandle(flag: boolean): void;
   deleteHandle?(): void;
 }
@@ -28,13 +28,12 @@ type TermComp = React.FunctionComponentElement<TermCompProps>;
 
 function TermComp(props: TermCompProps): TermComp {
   const [inputType, setInputType] = React.useState(SearchType.REGEX);
-  const [label, setLabel] = React.useState("");
+  const [value, setValue] = React.useState("");
   const [includeSynonyms, setIncludeSynonyms] = React.useState(false);
 
   function gotSuggestion(suggestions: Array<ac.Suggestion>): void {
-    const val = suggestions[0].labelOrig;
-    setLabel(val);
-    props.updateLabelHandle(val);
+    const val = suggestions[0]?.labelOrig || "";
+    props.updateValueHandle(val);
   }
 
   return (
@@ -46,8 +45,8 @@ function TermComp(props: TermCompProps): TermComp {
           setInputType(val);
           props.updateAnTypeHandle(val);
           if (val === SearchType.SEMANTIC) {
-            setLabel("");
-            props.updateLabelHandle("");
+            setValue("");
+            props.updateValueHandle("");
           }
         }}>
         <option value={SearchType.REGEX}>Any (regular expression)</option>
@@ -75,11 +74,11 @@ function TermComp(props: TermCompProps): TermComp {
           </div>
         </>
         : <input type="text" className="form-control"
-          value={label} 
+          value={value} 
           onChange={ev => {
             const val: string = ev.target.value;
-            setLabel(val);
-            props.updateLabelHandle(val);
+            setValue(val);
+            props.updateValueHandle(val);
           }}/>
       }
       {props.isFirst ? "" :
@@ -95,7 +94,7 @@ function TermComp(props: TermCompProps): TermComp {
 interface TermItem {
   id: number;
   sType: SearchType;
-  label: string;
+  value: string;
   includeSynonyms: boolean; //Relevant just for SEMANTIC
   termComp: TermComp;
 }
@@ -103,7 +102,7 @@ interface TermItem {
 enum TermsActionType { 
   ADD = "ADD",
   UPDATE_STYPE = "UPDATE_STYPE",
-  UPDATE_LABEL = "UPDATE_LABEL",
+  UPDATE_VALUE = "UPDATE_VALUE",
   UPDATE_SYNONYMS_FLAG = "UPDATE_SYNONYMS_FLAG",
   DELETE = "DELETE"
 }
@@ -116,37 +115,53 @@ function mkTermItem(id: number, isFirst: boolean, dispatch: React.Dispatch<Terms
   return {
     id,
     sType: SearchType.REGEX,
-    label: "",
+    value: "",
     includeSynonyms: false,
     termComp: <TermComp 
       key={id}
       isFirst={isFirst} 
       updateAnTypeHandle={(sType: SearchType): void => dispatch({ type: TermsActionType.UPDATE_STYPE, termId: id, sType })}
-      updateLabelHandle={(label: string): void => dispatch({ type: TermsActionType.UPDATE_LABEL, termId: id, label })}
+      updateValueHandle={(value: string): void => dispatch({ type: TermsActionType.UPDATE_VALUE, termId: id, value })}
       updateSynonymsHandle={(flag: boolean): void => dispatch({ type: TermsActionType.UPDATE_SYNONYMS_FLAG, termId: id, includeSynonyms: flag })}
       deleteHandle={() => dispatch({ type: TermsActionType.DELETE, termId: id })}/>
   };
 }
 
-interface TermsAction {
+interface TermsActionBase {
   type: TermsActionType;
   termId: number;
-  newTerm?: TermItem;
-  sType?: SearchType;
-  label?: string;
-  includeSynonyms?: boolean;
 }
+
+interface AddTermAction extends TermsActionBase {
+  newTerm: TermItem;
+}
+
+interface UpdateStypeTermAction extends TermsActionBase {
+  sType: SearchType;
+}
+
+interface UpdateValueTermAction extends TermsActionBase {
+  value: string;
+}
+
+interface UpdateSynonymsFlagTermAction extends TermsActionBase {
+  includeSynonyms: boolean;
+}
+
+type DeleteTermAction = TermsActionBase
+
+type TermsAction = AddTermAction | UpdateStypeTermAction | UpdateValueTermAction | UpdateSynonymsFlagTermAction | DeleteTermAction
 
 function reducer(terms: Array<TermItem>, action: TermsAction): Array<TermItem> {
   const res: Array<TermItem> = (
      action.type === TermsActionType.ADD ?
-       _.concat(terms, action.newTerm ? action.newTerm : [])
+       _.concat(terms, (action as AddTermAction).newTerm)
      : action.type === TermsActionType.UPDATE_STYPE ?
-       terms.map(t => t.id === action.termId ? { ...t, sType: action.sType ? action.sType : t.sType } : t) 
-     : action.type === TermsActionType.UPDATE_LABEL ?
-       terms.map(t => t.id === action.termId ? { ...t, label: action.label ? action.label : t.label } : t) 
+       terms.map(t => t.id === action.termId ? { ...t, sType: (action as UpdateStypeTermAction).sType } : t) 
+     : action.type === TermsActionType.UPDATE_VALUE ?
+       terms.map(t => t.id === action.termId ? { ...t, value: (action as UpdateValueTermAction).value } : t) 
      : action.type === TermsActionType.UPDATE_SYNONYMS_FLAG ?
-       terms.map(t => t.id === action.termId ? { ...t, includeSynonyms: action.includeSynonyms ? action.includeSynonyms : t.includeSynonyms } : t) 
+       terms.map(t => t.id === action.termId ? { ...t, includeSynonyms: (action as UpdateSynonymsFlagTermAction).includeSynonyms } : t) 
      : action.type === TermsActionType.DELETE ?
        terms.filter(t => t.id !== action.termId)
      : (() => { console.error("Unknown term action"); return terms; })()
@@ -162,12 +177,19 @@ enum SearchMode { ANY = "any", ALL = "all" }
 
 export function BasicSearch(props: BasicSearchProps): React.FunctionComponentElement<BasicSearchProps> {
   const [terms, dispatch] = React.useReducer(reducer, [] as Array<TermItem>);
+  const [nonEmptyTerms, setNonEmptyTerms] = React.useState([] as Array<TermItem>);
   const [mode, setMode] = React.useState(SearchMode.ANY);
 
   React.useEffect(() => {
     const firstTerm = mkTermItem(0, true, dispatch);
     dispatch({ type: TermsActionType.ADD, termId: firstTerm.id, newTerm: firstTerm });
   }, []);
+
+  React.useEffect(() => {
+    setNonEmptyTerms(terms.filter(t => t.value.length > 0)); 
+  }, [terms]);
+
+  //const nonEmptyTerms: () => Array<TermItem> = () => terms.filter(t => t.value.length > 1);
 
   function addTerm(): void {
     const termId = mkTermId();
@@ -182,7 +204,7 @@ export function BasicSearch(props: BasicSearchProps): React.FunctionComponentEle
   function mkValue(term: TermItem): string {
     const delim = term.sType === SearchType.REGEX ? "/" : '"';
     const synonyms = term.sType === SearchType.SEMANTIC && term.includeSynonyms ? "+s" : "";
-    return `${queryParser.type2marker(term.sType)}:${delim}${term.label}${delim}${synonyms}`;
+    return `${queryParser.type2marker(term.sType)}:${delim}${term.value}${delim}${synonyms}`;
   }
 
   function mkExpression(operator: BiOperatorType, terms: Array<TermItem> ): string {
@@ -205,7 +227,7 @@ export function BasicSearch(props: BasicSearchProps): React.FunctionComponentEle
   function submitQuery(): void {
     const operator = mode === SearchMode.ANY ? BiOperatorType.OR : BiOperatorType.AND;
     const query: SearchQuery = 
-      terms.length > 1 ? { expression: mkExpression(operator, terms) } : { expression: mkValue(terms[0]) };
+      nonEmptyTerms.length > 1 ? { expression: mkExpression(operator, nonEmptyTerms) } : { expression: mkValue(nonEmptyTerms[0]) };
     api.searchAnnotations(query)
     .then((anl: Array<AnRecord>) => {
       console.log(anl);
@@ -241,7 +263,7 @@ export function BasicSearch(props: BasicSearchProps): React.FunctionComponentEle
   }
 
   return (
-    <div className="container-fluid search-panel">
+    <div className="container-fluid">
       <form>
         {terms.map((term: TermItem) => term.termComp)}
         {terms.length > 1 ? renderModeSelection() : ""}
@@ -253,6 +275,7 @@ export function BasicSearch(props: BasicSearchProps): React.FunctionComponentEle
           </button>
           <button type="button" className="btn btn-primary" style={{marginLeft: "10px"}}
             data-toggle="tooltip" data-placement="bottom" title="Make search"
+            disabled={nonEmptyTerms.length === 0}
             onClick={submitQuery}>
             <SearchIcon/> 
           </button>

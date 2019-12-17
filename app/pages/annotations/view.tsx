@@ -6,6 +6,7 @@ import * as icons from "react-icons/fa";
 import * as anModel from "../../shared/annotationsModel";
 import * as api from "../../api/annotations";
 import { Context } from "../../widget/context";
+import { shorten } from "../pages";
 import { showAlertSuccess, showAlertWarning, showAlertError } from "../../components"; 
 import { LoaderFilter, AnItem } from "./loader";
 import * as ac from "../../autocomplete/autocomplete";
@@ -112,8 +113,6 @@ export function Annotations(props: Props): React.FunctionComponentElement<Props>
   const [pendingDeleteId, setPendingDeleteId] = React.useState(null as string|null);
   const [ontologyInfos, setOntologyInfos] = React.useState(null as Array<ontology.OntologyInfo>|null);
 
-  const shorten = (lbl: string, lng: number): string => lbl.length > lng ? lbl.substring(0, lng) + "..." : lbl;
-
   function loadOntologiesInfo(anRecord: anModel.AnRecord): void {
     const iris = anModel.getSources(anRecord);
     const infoPms = iris.map((iri: string) => ontology.getInfo(iri));
@@ -191,7 +190,7 @@ export function Annotations(props: Props): React.FunctionComponentElement<Props>
             data-toggle="tooltip" data-placement="bottom" title="Number of files with this annotation"
           >{anItem.files.length}</span>
           <button type="button" 
-            className="btn btn-sm btn-outline-primary anl-action-button"
+            className="btn btn-sm btn-outline-primary list-action-button"
             style={{padding: "0 4px 3px 0"}}
             onClick={() => toggleShowFilesFlag(anItem)}>
             {anItem.showFilesFlag ? <HideFilesIcon/> : <ShowFilesIcon/>}
@@ -204,13 +203,13 @@ export function Annotations(props: Props): React.FunctionComponentElement<Props>
       return (
         <React.Fragment>
           <button type="button"
-            className="btn btn-sm btn-outline-primary anl-action-button mr-1"
+            className="btn btn-sm btn-outline-primary list-action-button mr-1"
             data-toggle="tooltip" data-placement="bottom" title="Edit"
             onClick={() => setEditedRecordId(anRecord.id)}
           ><EditIcon/>
           </button>
           <button type="button"
-            className="btn btn-sm btn-outline-primary anl-action-button"
+            className="btn btn-sm btn-outline-primary list-action-button"
             data-toggle="tooltip" data-placement="bottom" title="Delete"
             onClick={() => setPendingDeleteId(anRecord.id)}
           ><DeleteIcon/>
