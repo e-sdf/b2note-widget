@@ -7,7 +7,7 @@ import * as anModel from "../shared/annotationsModel";
 import * as searchQueryParser from "../shared/searchQueryParser";
 
 const annotationsUrl = endpointUrl + anModel.annotationsUrl;
-const filesUrl = endpointUrl + anModel.filesUrl;
+const targetsUrl = endpointUrl + anModel.targetsUrl;
 const searchUrl = endpointUrl + anModel.searchUrl;
 
 export function postAnnotation(anRecord: anModel.AnRecord): Promise<any> {
@@ -88,9 +88,9 @@ export function deleteAnnotation(anIdUrl: string): Promise<any> {
   return axios.delete(makeLocalUrl(anIdUrl));
 }
 
-export function getFiles(tag: string): Promise<Array<string>> {
+export function getTargets(tag: string): Promise<Array<anModel.AnTarget>> {
   return new Promise((resolve, reject) => {
-    axios.get(filesUrl, { params: { tag } }).then(res => {
+    axios.get(targetsUrl, { params: { tag } }).then(res => {
       if(res.data) {
         resolve(res.data);
       } else {

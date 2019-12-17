@@ -18,7 +18,7 @@ const alertId = "anlAlert";
 
 export interface AnItem {
   anRecord: anModel.AnRecord;
-  files: Array<string>;
+  targets: Array<anModel.AnTarget>;
   showFilesFlag: boolean;
 }
 
@@ -65,11 +65,11 @@ export const LoaderFilter = React.forwardRef((props: LoaderProps, ref: React.Ref
     api.getAnnotations(props.context, filters).then(
       annotations => {
         const anl = sort(_.uniqBy(annotations, (a: anModel.AnRecord) => anModel.getLabel(a)));
-        const filesPms = anl.map(a => api.getFiles(anModel.getLabel(a)));
-        Promise.all(filesPms).then(files => {
+        const targetsPms = anl.map(a => api.getTargets(anModel.getLabel(a)));
+        Promise.all(targetsPms).then(targets => {
           props.setAnItems(anl.map((an, i) => ({ 
             anRecord: an,
-            files: files[i],
+            targets: targets[i],
             showFilesFlag: false
           })));
           setNoOfMine(annotations.filter(a => a.creator.id === props.context.user.id).length);

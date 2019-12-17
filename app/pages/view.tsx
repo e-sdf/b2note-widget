@@ -17,20 +17,22 @@ export function TargetTr(props: TargetTrProps): React.FunctionComponentElement<T
   return (
     <tr>
       <td style={{border: "none", padding: 0}}>
-        <a 
+        <span 
           data-toggle="tooltip" data-placement="bottom" title={props.target.source + (thisFile ? " (this file)" : " (other file)")}
-          href={props.target.id}>
+        >
           <span className={thisFile ? "font-weight-bold" : ""}>{shorten(props.target.source, 27)}</span>
-        </a>
+        </span>
       </td>
       <td style={{border: "none", padding: 0}}>
         <button type="button" className="btn btn-sm btn-outline-primary list-action-button"
           data-toggle="tooltip" data-placement="bottom" title="Visit landing page"
+          onClick={() => window.open(props.target.id, "_blank")}
         >
           <LookIcon/>
         </button>
         <button type="button" className="btn btn-sm btn-outline-primary list-action-button"
           data-toggle="tooltip" data-placement="bottom" title="Download file"
+          onClick={() => window.open(props.target.source, "_blank")}
         >
           <DownloadIcon/>
         </button>

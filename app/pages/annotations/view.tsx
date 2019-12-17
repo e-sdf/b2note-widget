@@ -9,6 +9,7 @@ import { Context } from "../../widget/context";
 import { shorten } from "../pages";
 import { showAlertSuccess, showAlertWarning, showAlertError } from "../../components"; 
 import { LoaderFilter, AnItem } from "./loader";
+import { TargetTr } from "../view";
 import * as ac from "../../autocomplete/autocomplete";
 import { SemanticAutocomplete } from "../../autocomplete/view";
 import * as ontology from "./ontologyInfo";
@@ -188,7 +189,7 @@ export function Annotations(props: Props): React.FunctionComponentElement<Props>
         <React.Fragment>
           <span className="badge badge-secondary" style={{verticalAlign: "middle"}}
             data-toggle="tooltip" data-placement="bottom" title="Number of files with this annotation"
-          >{anItem.files.length}</span>
+          >{anItem.targets.length}</span>
           <button type="button" 
             className="btn btn-sm btn-outline-primary list-action-button"
             style={{padding: "0 4px 3px 0"}}
@@ -218,22 +219,12 @@ export function Annotations(props: Props): React.FunctionComponentElement<Props>
       );
     }
 
-    function renderFiles(): React.ReactElement {
+    function renderTargets(): React.ReactElement {
       return (
-        <div>
-          {anItem.files.map(f => {
-            const thisFile = f === props.context.target.source;
-            return (
-              <div key={f}>
-                <a 
-                  data-toggle="tooltip" data-placement="bottom" title={f + (thisFile ? " (this file)" : " (other file)")}
-                  href={f}>
-                  <span className={thisFile ? "font-weight-bold" : ""}>{shorten(f, 36)}</span>
-                </a>
-              </div>
-            );
-          })}
-        </div>
+        <table className="table mb-0">
+          {anItem.targets.map(t =>
+            <TargetTr key={t.source} context={props.context} target={t}/>)}
+        </table>
       );
     }
 
@@ -288,7 +279,7 @@ export function Annotations(props: Props): React.FunctionComponentElement<Props>
           {anItem.showFilesFlag ? 
             <tr>
               <td colSpan={3} style={{borderTop: "none", paddingTop: 0}}>
-                {renderFiles()}
+                {renderTargets()}
               </td>
             </tr> : ""}
         </React.Fragment>
