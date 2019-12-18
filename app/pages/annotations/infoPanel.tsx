@@ -55,7 +55,6 @@ export function InfoPanel(props: Props): React.FunctionComponentElement<Props> {
 
     return (
       <nav 
-        className="anl-ontology-paginator"
         style={{backgroundColor: "white"}} aria-label="Ontologies navigation">
         <ul 
           className="pagination pagination-sm justify-content-center flex-wrap"
@@ -70,7 +69,7 @@ export function InfoPanel(props: Props): React.FunctionComponentElement<Props> {
 
   function renderTable(info: OntologyInfo): React.ReactElement {
     return (
-      <table className="table anl-ontology-table" style={{fontSize: "85%"}}>
+      <table className="table" style={{fontSize: "85%"}}>
         <tbody>
           <tr>
             <th>Description:</th>
@@ -89,6 +88,16 @@ export function InfoPanel(props: Props): React.FunctionComponentElement<Props> {
             <td>{info.ontologyAcronym}</td>
           </tr>
           <tr>
+            <th>Synonyms</th>
+            <td>{info.synonyms.map(s => 
+              <>
+                {s}
+                {s === _.last(info.synonyms) ? "" : <br/>}
+              </>
+              )}
+            </td>
+          </tr>
+          <tr>
             <th>URI:</th>
             <td><a href={info.uris}>{info.uris}</a></td>
           </tr>
@@ -98,26 +107,34 @@ export function InfoPanel(props: Props): React.FunctionComponentElement<Props> {
   }
 
   return (
-    <div className="container-fluid">
-      <div className="row">
-        <div className="col-sm">
-          <strong className="mr-auto" style={{fontSize: "125%"}}>{props.label}</strong>
-          <button type="button" className="ml-2 mb-1 close"
+    <>
+      <div className="container-fluid">
+        <div className="row">
+          <button type="button" className="ml-auto mr-3 close"
             onClick={() => props.closeFn()}
           ><span>&times;</span>
           </button>
         </div>
       </div>
-      <div className="row">
-        <div className="col-sm">
-          {renderTable(props.ontologyInfos[activePage - 1])}
+      <div className="container-fluid anl-ontology-pane">
+        <div className="row">
+          <div className="col-sm">
+            <strong className="mr-auto" style={{fontSize: "125%"}}>
+              {props.label}
+            </strong>
+          </div>
+        </div>
+        <div className="row">
+          <div className="col-sm">
+            {renderTable(props.ontologyInfos[activePage - 1])}
+          </div>
+        </div>
+        <div className="row">
+          <div className="col-sm">
+            {renderPaginator()}
+          </div>
         </div>
       </div>
-      <div className="row">
-        <div className="col-sm">
-          {renderPaginator()}
-        </div>
-      </div>
-    </div>
+    </>
   );
 }

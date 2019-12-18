@@ -7,7 +7,7 @@ export interface OntologyInfo {
   shortForm: string;
   ontologyName: string;
   ontologyAcronym: string;
-  synonyms: string;
+  synonyms: Array<string>;
   uris: string;
 }
 
@@ -23,14 +23,14 @@ export function getInfo(ontologyUri: string): Promise<OntologyInfo> {
       res => {
         if (res?.data?.response?.docs?.length > 0) {
           const info = res.data.response.docs[0];
-          //console.log(info);
+          console.log(info.synonyms);
           resolve({
             label: info.labels || "",
             description: info.description || "",
             shortForm: info.short_form || "",
             ontologyName: info.ontology_name || "",
             ontologyAcronym: info.ontology_acronym || "",
-            synonyms: info.synonyms || "",
+            synonyms: info.synonyms || [],
             uris: info.uris || ""
           });
         } else {
