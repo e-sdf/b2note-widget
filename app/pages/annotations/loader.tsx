@@ -1,7 +1,7 @@
 import * as _ from "lodash";
 import * as React from "react";
 import * as icons from "react-icons/fa";
-import * as anModel from "../../shared/annotationsModel";
+import * as anModel from "../../core/annotationsModel";
 import * as api from "../../api/annotations";
 import { Context } from "../../widget/context";
 import { showAlertError } from "../../components"; 

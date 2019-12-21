@@ -1,13 +1,10 @@
-import * as _ from "lodash";
 import * as React from "react";
-import * as ReactDOM from "react-dom";
 import * as icons from "react-icons/fa";
-import * as anModel from "../../shared/annotationsModel";
-import * as ac from "../../autocomplete/autocomplete";
-import { SemanticAutocomplete } from "../../autocomplete/view";
+import * as anModel from "../../core/annotationsModel";
+import * as ac from "../../autocomplete/view";
 import * as api from "../../api/annotations";
 import { showAlertWarning, showAlertError } from "../../components"; 
-import * as queryParser from "../../shared/searchQueryParser";
+import * as queryParser from "../../core/searchQueryParser";
 
 const OKIcon = icons.FaCheck;
 const ErrorIcon = icons.FaExclamation;
@@ -94,7 +91,7 @@ export function AdvancedSearch(props: AdvancedSearchProps): React.FunctionCompon
         {semanticTagsList.map((st, i) => 
           <div key={i} className="form-group">
             <span>{st}: </span>
-            <SemanticAutocomplete onChange={suggestions => tagFilled(st, suggestions)}/>
+            <ac.SemanticAutocomplete onChange={suggestions => tagFilled(st, suggestions)}/>
           </div>)
         }
         <div className="form-group">

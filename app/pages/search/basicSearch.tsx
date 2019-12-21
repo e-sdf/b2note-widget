@@ -1,12 +1,10 @@
 import * as _ from "lodash";
 import * as React from "react";
 import * as icons from "react-icons/fa";
-import { AnRecord, SearchQuery, TypeFilter} from "../../shared/annotationsModel";
-import { Context } from "../../widget/context";
-import * as ac from "../../autocomplete/autocomplete";
-import { SemanticAutocomplete } from "../../autocomplete/view";
-import { SearchType, BiOperatorType, BiOperatorExpr, TagExpr, Sexpr } from "../../shared/searchModel";
-import * as queryParser from "../../shared/searchQueryParser";
+import { AnRecord, SearchQuery, TypeFilter} from "../../core/annotationsModel";
+import * as ac from "../../autocomplete/view";
+import { SearchType, BiOperatorType } from "../../core/searchModel";
+import * as queryParser from "../../core/searchQueryParser";
 import * as api from "../../api/annotations";
 import { showAlertWarning, showAlertError } from "../../components"; 
 
@@ -56,7 +54,7 @@ function TermComp(props: TermCompProps): TermComp {
       </select>
       {inputType === SearchType.SEMANTIC ? 
         <>
-          <SemanticAutocomplete onChange={gotSuggestion}/>
+          <ac.SemanticAutocomplete onChange={gotSuggestion}/>
           <div className="form-group">
             <div className="form-check">
               <input className="form-check-input" type="checkbox"

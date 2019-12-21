@@ -2,9 +2,8 @@ import * as React from "react";
 import * as ReactDOM from "react-dom";
 import { FaPlus } from "react-icons/fa";
 import { Tabs, Tab } from "../../components";
-import { SemanticAutocomplete } from "../../autocomplete/view";
-import * as ac from "../../autocomplete/autocomplete";
-import * as anModel from "../../shared/annotationsModel";
+import * as ac from "../../autocomplete/view";
+import * as anModel from "../../core/annotationsModel";
 import * as api from "../../api/annotations";
 import { Context } from "../../widget/context";
 import { showAlertSuccess, showAlertWarning, showAlertError } from "../../components"; 
@@ -37,7 +36,7 @@ function Semantic(props: Props): React.FunctionComponentElement<Context> {
   function gotSuggestion(suggestions: Array<ac.Suggestion>): void {
     if (suggestions.length > 0) {
       setLabel(suggestions[0].labelOrig);
-      setUris(suggestions[0].items.map((i: ac.Item) => i.uris));
+      setUris(suggestions[0].items.map(i => i.uris));
     } else {
       setLabel("");
       setUris([]);
@@ -53,7 +52,7 @@ function Semantic(props: Props): React.FunctionComponentElement<Context> {
     api.postAnnotation(req)
       .then(() => showAlertSuccess(alertId, "Semantic annotation created"))
       .catch(error => {
-        if (error.response.data && error.response.data.message) {
+        if (error.response?.data?.message) {
           showAlertWarning(alertId, error.response.data.message);
         } else {
           showAlertError(alertId, "Failed: server error");
@@ -63,7 +62,7 @@ function Semantic(props: Props): React.FunctionComponentElement<Context> {
 
   return (
     <div className="b2-container d-flex flex-row">
-      <SemanticAutocomplete 
+      <ac.SemanticAutocomplete 
         ref={(comp) => setRef(comp)} 
         onChange={gotSuggestion}
       />

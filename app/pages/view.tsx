@@ -1,6 +1,6 @@
 import * as React from "react";
 import { Context } from "../widget/context";
-import * as anModel from "../shared/annotationsModel";
+import * as anModel from "../core/annotationsModel";
 import { shorten } from "./pages";
 import * as icons from "react-icons/fa";
 import { DownloadIcon } from "./icons";

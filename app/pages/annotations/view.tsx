@@ -3,16 +3,15 @@ import allSettled from "promise.allsettled";
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 import * as icons from "react-icons/fa";
-import * as anModel from "../../shared/annotationsModel";
+import * as anModel from "../../core/annotationsModel";
 import * as api from "../../api/annotations";
 import { Context } from "../../widget/context";
 import { shorten } from "../pages";
 import { showAlertSuccess, showAlertWarning, showAlertError } from "../../components"; 
 import { LoaderFilter, AnItem } from "./loader";
 import { TargetTr } from "../view";
-import * as ac from "../../autocomplete/autocomplete";
-import { SemanticAutocomplete } from "../../autocomplete/view";
-import * as ontology from "../../shared/ontologyInfo";
+import * as ac from "../../autocomplete/view";
+import * as oreg from "../../core/ontologyRegister";
 import { SemanticIcon, KeywordIcon, CommentIcon } from "../icons";
 import { InfoPanel } from "./infoPanel";
 
@@ -40,7 +39,7 @@ function TagEditor(props: TagEditorProps): React.FunctionComponentElement<TagEdi
   const [ref, setRef] = React.useState(null as any);
 
   function gotSuggestion(suggestions: Array<ac.Suggestion>): void {
-    setUris(suggestions[0].items.map((i: ac.Item) => i.uris));
+    setUris(suggestions[0].items.map(i => i.uris));
     setLabel(suggestions[0].labelOrig);
   }
 
@@ -76,7 +75,7 @@ function TagEditor(props: TagEditorProps): React.FunctionComponentElement<TagEdi
       <td colSpan={3}>
         <div className="d-flex flex-row">
           {anModel.isSemantic(props.anRecord) ?
-            <SemanticAutocomplete 
+            <ac.SemanticAutocomplete 
               ref={(comp) => setRef(comp)} 
               defaultInputValue={label}
               onChange={gotSuggestion}
@@ -112,14 +111,14 @@ export function Annotations(props: Props): React.FunctionComponentElement<Props>
   const [activeItem, setActiveItem] = React.useState(null as string|null);
   const [editedRecordId, setEditedRecordId] = React.useState(null as string|null);
   const [pendingDeleteId, setPendingDeleteId] = React.useState(null as string|null);
-  const [ontologyInfos, setOntologyInfos] = React.useState(null as Array<ontology.OntologyInfo>|null);
+  const [ontologyInfos, setOntologyInfos] = React.useState(null as Array<oreg.OntologyInfo>|null);
 
   function loadOntologiesInfo(anRecord: anModel.AnRecord): void {
     const iris = anModel.getSources(anRecord);
-    const infoPms = iris.map((iri: string) => ontology.getInfo(iri));
-    allSettled<ontology.OntologyInfo>(infoPms).then(
+    const infoPms = iris.map((iri: string) => oreg.getInfo(iri));
+    allSettled<oreg.OntologyInfo>(infoPms).then(
       (results) => {
-        const settled = results.filter(r => r.status === "fulfilled") as Array<allSettled.PromiseResolution<ontology.OntologyInfo>>;
+        const settled = results.filter(r => r.status === "fulfilled") as Array<allSettled.PromiseResolution<oreg.OntologyInfo>>;
         const infos = settled.map(s  => s.value);
         setOntologyInfos(infos);
       }

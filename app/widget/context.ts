@@ -1,5 +1,5 @@
 import { User } from "../api/profile";
-import { Target } from "../shared/annotationsModel";
+import { Target } from "../core/annotationsModel";
 
 export interface Context {
   user: User;

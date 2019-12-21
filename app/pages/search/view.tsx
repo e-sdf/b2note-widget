@@ -2,7 +2,7 @@ import * as React from "react";
 import * as ReactDOM from "react-dom";
 import { Context } from "../../widget/context";
 import { Tabs, Tab } from "../../components";
-import * as anModel from "../../shared/annotationsModel";
+import * as anModel from "../../core/annotationsModel";
 import { BasicSearch } from "./basicSearch";
 import { AdvancedSearch } from "./advancedSearch";
 import { TargetTr } from "../view";

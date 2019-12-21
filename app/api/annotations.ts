@@ -3,8 +3,8 @@ import axios from "axios";
 import * as secret from "../secret";
 import { endpointUrl } from "./server";
 import { Context } from "../widget/context";
-import * as anModel from "../shared/annotationsModel";
-import * as searchQueryParser from "../shared/searchQueryParser";
+import * as anModel from "../core/annotationsModel";
+import * as searchQueryParser from "../core/searchQueryParser";
 
 const annotationsUrl = endpointUrl + anModel.annotationsUrl;
 const targetsUrl = endpointUrl + anModel.targetsUrl;

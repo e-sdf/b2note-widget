@@ -1,4 +1,4 @@
-import { Target } from "./shared/annotationsModel";
+import { Target } from "./core/annotationsModel";
 import { User } from "./api/profile";
 import { Context } from "./widget/context";
 import * as widget from "./widget/view";

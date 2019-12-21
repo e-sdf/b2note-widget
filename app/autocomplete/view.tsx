@@ -3,7 +3,7 @@ import * as React from "react";
 import { OntologyItem, getOntologies } from "../core/ontologyRegister";
 import { AsyncTypeahead } from "react-bootstrap-typeahead";
 
-interface Suggestion {
+export interface Suggestion {
   label: string;
   labelOrig: string;
   items: Array<OntologyItem>;
