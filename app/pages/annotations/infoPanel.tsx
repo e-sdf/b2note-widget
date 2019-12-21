@@ -2,7 +2,7 @@ import * as _ from "lodash";
 import * as React from "react";
 import * as icons from "react-icons/fa";
 import * as anModel from "../../shared/annotationsModel";
-import { OntologyInfo } from "./ontologyInfo";
+import { OntologyInfo } from "../../shared/ontologyInfo";
 
 const LeftIcon = icons.FaCaretLeft; 
 const RightIcon = icons.FaCaretRight; 

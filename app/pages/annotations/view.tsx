@@ -12,7 +12,7 @@ import { LoaderFilter, AnItem } from "./loader";
 import { TargetTr } from "../view";
 import * as ac from "../../autocomplete/autocomplete";
 import { SemanticAutocomplete } from "../../autocomplete/view";
-import * as ontology from "./ontologyInfo";
+import * as ontology from "../../shared/ontologyInfo";
 import { SemanticIcon, KeywordIcon, CommentIcon } from "../icons";
 import { InfoPanel } from "./infoPanel";
 

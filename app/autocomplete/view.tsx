@@ -1,17 +1,50 @@
+import * as _ from "lodash";
 import * as React from "react";
-import axios from "axios";
+import { OntologyItem, getOntologies } from "../core/ontologyRegister";
 import { AsyncTypeahead } from "react-bootstrap-typeahead";
-import * as ac from "./autocomplete";
+
+interface Suggestion {
+  label: string;
+  labelOrig: string;
+  items: Array<OntologyItem>;
+}
+
+function mkSuggestion(item: OntologyItem): Suggestion {
+  return {
+    label: item.labels + " (" + item.ontology_acronym + " " + item.short_form + ")",
+    labelOrig: item.labels,
+    items: [item]
+  };
+}
+
+function aggregateGroup(group: Array<OntologyItem>): Suggestion {
+  return {
+    label: group[0].labels + " (" + group.length + ")",
+    labelOrig: group[0].labels,
+    items: group 
+  };
+}
+
+function mkSuggestions(items: Array<OntologyItem>): Array<Suggestion> {
+  const groups = _.groupBy(items, (i) => i.labels.toLowerCase());
+  const res: Array<Suggestion> = _.keys(groups).map(gk => {
+    const g = groups[gk];
+    return g.length > 1 ? aggregateGroup(g) : mkSuggestion(g[0]);
+  });
+  //console.log(res);
+  return res;
+}
+
 
 interface Props {
   id?: string;
   defaultInputValue?: string;
-  onChange: (val: Array<ac.Suggestion>) => void;
+  onChange: (val: Array<Suggestion>) => void;
 }
 
 interface State {
   loading: boolean;
-  options: Array<ac.Suggestion>;
+  options: Array<Suggestion>;
 }
 
 export class SemanticAutocomplete extends React.Component<Props, State> {
@@ -49,13 +82,13 @@ export class SemanticAutocomplete extends React.Component<Props, State> {
         isLoading={this.state.loading}
         onSearch={query => {
           this.setState({ loading: true });
-          axios.get(ac.makeSolrUrl(query))
-            .then((resp) => {
-              this.setState({ 
-                loading: false,
-                options: ac.mkSuggestions(resp.data.response.docs)
-              });
+          getOntologies(query)
+          .then((resp) => {
+            this.setState({ 
+              loading: false,
+              options: mkSuggestions(resp)
             });
+          });
         }}
         onChange={this.props.onChange}
         options={this.state.options}
