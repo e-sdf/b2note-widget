@@ -1,23 +1,23 @@
 import * as _ from "lodash";
 import * as React from "react";
-import { OntologyItem, getOntologies } from "../core/ontologyRegister";
+import { OntologyInfo, OntologyDict, getOntologies } from "../core/ontologyRegister";
 import { AsyncTypeahead } from "react-bootstrap-typeahead";
 
 export interface Suggestion {
   label: string;
   labelOrig: string;
-  items: Array<OntologyItem>;
+  items: Array<OntologyInfo>;
 }
 
-function mkSuggestion(item: OntologyItem): Suggestion {
+function mkSuggestion(item: OntologyInfo): Suggestion {
   return {
-    label: item.labels + " (" + item.ontology_acronym + " " + item.short_form + ")",
+    label: item.labels + " (" + item.ontologyAcronym + " " + item.shortForm + ")",
     labelOrig: item.labels,
     items: [item]
   };
 }
 
-function aggregateGroup(group: Array<OntologyItem>): Suggestion {
+function aggregateGroup(group: Array<OntologyInfo>): Suggestion {
   return {
     label: group[0].labels + " (" + group.length + ")",
     labelOrig: group[0].labels,
@@ -25,11 +25,10 @@ function aggregateGroup(group: Array<OntologyItem>): Suggestion {
   };
 }
 
-function mkSuggestions(items: Array<OntologyItem>): Array<Suggestion> {
-  const groups = _.groupBy(items, (i) => i.labels.toLowerCase());
-  const res: Array<Suggestion> = _.keys(groups).map(gk => {
-    const g = groups[gk];
-    return g.length > 1 ? aggregateGroup(g) : mkSuggestion(g[0]);
+function mkSuggestions(oDict: OntologyDict): Array<Suggestion> {
+  const res: Array<Suggestion> = _.keys(oDict).map(oKey => {
+    const og = oDict[oKey];
+    return og.length > 1 ? aggregateGroup(og) : mkSuggestion(og[0]);
   });
   //console.log(res);
   return res;
@@ -83,10 +82,10 @@ export class SemanticAutocomplete extends React.Component<Props, State> {
         onSearch={query => {
           this.setState({ loading: true });
           getOntologies(query)
-          .then((resp) => {
+          .then((ontologiesDict) => {
             this.setState({ 
               loading: false,
-              options: mkSuggestions(resp)
+              options: mkSuggestions(ontologiesDict)
             });
           });
         }}

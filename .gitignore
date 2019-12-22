@@ -66,5 +66,5 @@ typings/
 # next.js build output
 .next
 
-develop.sh
 secret.ts
+b2note-core/

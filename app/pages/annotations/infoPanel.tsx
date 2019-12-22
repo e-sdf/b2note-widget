@@ -72,7 +72,7 @@ export function InfoPanel(props: Props): React.FunctionComponentElement<Props> {
         <tbody>
           <tr>
             <th>Description:</th>
-            <td>{info.description}</td>
+            <td>{(info.descriptions || []).map(d => <>{d}<br/></>)}</td>
           </tr>
           <tr>
             <th>Short<br/>Form:</th>
