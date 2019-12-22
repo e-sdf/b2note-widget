@@ -35,6 +35,7 @@ function Semantic(props: Props): React.FunctionComponentElement<Context> {
 
   function gotSuggestion(suggestions: Array<ac.Suggestion>): void {
     if (suggestions.length > 0) {
+      //console.log(suggestions);
       setLabel(suggestions[0].labelOrig);
       setUris(suggestions[0].items.map(i => i.uris));
     } else {
