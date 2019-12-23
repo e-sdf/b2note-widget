@@ -46,7 +46,7 @@ export const LoaderFilter = React.forwardRef((props: LoaderProps, ref: React.Ref
   const [noOfComment, setNoOfComment] = React.useState(null as number|null);
 
   function sort(ans: Array<anModel.AnRecord>): Array<anModel.AnRecord> {
-    return _.sortBy(ans, (a) => anModel.getLabel(a));
+    return _.sortBy(ans, (a) => anModel.getLabel(a).toLocaleLowerCase());
   }
 
   function loadAnnotations(): void {
