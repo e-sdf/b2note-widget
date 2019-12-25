@@ -8,21 +8,19 @@ import { render as searchRender } from "../pages/search/view";
 import { render as helpRender } from "../pages/help/view";
 import { render as profileRender } from "../pages/profile/view";
 import { Context } from "./context";
+import { matchSwitch } from '@babakness/exhaustive-type-checking';
 
-type SetPage = (p: Page) => any;
-
-let currentPage: Page = "annotate";
-let helpPage: Page = "annotate";
+let currentPage = Page.ANNOTATE;
+let helpPage = Page.ANNOTATE;
 
 function renderPage(page: Page, context: Context): void {
-  switch (page) {
-    case "annotate": annotateRender(context); break;
-    case "annotations": annotationsRender(context); break;
-    case "search": searchRender(context); break;
-    case "help": helpRender(helpPage); break;
-    case "profile": profileRender(context); break;
-    default: console.error(`page ${page} not found`); 
-  }
+  return matchSwitch(page, {
+    [Page.ANNOTATE]: () => annotateRender(context),
+    [Page.ANNOTATIONS]: () => annotationsRender(context),
+    [Page.SEARCH]: () => searchRender(context),
+    [Page.HELP]: () => helpRender(helpPage),
+    [Page.PROFILE]: () => profileRender(context)
+  });
 }
 
 function switchPage(newPage: Page, context: Context): void {
@@ -31,7 +29,7 @@ function switchPage(newPage: Page, context: Context): void {
     ReactDOM.unmountComponentAtNode(node);
     renderPage(newPage, context);
     currentPage = newPage;
-    helpPage = currentPage === "help" ? helpPage : currentPage;
+    helpPage = currentPage === Page.HELP ? helpPage : currentPage;
   }
 }
 
@@ -53,39 +51,39 @@ function Navbar(props: Props): React.FunctionComponentElement<Context> {
       <ul className="navbar-nav" style={{width: "100%"}}>
         <li className="nav-item">
           <a
-            className={"nav-link" + activeFlag("annotate")} href="#" 
+            className={"nav-link" + activeFlag(Page.ANNOTATE)} href="#" 
             data-toggle="tooltip" data-placement="bottom" title="Annotate"
-            onClick={() => pageSelected("annotate")}
+            onClick={() => pageSelected(Page.ANNOTATE)}
             ><FaEdit/>
           </a>
         </li>
         <li className="nav-item">
           <a
-            className={"nav-link" + activeFlag("annotations")} href="#" 
+            className={"nav-link" + activeFlag(Page.ANNOTATIONS)} href="#" 
             data-toggle="tooltip" data-placement="bottom" title="Annotations"
-            onClick={() => pageSelected("annotations")}
+            onClick={() => pageSelected(Page.ANNOTATIONS)}
             ><FaList/>
           </a>
         </li>
         <li className="nav-item">
           <a
-            className={"nav-link" + activeFlag("search")} href="#" 
+            className={"nav-link" + activeFlag(Page.SEARCH)} href="#" 
             data-toggle="tooltip" data-placement="bottom" title="Search"
-            onClick={() => pageSelected("search")}
+            onClick={() => pageSelected(Page.SEARCH)}
             ><FaSearch/>
           </a>
         </li>
         <li className="nav-item">
           <a className="nav-link" href="#"data-toggle="tooltip" 
              data-placement="bottom" title="Context Help"
-            onClick={() => pageSelected("help")}
+            onClick={() => pageSelected(Page.HELP)}
           ><FaQuestionCircle/></a>
         </li>
         <li className="nav-item ml-auto">
           <a
-            className={"nav-link" + activeFlag("profile")} href="#" 
+            className={"nav-link" + activeFlag(Page.PROFILE)} href="#" 
             data-toggle="tooltip" data-placement="bottom" title="Login"
-            onClick={() => pageSelected("profile")}
+            onClick={() => pageSelected(Page.PROFILE)}
             ><FaSignInAlt/>
           </a>
         </li>

@@ -1,7 +1,8 @@
-import * as _ from "lodash";
+import _ from "lodash";
+import { matchSwitch } from "@babakness/exhaustive-type-checking";
 import * as React from "react";
 import * as icons from "react-icons/fa";
-import { AnRecord, SearchQuery, TypeFilter} from "../../core/annotationsModel";
+import { AnRecord, SearchQuery } from "../../core/annotationsModel";
 import * as ac from "../../autocomplete/view";
 import { SearchType, BiOperatorType } from "../../core/searchModel";
 import * as queryParser from "../../core/searchQueryParser";
@@ -29,7 +30,7 @@ function TermComp(props: TermCompProps): TermComp {
   const [value, setValue] = React.useState("");
   const [includeSynonyms, setIncludeSynonyms] = React.useState(false);
 
-  function gotSuggestion(suggestions: Array<ac.Suggestion>): void {
+  function gotSuggestion(suggestions: ac.Suggestion[]): void {
     const val = suggestions[0]?.labelOrig || "";
     props.updateValueHandle(val);
   }
@@ -151,20 +152,13 @@ type DeleteTermAction = TermsActionBase
 type TermsAction = AddTermAction | UpdateStypeTermAction | UpdateValueTermAction | UpdateSynonymsFlagTermAction | DeleteTermAction
 
 function reducer(terms: Array<TermItem>, action: TermsAction): Array<TermItem> {
-  const res: Array<TermItem> = (
-     action.type === TermsActionType.ADD ?
-       _.concat(terms, (action as AddTermAction).newTerm)
-     : action.type === TermsActionType.UPDATE_STYPE ?
-       terms.map(t => t.id === action.termId ? { ...t, sType: (action as UpdateStypeTermAction).sType } : t) 
-     : action.type === TermsActionType.UPDATE_VALUE ?
-       terms.map(t => t.id === action.termId ? { ...t, value: (action as UpdateValueTermAction).value } : t) 
-     : action.type === TermsActionType.UPDATE_SYNONYMS_FLAG ?
-       terms.map(t => t.id === action.termId ? { ...t, includeSynonyms: (action as UpdateSynonymsFlagTermAction).includeSynonyms } : t) 
-     : action.type === TermsActionType.DELETE ?
-       terms.filter(t => t.id !== action.termId)
-     : (() => { console.error("Unknown term action"); return terms; })()
-   );
-   return res;
+  return matchSwitch(action.type, {
+    [TermsActionType.ADD]: () => [ ...terms, (action as AddTermAction).newTerm ],
+    [TermsActionType.UPDATE_STYPE]: () => terms.map(t => t.id === action.termId ? { ...t, sType: (action as UpdateStypeTermAction).sType } : t),
+    [TermsActionType.UPDATE_VALUE]: () => terms.map(t => t.id === action.termId ? { ...t, value: (action as UpdateValueTermAction).value } : t), 
+    [TermsActionType.UPDATE_SYNONYMS_FLAG]: () => terms.map(t => t.id === action.termId ? { ...t, includeSynonyms: (action as UpdateSynonymsFlagTermAction).includeSynonyms } : t),
+    [TermsActionType.DELETE]: () => terms.filter(t => t.id !== action.termId)
+  });
 }
 
 export interface BasicSearchProps {
@@ -211,15 +205,6 @@ export function BasicSearch(props: BasicSearchProps): React.FunctionComponentEle
         `${mkValue(terms[0])} ${operator} ${mkExpression(operator, _.tail(terms))}`
       : `${mkValue(terms[0])} ${operator} ${mkValue(terms[1])}`
     );
-  }
-
-  function sType2anType(sType: SearchType): TypeFilter {
-    switch (sType) {
-      case SearchType.SEMANTIC: return TypeFilter.SEMANTIC;
-      case SearchType.KEYWORD: return TypeFilter.KEYWORD;
-      case SearchType.COMMENT: return TypeFilter.COMMENT;
-      default: throw new Error("Other TypeFilter values invalid here");
-    }
   }
 
   function submitQuery(): void {

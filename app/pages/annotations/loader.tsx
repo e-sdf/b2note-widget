@@ -1,10 +1,11 @@
-import * as _ from "lodash";
 import * as React from "react";
+import fileDownload from "js-file-download"; 
 import * as icons from "react-icons/fa";
 import * as anModel from "../../core/annotationsModel";
 import * as api from "../../api/annotations";
 import { Context } from "../../widget/context";
 import { showAlertError } from "../../components"; 
+import { DownloadIcon } from "../icons";
 
 const QuestionIcon = icons.FaQuestionCircle;
 const AllFilesIcon = icons.FaCopy;
@@ -45,12 +46,8 @@ export const LoaderFilter = React.forwardRef((props: LoaderProps, ref: React.Ref
   const [noOfKeyword, setNoOfKeyword] = React.useState(null as number|null);
   const [noOfComment, setNoOfComment] = React.useState(null as number|null);
 
-  function sort(ans: Array<anModel.AnRecord>): Array<anModel.AnRecord> {
-    return _.sortBy(ans, (a) => anModel.getLabel(a).toLocaleLowerCase());
-  }
-
-  function loadAnnotations(): void {
-    const filters: api.Filters = { 
+  function mkFilters(): api.Filters {
+    return {
       allFiles: allFilesFilter, 
       creator: {
         mine: mineFilter,
@@ -62,9 +59,12 @@ export const LoaderFilter = React.forwardRef((props: LoaderProps, ref: React.Ref
         comment: commentFilter
       }
     };
-    api.getAnnotations(props.context, filters).then(
-      annotations => {
-        const anl = sort(_.uniqBy(annotations, (a: anModel.AnRecord) => anModel.getLabel(a)));
+  }
+
+  function loadAnnotations(): void {
+    const filters = mkFilters();
+    api.getAnnotationsJSON(props.context, filters).then(
+      anl => {
         const targetsPms = anl.map(a => api.getTargets(anModel.getLabel(a)));
         Promise.all(targetsPms).then(targets => {
           props.setAnItems(anl.map((an, i) => ({ 
@@ -72,11 +72,11 @@ export const LoaderFilter = React.forwardRef((props: LoaderProps, ref: React.Ref
             targets: targets[i],
             showFilesFlag: false
           })));
-          setNoOfMine(annotations.filter(a => a.creator.id === props.context.user.id).length);
-          setNoOfOthers(annotations.filter(a => a.creator.id !== props.context.user.id).length);
-          setNoOfSemantic(annotations.filter(anModel.isSemantic).length);
-          setNoOfKeyword(annotations.filter(anModel.isKeyword).length);
-          setNoOfComment(annotations.filter(anModel.isComment).length);
+          setNoOfMine(anl.filter(a => a.creator.id === props.context.user.id).length);
+          setNoOfOthers(anl.filter(a => a.creator.id !== props.context.user.id).length);
+          setNoOfSemantic(anl.filter(anModel.isSemantic).length);
+          setNoOfKeyword(anl.filter(anModel.isKeyword).length);
+          setNoOfComment(anl.filter(anModel.isComment).length);
         });
       },
       error => { console.log(error); showAlertError(alertId, "Failed getting annotations"); }
@@ -90,6 +90,30 @@ export const LoaderFilter = React.forwardRef((props: LoaderProps, ref: React.Ref
   React.useEffect(() => {
     loadAnnotations();
   }, [allFilesFilter, mineFilter, othersFilter, semanticFilter, keywordFilter, commentFilter]);
+
+  function mkFilename(format: anModel.Format): string {
+    return "annotations_" + anModel.mkTimestamp() + anModel.mkFileExt(format);
+  }
+
+  function downloadJSON(): void {
+    const filters = mkFilters();
+    api.getAnnotationsJSON(props.context, filters, true).then(
+      anl => {
+        fileDownload(JSON.stringify(anl, null, 2), mkFilename(anModel.Format.JSONLD));
+      },
+      error => { console.log(error); showAlertError(alertId, "Failed getting annotations"); }
+    );
+  }
+
+  function downloadRDF(): void {
+    const filters = mkFilters();
+    api.getAnnotationsRDF(props.context, filters, true).then(
+      anl => {
+        fileDownload(JSON.stringify(anl), mkFilename(anModel.Format.RDF));
+      },
+      error => { console.log(error); showAlertError(alertId, "Failed getting annotations"); }
+    );
+  }
 
   function renderLabel(): React.ReactElement {
     return (
@@ -114,9 +138,9 @@ export const LoaderFilter = React.forwardRef((props: LoaderProps, ref: React.Ref
 
   function renderFileSelection(): React.ReactElement {
     return (
-      <div className="btn-group mr-2" role="group" aria-label="Files Filter">
+      <div className="btn-group" role="group" aria-label="Files Filter">
         <button type="button"
-          className={`btn btn-${btnState(allFilesFilter)}secondary`}
+          className={`btn btn-sm btn-${btnState(allFilesFilter)}secondary`}
           data-toggle="tooltip" data-placement="bottom" title="All Files"
           onClick={() => setAllFilesFilter(!allFilesFilter)}
         ><AllFilesIcon/></button>
@@ -126,14 +150,14 @@ export const LoaderFilter = React.forwardRef((props: LoaderProps, ref: React.Ref
 
   function renderCreatorSelection(): React.ReactElement {
     return (
-      <div className="btn-group mr-2" role="group" aria-label="Creator Filter">
+      <div className="btn-group ml-2" role="group" aria-label="Creator Filter">
         <button type="button"
-          className={`btn btn-${btnState(mineFilter)}secondary`}
+          className={`btn btn-sm btn-${btnState(mineFilter)}secondary`}
           data-toggle="tooltip" data-placement="bottom" title={"My annotations" + (noOfMine ? ` (${noOfMine})` : "")}
           onClick={() => setMineFilter(!mineFilter)}
         ><MineIcon/></button>
         <button type="button"
-          className={`btn btn-${btnState(othersFilter)}secondary`}
+          className={`btn btn-sm btn-${btnState(othersFilter)}secondary`}
           data-toggle="tooltip" data-placement="bottom" title={"Other's annotations /displayed in italic/" + (noOfOthers ? ` (${noOfOthers})` : "")}
           onClick={() => setOthersFilter(!othersFilter)}
         ><OthersIcon/></button>
@@ -143,22 +167,42 @@ export const LoaderFilter = React.forwardRef((props: LoaderProps, ref: React.Ref
 
   function renderTypeSelection(): React.ReactElement {
     return (
-      <div className="btn-group" role="group" aria-label="Type Filter">
+      <div className="btn-group ml-2" role="group" aria-label="Type Filter">
         <button type="button"
-          className={`btn btn-${btnState(semanticFilter)}secondary`}
+          className={`btn btn-sm btn-${btnState(semanticFilter)}secondary`}
           data-toggle="tooltip" data-placement="bottom" title={"Sematic tags" + (noOfSematic ? ` (${noOfSematic})` : "")}
           onClick={() => setSemanticFilter(!semanticFilter)}
         ><SemanticIcon/></button>
         <button type="button"
-          className={`btn btn-${btnState(keywordFilter)}secondary`}
+          className={`btn btn-sm btn-${btnState(keywordFilter)}secondary`}
           data-toggle="tooltip" data-placement="bottom" title={"Free-text keywords" + (noOfKeyword ? ` (${noOfKeyword})` : "")}
           onClick={() => setKeywordFilter(!keywordFilter)}
         ><KeywordIcon/></button>
         <button type="button"
-          className={`btn btn-${btnState(commentFilter)}secondary`}
+          className={`btn btn-sm btn-${btnState(commentFilter)}secondary`}
           data-toggle="tooltip" data-placement="bottom" title={"Comments" +  (noOfComment ? ` (${noOfComment})` : "")}
           onClick={() => setCommentFilter(!commentFilter)}
         ><CommentIcon/></button>
+      </div>
+    );
+  }
+
+  function renderDownloadButton(): React.ReactElement {
+    return (
+      <div className="dropdown ml-auto">
+        <button className="btn btn-sm btn-outline-primary dropdown-toggle" type="button" id="anl-ddd" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          <DownloadIcon/>
+        </button>
+        <div className="dropdown-menu" aria-labelledby="anl-ddd">
+          <button type="button"
+            className="dropdown-item"
+            onClick={downloadJSON}
+          >Download JSON-LD</button>
+          <button type="button"
+            className="dropdown-item"
+            onClick={downloadRDF}
+          >Download RDF/XML</button>
+        </div>
       </div>
     );
   }
@@ -172,6 +216,7 @@ export const LoaderFilter = React.forwardRef((props: LoaderProps, ref: React.Ref
             {renderFileSelection()}
             {renderCreatorSelection()}
             {renderTypeSelection()}
+            {renderDownloadButton()}
           </div>
         </div>
       </div>

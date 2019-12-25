@@ -12,6 +12,7 @@
     "no-console": false,
     "comment-format": false,
     "no-var-keyword": false,
-    "jsx-alignment": false
+    "jsx-alignment": false,
+    "jsx-wrap-multiline": false
   }
 }

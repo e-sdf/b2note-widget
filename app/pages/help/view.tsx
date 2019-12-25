@@ -1,6 +1,7 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 import { Page } from "../pages";
+import { matchSwitch } from "@babakness/exhaustive-type-checking";
 
 function AnnotateText(): React.ReactElement {
   return (
@@ -57,13 +58,13 @@ function ToC(): React.ReactElement {
 }
 
 function renderSection(section: Page): React.ReactElement {
-  return (
-    section === "annotate" ? <AnnotateText/>
-    : section === "annotations" ? <AnnotationsText/>
-    : section === "search" ? <SearchText/>
-    : section === "profile" ? <ProfileText/>
-    : <></>
-  );
+  return matchSwitch(section, {
+    [Page.ANNOTATE]: () => <AnnotateText/>,
+    [Page.ANNOTATIONS]: () => <AnnotationsText/>,
+    [Page.SEARCH]: () => <SearchText/>,
+    [Page.PROFILE]: () => <ProfileText/>,
+    [Page.HELP]: () => <></>
+  });
 }
 
 interface HelpPageProps {

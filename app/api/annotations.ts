@@ -1,14 +1,15 @@
-import * as _ from "lodash";
 import axios from "axios";
 import * as secret from "../secret";
 import { endpointUrl } from "./server";
 import { Context } from "../widget/context";
 import * as anModel from "../core/annotationsModel";
+import * as sModel from "../core/searchModel";
 import * as searchQueryParser from "../core/searchQueryParser";
+import { Format } from '../../b2note-core/app/annotationsModel';
 
 const annotationsUrl = endpointUrl + anModel.annotationsUrl;
 const targetsUrl = endpointUrl + anModel.targetsUrl;
-const searchUrl = endpointUrl + anModel.searchUrl;
+const searchUrl = endpointUrl + sModel.searchUrl;
 
 export function postAnnotation(anRecord: anModel.AnRecord): Promise<any> {
   const config = { headers: {'Creatorization': "bearer " + secret.token} };
@@ -53,12 +54,14 @@ function mkValueFilter(f: Filters): Query {
   return f.value ? { value: f.value } : {};
 }
 
-export function getAnnotations(context: Context, f: Filters): Promise<Array<anModel.AnRecord>> {
+function getAnnotations(context: Context, f: Filters, format: anModel.Format, download = false): Promise<any> {
   const params: Query = {
     ...mkTypeFilter(f),
     ...mkCreatorFilter(context, f),
     ...mkTargetSourceFilter(context, f),
-    ...mkValueFilter(f)
+    ...mkValueFilter(f),
+    format,
+    download
   };
   return new Promise((resolve, reject) => {
     axios.get(annotationsUrl, { params }).then(res => {
@@ -73,6 +76,14 @@ export function getAnnotations(context: Context, f: Filters): Promise<Array<anMo
     },
     error => reject(error));
   });
+}
+
+export function getAnnotationsJSON(context: Context, f: Filters, download = false): Promise<Array<anModel.AnRecord>> {
+  return getAnnotations(context, f, anModel.Format.JSONLD, download);
+}
+
+export function getAnnotationsRDF(context: Context, f: Filters, download = false): Promise<string> {
+  return getAnnotations(context, f, anModel.Format.RDF, download);
 }
 
 function makeLocalUrl(url: string): string {
