@@ -92,7 +92,7 @@ export const LoaderFilter = React.forwardRef((props: LoaderProps, ref: React.Ref
   }, [allFilesFilter, mineFilter, othersFilter, semanticFilter, keywordFilter, commentFilter]);
 
   function mkFilename(format: anModel.Format): string {
-    return "annotations_" + anModel.mkTimestamp() + anModel.mkFileExt(format);
+    return "annotations_" + anModel.mkTimestamp() + "." + anModel.mkFileExt(format);
   }
 
   function downloadJSON(): void {
@@ -107,9 +107,9 @@ export const LoaderFilter = React.forwardRef((props: LoaderProps, ref: React.Ref
 
   function downloadRDF(): void {
     const filters = mkFilters();
-    api.getAnnotationsRDF(props.context, filters, true).then(
-      anl => {
-        fileDownload(JSON.stringify(anl), mkFilename(anModel.Format.RDF));
+    api.getAnnotationsRDF(props.context, filters).then(
+      rdf => {
+        fileDownload(rdf, mkFilename(anModel.Format.RDF));
       },
       error => { console.log(error); showAlertError(alertId, "Failed getting annotations"); }
     );

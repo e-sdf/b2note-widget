@@ -35,9 +35,9 @@ type Query = Record<string, any>;
 function mkTypeFilter(f: Filters): Query {
   return {
     type: [ 
-    ...(f.type.semantic ? [anModel.TypeFilter.SEMANTIC]: []), 
-    ...(f.type.keyword ? [anModel.TypeFilter.KEYWORD]: []), 
-    ...(f.type.comment ? [anModel.TypeFilter.COMMENT]: []) 
+    ...(f.type.semantic ? [anModel.AnRecordType.SEMANTIC]: []), 
+    ...(f.type.keyword ? [anModel.AnRecordType.KEYWORD]: []), 
+    ...(f.type.comment ? [anModel.AnRecordType.COMMENT]: []) 
     ]
   };
 }
@@ -54,8 +54,8 @@ function mkValueFilter(f: Filters): Query {
   return f.value ? { value: f.value } : {};
 }
 
-function getAnnotations(context: Context, f: Filters, format: anModel.Format, download = false): Promise<any> {
-  const params: Query = {
+function mkQuery(context: Context, f: Filters, format: anModel.Format, download: boolean): Query {
+  return {
     ...mkTypeFilter(f),
     ...mkCreatorFilter(context, f),
     ...mkTargetSourceFilter(context, f),
@@ -63,6 +63,10 @@ function getAnnotations(context: Context, f: Filters, format: anModel.Format, do
     format,
     download
   };
+}
+
+export function getAnnotationsJSON(context: Context, f: Filters, download = false): Promise<Array<anModel.AnRecord>> {
+  const params = mkQuery(context, f, anModel.Format.JSONLD, download);
   return new Promise((resolve, reject) => {
     axios.get(annotationsUrl, { params }).then(res => {
       if(res.data) {
@@ -78,12 +82,18 @@ function getAnnotations(context: Context, f: Filters, format: anModel.Format, do
   });
 }
 
-export function getAnnotationsJSON(context: Context, f: Filters, download = false): Promise<Array<anModel.AnRecord>> {
-  return getAnnotations(context, f, anModel.Format.JSONLD, download);
-}
-
-export function getAnnotationsRDF(context: Context, f: Filters, download = false): Promise<string> {
-  return getAnnotations(context, f, anModel.Format.RDF, download);
+export function getAnnotationsRDF(context: Context, f: Filters): Promise<string> {
+  const params = mkQuery(context, f, anModel.Format.RDF, true);
+  return new Promise((resolve, reject) => {
+    axios.get(annotationsUrl, { params }).then(res => {
+      if(res.data) {
+        resolve(res.data);
+      } else {
+        reject(new Error("Empty data"));
+      }
+    },
+    error => reject(error));
+  });
 }
 
 function makeLocalUrl(url: string): string {

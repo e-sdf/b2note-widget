@@ -1,6 +1,6 @@
 {
-  "name": "b2note-app",
-  "version": "0.1.0",
+  "name": "b2note-reactjs",
+  "version": "3.0.0",
   "description": "B2Note client app",
   "private": "true",
   "scripts": {
