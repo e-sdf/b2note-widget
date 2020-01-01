@@ -1,12 +1,11 @@
 import * as React from "react";
-import fileDownload from "js-file-download"; 
 import * as icons from "react-icons/fa";
 import * as anModel from "../../core/annotationsModel";
 import * as api from "../../api/annotations";
 import { Context } from "../../components/context";
 import { showAlertError } from "../../components/ui"; 
 import { DownloadIcon } from "../../components/icons";
-import { mkRDF } from "../../core/rdf";
+import { downloadJSON, downloadRDF } from "../../components/download";
 
 const QuestionIcon = icons.FaQuestionCircle;
 const AllFilesIcon = icons.FaCopy;
@@ -94,19 +93,6 @@ export const LoaderFilter = React.forwardRef((props: LoaderProps, ref: React.Ref
     loadAnnotations();
   }, [allFilesFilter, mineFilter, othersFilter, semanticFilter, keywordFilter, commentFilter]);
 
-  function mkFilename(format: anModel.Format): string {
-    return "annotations_" + anModel.mkTimestamp() + "." + anModel.mkFileExt(format);
-  }
-
-  function downloadJSON(): void {
-    fileDownload(JSON.stringify(anRecords, null, 2), mkFilename(anModel.Format.JSONLD));
-  }
-
-  function downloadRDF(): void {
-    const rdf = mkRDF(anRecords);
-    fileDownload(rdf, mkFilename(anModel.Format.RDF));
-  }
-
   function renderLabel(): React.ReactElement {
     return (
       <div className="row">
@@ -188,11 +174,11 @@ export const LoaderFilter = React.forwardRef((props: LoaderProps, ref: React.Ref
         <div className="dropdown-menu" aria-labelledby="anl-ddd">
           <button type="button"
             className="dropdown-item"
-            onClick={downloadJSON}
+            onClick={() => downloadJSON(anRecords)}
           >Download JSON-LD</button>
           <button type="button"
             className="dropdown-item"
-            onClick={downloadRDF}
+            onClick={() => downloadRDF(anRecords)}
           >Download RDF/XML</button>
         </div>
       </div>
