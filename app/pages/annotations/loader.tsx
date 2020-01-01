@@ -3,9 +3,9 @@ import fileDownload from "js-file-download";
 import * as icons from "react-icons/fa";
 import * as anModel from "../../core/annotationsModel";
 import * as api from "../../api/annotations";
-import { Context } from "../../widget/context";
-import { showAlertError } from "../../components"; 
-import { DownloadIcon } from "../icons";
+import { Context } from "../../components/context";
+import { showAlertError } from "../../components/ui"; 
+import { DownloadIcon } from "../../components/icons";
 
 const QuestionIcon = icons.FaQuestionCircle;
 const AllFilesIcon = icons.FaCopy;

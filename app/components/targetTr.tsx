@@ -1,18 +1,18 @@
 import * as React from "react";
-import { Context } from "../widget/context";
+import { Context } from "./context";
 import * as anModel from "../core/annotationsModel";
-import { shorten } from "./pages";
+import { shorten } from "./utils";
 import * as icons from "react-icons/fa";
 import { DownloadIcon } from "./icons";
 
 const LookIcon = icons.FaEye;
 
-export interface TargetTrProps {
+interface TargetTrProps {
   context: Context;
   target: anModel.AnTarget;
 }
 
-export function TargetTr(props: TargetTrProps): React.FunctionComponentElement<TargetTrProps> { 
+export default function TargetTr(props: TargetTrProps): React.FunctionComponentElement<TargetTrProps> { 
   const thisFile = props.target.source === props.context.target.source;
   return (
     <tr>

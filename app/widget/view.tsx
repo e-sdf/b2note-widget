@@ -7,7 +7,7 @@ import { render as annotationsRender } from "../pages/annotations/view";
 import { render as searchRender } from "../pages/search/view";
 import { render as helpRender } from "../pages/help/view";
 import { render as profileRender } from "../pages/profile/view";
-import { Context } from "./context";
+import { Context } from "../components/context";
 import { matchSwitch } from '@babakness/exhaustive-type-checking';
 
 let currentPage = Page.ANNOTATE;

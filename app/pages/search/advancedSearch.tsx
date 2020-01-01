@@ -1,9 +1,11 @@
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as React from "react";
 import * as icons from "react-icons/fa";
 import * as anModel from "../../core/annotationsModel";
 import * as ac from "../../autocomplete/view";
 import * as api from "../../api/annotations";
-import { showAlertWarning, showAlertError } from "../../components"; 
+import { showAlertWarning, showAlertError } from "../../components/ui"; 
 import * as queryParser from "../../core/searchQueryParser";
 
 const OKIcon = icons.FaCheck;
@@ -48,7 +50,7 @@ export function AdvancedSearch(props: AdvancedSearchProps): React.FunctionCompon
     //console.log(query);
     api.searchAnnotations({ expression: query })
     .then((anl: Array<anModel.AnRecord>) => {
-      console.log(anl);
+      // console.log(anl);
       props.resultsHandle(anl);
     })
     .catch((error: any) => {

@@ -1,6 +1,6 @@
 import { Target } from "./core/annotationsModel";
 import { User } from "./api/profile";
-import { Context } from "./widget/context";
+import { Context } from "./components/context";
 import * as widget from "./widget/view";
 
 const target: Target = {

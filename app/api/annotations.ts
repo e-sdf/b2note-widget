@@ -1,7 +1,7 @@
 import axios from "axios";
 import * as secret from "../secret";
 import { endpointUrl } from "./server";
-import { Context } from "../widget/context";
+import { Context } from "../components/context";
 import * as anModel from "../core/annotationsModel";
 import * as sModel from "../core/searchModel";
 import * as searchQueryParser from "../core/searchQueryParser";

@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
 import _ from "lodash";
 import { matchSwitch } from "@babakness/exhaustive-type-checking";
 import * as React from "react";
@@ -7,7 +9,7 @@ import * as ac from "../../autocomplete/view";
 import { SearchType, BiOperatorType } from "../../core/searchModel";
 import * as queryParser from "../../core/searchQueryParser";
 import * as api from "../../api/annotations";
-import { showAlertWarning, showAlertError } from "../../components"; 
+import { showAlertWarning, showAlertError } from "../../components/ui"; 
 
 const AddIcon = icons.FaPlus;
 const SearchIcon = icons.FaSearch;
@@ -213,7 +215,7 @@ export function BasicSearch(props: BasicSearchProps): React.FunctionComponentEle
       nonEmptyTerms.length > 1 ? { expression: mkExpression(operator, nonEmptyTerms) } : { expression: mkValue(nonEmptyTerms[0]) };
     api.searchAnnotations(query)
     .then((anl: Array<AnRecord>) => {
-      console.log(anl);
+      // console.log(anl);
       props.resultsHandle(anl);
     })
     .catch((error: any) => {

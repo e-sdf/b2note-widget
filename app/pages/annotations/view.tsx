@@ -1,18 +1,19 @@
-import * as _ from "lodash";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
+import _ from "lodash";
 import allSettled from "promise.allsettled";
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 import * as icons from "react-icons/fa";
 import * as anModel from "../../core/annotationsModel";
 import * as api from "../../api/annotations";
-import { Context } from "../../widget/context";
-import { shorten } from "../pages";
-import { showAlertSuccess, showAlertWarning, showAlertError } from "../../components"; 
+import { Context } from "../../components/context";
+import { showAlertSuccess, showAlertWarning, showAlertError } from "../../components/ui"; 
 import { LoaderFilter, AnItem } from "./loader";
-import { TargetTr } from "../view";
+import AnnotationTag from "../../components/annotationTag";
+import TargetTr from "../../components/targetTr";
 import * as ac from "../../autocomplete/view";
 import * as oreg from "../../core/ontologyRegister";
-import { SemanticIcon, KeywordIcon, CommentIcon } from "../icons";
 import { InfoPanel } from "./infoPanel";
 
 const EditIcon = icons.FaEdit;
@@ -111,7 +112,7 @@ export function Annotations(props: Props): React.FunctionComponentElement<Props>
   const [activeItem, setActiveItem] = React.useState(null as string|null);
   const [editedRecordId, setEditedRecordId] = React.useState(null as string|null);
   const [pendingDeleteId, setPendingDeleteId] = React.useState(null as string|null);
-  const [ontologyInfos, setOntologyInfos] = React.useState(null as Array<oreg.OntologyInfo>|null);
+  const [showOntologyInfos, setShowOntologyInfos] = React.useState(null as Array<oreg.OntologyInfo>|null);
 
   function loadOntologiesInfo(anRecord: anModel.AnRecord): void {
     const iris = anModel.getSources(anRecord);
@@ -120,63 +121,19 @@ export function Annotations(props: Props): React.FunctionComponentElement<Props>
       (results) => {
         const settled = results.filter(r => r.status === "fulfilled") as Array<allSettled.PromiseResolution<oreg.OntologyInfo>>;
         const infos = settled.map(s  => s.value);
-        setOntologyInfos(infos);
+        setShowOntologyInfos(infos);
       }
     );
   }
 
   function closeOntologiesInfo(): void {
-    setOntologyInfos(null);
+    setShowOntologyInfos(null);
   }
 
   function renderAnItem(anItem: AnItem): React.ReactElement {
-    const anRecord: anModel.AnRecord = anItem.anRecord;
+    const anRecord = anItem.anRecord;
     const label = anModel.getLabel(anRecord);
     const visibility = activeItem === label ? "visible" : "hidden";
-
-    function renderLabel(): React.ReactElement {
-      const icon = 
-        anModel.isComment(anRecord) ? 
-          <CommentIcon className="text-secondary"/> 
-        : anModel.isSemantic(anRecord) ?
-          <SemanticIcon className="text-secondary"/>
-        : <KeywordIcon className="text-secondary"/>;
-      const itemStyle = anRecord.creator.id === props.context.user.id ? {} : { fontStyle: "italic" };
-      const shortened = shorten(label, 14);
-
-      function renderSemanticLabel(): React.ReactElement {
-        const ontologiesNo = anModel.getSources(anRecord).length;
-        return (
-          <a
-            href="#"
-            style={itemStyle}
-            data-toggle="tooltip" data-placement="bottom" 
-            title={`${label} (present in ${ontologiesNo} ${ontologiesNo > 1 ? "ontologies" : "ontology"})`}
-            onClick={() => loadOntologiesInfo(anRecord)}
-            >{`${shortened} (${ontologiesNo})`}
-          </a>
-        );
-      }
-
-      function renderOtherLabel(): React.ReactElement {
-        return (
-          <span
-            style={itemStyle}
-            data-toggle="tooltip" data-placement="bottom" title={label}>
-            {shortened}
-          </span>
-        );
-      }
-
-      return (
-        <React.Fragment>
-          {icon}<span> </span>
-          {anModel.isSemantic(anRecord) ?
-            renderSemanticLabel()
-          : renderOtherLabel()}
-        </React.Fragment>
-      );
-    }
 
     function toggleShowFilesFlag(anItem: AnItem): void {
       const anl2 = annotations.map(a => _.isEqual(a, anItem) ? { ...a, showFilesFlag: !a.showFilesFlag } : a);
@@ -262,7 +219,7 @@ export function Annotations(props: Props): React.FunctionComponentElement<Props>
         <React.Fragment>
           <tr onMouseOver={() => setActiveItem(label)} onMouseLeave={() => setActiveItem(null)}>
             <td style={{verticalAlign: "middle", whiteSpace: "nowrap"}}>
-              {renderLabel()}
+              <AnnotationTag context={props.context} anRecord={anRecord} onClick={() => loadOntologiesInfo(anRecord)}/>
             </td>
             <td style={{paddingLeft: 0}}>
               {renderFilesBadge()}
@@ -300,7 +257,7 @@ export function Annotations(props: Props): React.FunctionComponentElement<Props>
     );
   }
 
-  function renderMain(): React.ReactElement {
+  function renderAnnotationsTable(): React.ReactElement {
     return (
       <div className="container-fluid">
         <LoaderFilter ref={loaderRef} context={props.context} setAnItems={setAnnotations}/>
@@ -321,13 +278,13 @@ export function Annotations(props: Props): React.FunctionComponentElement<Props>
   }
 
   return (
-    ontologyInfos ?
+    showOntologyInfos ?
       <InfoPanel 
         label={activeItem ? activeItem : ""}
-        ontologyInfos={ontologyInfos}
+        ontologyInfos={showOntologyInfos}
         closeFn={closeOntologiesInfo}
       />
-    : renderMain()
+    : renderAnnotationsTable()
   );
 }
 

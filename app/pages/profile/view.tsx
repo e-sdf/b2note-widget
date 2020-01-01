@@ -1,6 +1,6 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
-import { Context } from "../../widget/context";
+import { Context } from "../../components/context";
 
 interface ProfileProps {
   context: Context;
