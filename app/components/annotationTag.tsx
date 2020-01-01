@@ -8,7 +8,8 @@ import { Context } from "./context";
 interface AnnotationProps {
   anRecord: anModel.AnRecord;
   context: Context;
-  onClick(): void;
+  maxLen?: number;
+  onClick?: () => void;
 }
 
 export default function AnnotationTag(props: AnnotationProps): React.FunctionComponentElement<AnnotationProps> {
@@ -21,7 +22,7 @@ export default function AnnotationTag(props: AnnotationProps): React.FunctionCom
     [anModel.AnRecordType.COMMENT]: () => <CommentIcon className="text-secondary" />,
   });
   const itemStyle = anRecord.creator.id === props.context.user.id ? {} : { fontStyle: "italic" };
-  const shortened = shorten(label, 14);
+  const shortened = props.maxLen ? shorten(label, props.maxLen) : label;
 
   function renderSemanticLabel(): React.ReactElement {
     const ontologiesNo = anModel.getSources(anRecord).length;
@@ -34,7 +35,7 @@ export default function AnnotationTag(props: AnnotationProps): React.FunctionCom
         title={`${label} (present in ${ontologiesNo} ${
           ontologiesNo > 1 ? "ontologies" : "ontology"
         })`}
-        onClick={props.onClick}
+        onClick={props.onClick ? props.onClick : () => "nop"}
       >
         {`${shortened} (${ontologiesNo})`}
       </a>

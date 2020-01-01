@@ -6,6 +6,7 @@ import * as api from "../../api/annotations";
 import { Context } from "../../components/context";
 import { showAlertError } from "../../components/ui"; 
 import { DownloadIcon } from "../../components/icons";
+import { mkRDF } from "../../core/rdf";
 
 const QuestionIcon = icons.FaQuestionCircle;
 const AllFilesIcon = icons.FaCopy;
@@ -40,6 +41,7 @@ export const LoaderFilter = React.forwardRef((props: LoaderProps, ref: React.Ref
   const [semanticFilter, setSemanticFilter] = React.useState(true);
   const [keywordFilter, setKeywordFilter] = React.useState(true);
   const [commentFilter, setCommentFilter] = React.useState(true);
+  const [anRecords, setAnRecords] = React.useState([] as anModel.AnRecord[]);
   const [noOfMine, setNoOfMine] = React.useState(null as number|null);
   const [noOfOthers, setNoOfOthers] = React.useState(null as number|null);
   const [noOfSematic, setNoOfSemantic] = React.useState(null as number|null);
@@ -65,6 +67,7 @@ export const LoaderFilter = React.forwardRef((props: LoaderProps, ref: React.Ref
     const filters = mkFilters();
     api.getAnnotationsJSON(props.context, filters).then(
       anl => {
+        setAnRecords(anl);
         const targetsPms = anl.map(a => api.getTargets(anModel.getLabel(a)));
         Promise.all(targetsPms).then(targets => {
           props.setAnItems(anl.map((an, i) => ({ 
@@ -96,23 +99,12 @@ export const LoaderFilter = React.forwardRef((props: LoaderProps, ref: React.Ref
   }
 
   function downloadJSON(): void {
-    const filters = mkFilters();
-    api.getAnnotationsJSON(props.context, filters, true).then(
-      anl => {
-        fileDownload(JSON.stringify(anl, null, 2), mkFilename(anModel.Format.JSONLD));
-      },
-      error => { console.log(error); showAlertError(alertId, "Failed getting annotations"); }
-    );
+    fileDownload(JSON.stringify(anRecords, null, 2), mkFilename(anModel.Format.JSONLD));
   }
 
   function downloadRDF(): void {
-    const filters = mkFilters();
-    api.getAnnotationsRDF(props.context, filters).then(
-      rdf => {
-        fileDownload(rdf, mkFilename(anModel.Format.RDF));
-      },
-      error => { console.log(error); showAlertError(alertId, "Failed getting annotations"); }
-    );
+    const rdf = mkRDF(anRecords);
+    fileDownload(rdf, mkFilename(anModel.Format.RDF));
   }
 
   function renderLabel(): React.ReactElement {

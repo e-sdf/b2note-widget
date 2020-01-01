@@ -219,7 +219,11 @@ export function Annotations(props: Props): React.FunctionComponentElement<Props>
         <React.Fragment>
           <tr onMouseOver={() => setActiveItem(label)} onMouseLeave={() => setActiveItem(null)}>
             <td style={{verticalAlign: "middle", whiteSpace: "nowrap"}}>
-              <AnnotationTag context={props.context} anRecord={anRecord} onClick={() => loadOntologiesInfo(anRecord)}/>
+              <AnnotationTag 
+                context={props.context}
+                anRecord={anRecord}
+                maxLen={14}
+                onClick={() => loadOntologiesInfo(anRecord)}/>
             </td>
             <td style={{paddingLeft: 0}}>
               {renderFilesBadge()}

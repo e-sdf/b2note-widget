@@ -7,6 +7,7 @@ import * as anModel from "../../core/annotationsModel";
 import { BasicSearch } from "./basicSearch";
 import { AdvancedSearch } from "./advancedSearch";
 import TargetTr from "../../components/targetTr";
+import AnnotationTag from "../../components/annotationTag";
 import { DownloadIcon } from "../../components/icons";
 
 type TabType = "basic" | "advanced";
@@ -39,24 +40,49 @@ export function SearchPage(props: SearchProps): React.FunctionComponentElement<S
     );
   }
 
-  function renderItems(res: Array<anModel.AnRecord>): React.ReactElement {
+  function renderAnTags(anl: anModel.AnRecord[]): React.ReactElement {
     return (
       <>
-        <h3>Results</h3>
-        <table className="table">
-          {res.map(r => <TargetTr key={r.target.source} context={props.context} target={r.target}/>)}
-        </table>
-        {renderDownloadButton()}
+        {anl.map((an, i) => 
+          <tr key={i}>
+            <td colSpan={2} style={{border: "none", padding: "0 0 0 0.5em"}}>
+              <AnnotationTag anRecord={an} context={props.context} maxLen={35}/>
+            </td>
+          </tr>
+        )}
       </>
     );
   }
 
   function renderResults(results: Array<anModel.AnRecord>): React.ReactElement {
-    const filesDict = _.groupBy(results, o => o.target.source);
-    console.log(filesDict);
+    const resultsDict = _.groupBy(results, o => o.target.source);
+
+    function renderItems(): React.ReactElement {
+      return (
+        <>
+          <table className="table">
+            {Object.keys(resultsDict).map(source => 
+              <>
+                <TargetTr key={source} context={props.context} target={resultsDict[source][0].target}/>
+                {renderAnTags(resultsDict[source])}
+              </>
+            )}
+          </table>
+          {renderDownloadButton()}
+        </>
+      );
+    }
+
     return (
       <div className="container-fluid">
-        {results.length === 0 ? <h3>No results</h3> : renderItems(results)}
+        {results.length === 0 ? 
+          <h3>No results</h3> 
+          : 
+          <>
+            <h3>Results</h3>
+            {renderItems()}
+          </>
+        }
       </div>
     );
   }
