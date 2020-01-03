@@ -12,7 +12,7 @@ import { showAlertSuccess, showAlertWarning, showAlertError } from "../../compon
 import { LoaderFilter, AnItem } from "./loader";
 import AnnotationTag from "../../components/annotationTag";
 import TargetTr from "../../components/targetTr";
-import * as ac from "../../autocomplete/view";
+import * as ac from "../../components/autocomplete/view";
 import * as oreg from "../../core/ontologyRegister";
 import { InfoPanel } from "./infoPanel";
 

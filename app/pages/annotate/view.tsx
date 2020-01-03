@@ -2,7 +2,7 @@ import * as React from "react";
 import * as ReactDOM from "react-dom";
 import { FaPlus } from "react-icons/fa";
 import { Tabs, Tab } from "../../components/ui";
-import * as ac from "../../autocomplete/view";
+import * as ac from "../../components/autocomplete/view";
 import * as anModel from "../../core/annotationsModel";
 import * as api from "../../api/annotations";
 import { Context } from "../../components/context";

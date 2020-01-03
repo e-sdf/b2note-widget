@@ -5,7 +5,7 @@ import { matchSwitch } from "@babakness/exhaustive-type-checking";
 import * as React from "react";
 import * as icons from "react-icons/fa";
 import { AnRecord, SearchQuery } from "../../core/annotationsModel";
-import * as ac from "../../autocomplete/view";
+import * as ac from "../../components/autocomplete/view";
 import { SearchType, BiOperatorType } from "../../core/searchModel";
 import * as queryParser from "../../core/searchQueryParser";
 import * as api from "../../api/annotations";
