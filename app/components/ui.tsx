@@ -129,9 +129,6 @@ export class Modal extends React.Component<ModalProps> {
     this.getJQ().modal("show");
   }
 
-  //public componentWillUnmount = () => {
-    //this.hide();
-  //}
 }
 
 // Tabs {{{1
