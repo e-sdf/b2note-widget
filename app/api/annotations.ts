@@ -11,9 +11,50 @@ const annotationsUrl = endpointUrl + anModel.annotationsUrl;
 const targetsUrl = endpointUrl + anModel.targetsUrl;
 const searchUrl = endpointUrl + sModel.searchUrl;
 
-export function postAnnotation(anRecord: anModel.AnRecord): Promise<any> {
+function mkTarget(context: Context): anModel.AnTarget {
+  return anModel.mkTarget({
+      id: context.target.pid, 
+      source: context.target.source
+  });
+}
+
+function mkCreator(context: Context): anModel.AnCreator {
+  return anModel.mkCreator({
+      id: context.user.id, 
+      nickname: context.user.nickname
+    });
+}
+
+function postAnnotation(anRecord: anModel.AnRecord): Promise<any> {
   const config = { headers: {'Creatorization': "bearer " + secret.token} };
   return axios.post(annotationsUrl, anRecord, config);
+}
+
+export function postAnnotationSemantic(uris: string[], label: string, context: Context): Promise<any> {
+  const body = anModel.mkSemanticAnBody(uris, label);
+  const target = mkTarget(context);
+  const creator = mkCreator(context);
+  const generator = anModel.mkGenerator();
+  const req = anModel.mkAnRecord(body, target, creator, generator, anModel.PurposeType.TAGGING);
+  return postAnnotation(req);
+}
+
+export function postAnnotationKeyword(label: string, context: Context): Promise<any> {
+  const body = anModel.mkKeywordAnBody(label);
+  const target = mkTarget(context);
+  const creator = mkCreator(context);
+  const generator = anModel.mkGenerator();
+  const req = anModel.mkAnRecord(body, target, creator, generator, anModel.PurposeType.TAGGING);
+  return postAnnotation(req);
+}
+
+export function postAnnotationComment(comment: string, context: Context): Promise<any> {
+  const body = anModel.mkCommentAnBody(comment);
+  const target = mkTarget(context);
+  const creator = mkCreator(context);
+  const generator = anModel.mkGenerator();
+  const req = anModel.mkAnRecord(body, target, creator, generator, anModel.PurposeType.COMMENTING);
+  return postAnnotation(req);
 }
 
 export interface Filters {

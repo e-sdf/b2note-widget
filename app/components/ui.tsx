@@ -132,28 +132,34 @@ export class Modal extends React.Component<ModalProps> {
 }
 
 // Tabs {{{1
-interface TabsProps {
-  activeTab: string;
+interface TabsProps<T> {
+  activeTab: T;
+  activeHandle?: (newTab: T) => void;
   id: string;
   children?: any;
 }
 
-function activeCls(tab: React.ReactElement, props: TabsProps): string {
-  if (tab) {
-    const first: boolean = !props.children ? false : tab.props.tabId === props.children[0].props.tabId;
-    return first ? " active" : "";
-  } else {
-    return "";
-  }
-}
+export function Tabs<T>(props: TabsProps<T>): React.ReactElement {
+  const [activeTab, setActiveTab] = React.useState(props.activeTab);
 
-export function Tabs(props: TabsProps): React.ReactElement {
+  function activeCls(tab: React.ReactElement): string {
+    return tab ?
+      tab.props.tabId === activeTab ? " active" : ""
+      : "";
+  }
+
   return (
     <div>
       <ul className="nav nav-tabs" id={props.id} role="tablist">
         {!props.children ? "" : props.children.map((tab: React.ReactElement) =>
           <li key={tab.props.tabId} className="nav-item">
-            <a className={"nav-link" + activeCls(tab, props)} id={`${tab.props.tabId}-tab`} data-toggle="tab" href={`#${tab.props.tabId}`} role="tab">{tab.props.title}</a>
+            <a className={"nav-link" + activeCls(tab)} id={`${tab.props.tabId}-tab`} href="#"
+              onClick={() => {
+                setActiveTab(tab.props.tabId);
+                if (props.activeHandle) { props.activeHandle(tab.props.tabId); }
+              }}>
+              {tab.props.title}
+            </a>
           </li>
         )}
       </ul>
@@ -162,7 +168,7 @@ export function Tabs(props: TabsProps): React.ReactElement {
         <div
           key={tab.props.tabId}
           id={tab.props.tabId}
-          className={"tab-pane" + activeCls(tab, props)}
+          className={"tab-pane" + activeCls(tab)}
           role="tabpanel">
           {tab.props.children}
         </div>
@@ -173,18 +179,14 @@ export function Tabs(props: TabsProps): React.ReactElement {
 }
 
 // Tab {{{1
-interface TabProps {
-  tabId: string;
+interface TabProps<T> {
+  tabId: T;
   title: React.ReactNode;
   children?: any;
 }
 
-export function Tab(props: TabProps): React.ReactElement {
-  return (
-    <div>
-      {props.children}
-    </div>
-  );
+export function Tab<T>(props: TabProps<T>): React.ReactElement {
+  return (<></>);
 }
 
 // Confirm {{{1

@@ -4,26 +4,11 @@ import { FaPlus } from "react-icons/fa";
 import { Tabs, Tab } from "../../components/ui";
 import * as oreg from "../../core/ontologyRegister";
 import * as ac from "../../components/autocomplete/view";
-import * as anModel from "../../core/annotationsModel";
 import * as api from "../../api/annotations";
 import { Context } from "../../components/context";
 import { showAlertSuccess, showAlertWarning, showAlertError } from "../../components/ui"; 
 
 const alertId = "anAlert";
-
-function mkTarget(context: Context): anModel.AnTarget {
-  return anModel.mkTarget({
-      id: context.target.pid, 
-      source: context.target.source
-  });
-}
-
-function mkCreator(context: Context): anModel.AnCreator {
-  return anModel.mkCreator({
-      id: context.user.id, 
-      nickname: context.user.nickname
-    });
-}
 
 interface SemanticProps {
   context: Context;
@@ -46,12 +31,7 @@ function Semantic(props: SemanticProps): React.FunctionComponentElement<Semantic
   }
 
   function annotate(): void {
-    const body = anModel.mkSemanticAnBody(uris, label);
-    const target = mkTarget(props.context);
-    const creator = mkCreator(props.context);
-    const generator = anModel.mkGenerator();
-    const req = anModel.mkAnRecord(body, target, creator, generator, anModel.PurposeType.TAGGING);
-    api.postAnnotation(req)
+    api.postAnnotationSemantic(uris, label, props.context)
       .then(() => showAlertSuccess(alertId, "Semantic annotation created"))
       .catch(error => {
         if (error.response?.data?.message) {
@@ -83,22 +63,33 @@ function Semantic(props: SemanticProps): React.FunctionComponentElement<Semantic
 
 interface KeywordProps {
   context: Context;
-  switchToSemantic(label: string): void;
 }
 
 function Keyword(props: KeywordProps): React.FunctionComponentElement<KeywordProps> {
   const [label, setLabel] = React.useState("");
+  const [uris, setUris] = React.useState([] as Array<string>);
   const [semanticFound, setSemanticFound] = React.useState(false);
 
   function postAnnotation(): void {
-    const body = anModel.mkKeywordAnBody(label);
-    const target = mkTarget(props.context);
-    const creator = mkCreator(props.context);
-    const generator = anModel.mkGenerator();
-    const req = anModel.mkAnRecord(body, target, creator, generator, anModel.PurposeType.TAGGING);
-    api.postAnnotation(req)
+    api.postAnnotationKeyword(label, props.context)
       .then(() => {
         showAlertSuccess(alertId, "Keyword annotation created");
+        setLabel("");
+      })
+      .catch((error: any) => {
+        console.error(error);
+        if (error?.response?.data?.message) {
+          showAlertWarning(alertId, error.response.data.message);
+        } else {
+          showAlertError(alertId, "Failed: server error");
+        }
+      });
+  }
+
+  function postAnnotationAsSemantic(): void {
+    api.postAnnotationSemantic(uris, label, props.context)
+      .then(() => {
+        showAlertSuccess(alertId, "Semantic annotation created");
         setLabel("");
       })
       .catch((error: any) => {
@@ -114,6 +105,7 @@ function Keyword(props: KeywordProps): React.FunctionComponentElement<KeywordPro
   function annotate(): void {
     oreg.getOntologies(label).then(oDict => {
       if (oDict[label]) {
+        setUris(oDict[label].map(i => i.uris));
         setSemanticFound(true);
       } else {
         postAnnotation();
@@ -133,8 +125,8 @@ function Keyword(props: KeywordProps): React.FunctionComponentElement<KeywordPro
         <div className="d-flex flex-row justify-content-between" style={{ margin: "10px" }}>
           <button type="button" className="btn btn-primary"
             onClick={() => {
-              setLabel(""); 
-              props.switchToSemantic(label);
+              setSemanticFound(false);
+              postAnnotationAsSemantic();
             }}>
             Semantic
             </button>
@@ -180,12 +172,7 @@ function Comment(props: CommentProps): React.FunctionComponentElement<CommentPro
   const [comment, setComment] = React.useState("");
 
   function annotate(): void {
-    const body = anModel.mkCommentAnBody(comment);
-    const target = mkTarget(props.context);
-    const creator = mkCreator(props.context);
-    const generator = anModel.mkGenerator();
-    const req = anModel.mkAnRecord(body, target, creator, generator, anModel.PurposeType.COMMENTING);
-    api.postAnnotation(req)
+    api.postAnnotationComment(comment, props.context)
     .then(() => {
       showAlertSuccess(alertId, "Comment created");
       setComment("");
@@ -213,23 +200,25 @@ function Comment(props: CommentProps): React.FunctionComponentElement<CommentPro
   );
 }
 
-type TabType = "semantic" | "keyword" | "comment";
+enum TabType { SEMANTIC = "semantic", KEYWORD = "keyword", COMMENT = "comment" }
 
 interface PageProps {
   context: Context;
 }
 
 export function AnnotatePage(props: PageProps): React.FunctionComponentElement<PageProps> {
+  const [activeTab, setActiveTab] = React.useState(TabType.SEMANTIC);
+
   return (
     <>
-      <Tabs id="annotateTabs" activeTab={"semantic" as TabType}>
-        <Tab tabId={"semantic" as TabType} title={<span>Semantic<br/>tag</span>}>
+      <Tabs key={activeTab} id="annotateTabs" activeTab={activeTab} activeHandle={setActiveTab}> 
+        <Tab tabId={TabType.SEMANTIC} title={<span>Semantic<br/>tag</span>}>
           <Semantic context={props.context}/>
         </Tab>
-        <Tab tabId={"keyword" as TabType} title={<span>Fee-text<br/>keyword</span>}>
-          <Keyword context={props.context} switchToSemantic={(label) => console.log(label)}/>
+        <Tab tabId={TabType.KEYWORD} title={<span>Fee-text<br/>keyword</span>}>
+          <Keyword context={props.context}/>
         </Tab>
-        <Tab tabId={"comment" as TabType} title={<span>Comment<br/>&nbsp;</span>}>
+        <Tab tabId={TabType.COMMENT} title={<span>Comment<br/>&nbsp;</span>}>
           <Comment context={props.context}/>
         </Tab>
       </Tabs>
