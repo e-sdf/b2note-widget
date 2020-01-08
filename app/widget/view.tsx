@@ -1,3 +1,4 @@
+import { matchSwitch } from '@babakness/exhaustive-type-checking';
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 import { FaEdit, FaList, FaSearch, FaQuestionCircle, FaSignInAlt } from "react-icons/fa";
@@ -5,20 +6,29 @@ import { Page } from "../pages/pages";
 import { render as annotateRender } from "../pages/annotate/view";
 import { render as annotationsRender } from "../pages/annotations/view";
 import { render as searchRender } from "../pages/search/view";
-import { render as helpRender } from "../pages/help/view";
+import { HelpSection, render as helpRender } from "../pages/help/view";
 import { render as profileRender } from "../pages/profile/view";
 import { Context } from "../components/context";
-import { matchSwitch } from '@babakness/exhaustive-type-checking';
 
 let currentPage = Page.ANNOTATE;
 let helpPage = Page.ANNOTATE;
+
+function pageToHelp(page: Page): HelpSection {
+  return matchSwitch(page, {
+    [Page.ANNOTATE]: () => HelpSection.ANNOTATE,
+    [Page.ANNOTATIONS]: () => HelpSection.ANNOTATIONS,
+    [Page.SEARCH]: () => HelpSection.SEARCH,
+    [Page.PROFILE]: () => HelpSection.PROFILE,
+    [Page.HELP]: () => HelpSection.TOC // just for type exahaustivness, not used actually
+  });  
+}
 
 function renderPage(page: Page, context: Context): void {
   return matchSwitch(page, {
     [Page.ANNOTATE]: () => annotateRender(context),
     [Page.ANNOTATIONS]: () => annotationsRender(context),
     [Page.SEARCH]: () => searchRender(context),
-    [Page.HELP]: () => helpRender(helpPage),
+    [Page.HELP]: () => helpRender(pageToHelp(helpPage)),
     [Page.PROFILE]: () => profileRender(context)
   });
 }
