@@ -40,8 +40,8 @@ function TagEditor(props: TagEditorProps): React.FunctionComponentElement<TagEdi
   const [ref, setRef] = React.useState(null as any);
 
   function gotSuggestion(suggestions: Array<ac.Suggestion>): void {
-    setUris(suggestions[0].items.map(i => i.uris));
-    setLabel(suggestions[0].labelOrig);
+    setUris((suggestions[0].items || []).map(i => i.uris));
+    setLabel(suggestions[0].labelOrig || "");
   }
 
   function update(): void {

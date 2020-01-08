@@ -34,7 +34,7 @@ export function AdvancedSearch(props: AdvancedSearchProps): React.FunctionCompon
   }
   
   function tagFilled(tag: string, suggestions: Array<ac.Suggestion>): void {
-    const value = suggestions[0].labelOrig;
+    const value = suggestions[0].labelOrig || "";
     setSemanticTagsDict({ ...semanticTagsDict, [tag]: value });
   }
 

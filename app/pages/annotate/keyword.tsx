@@ -74,7 +74,7 @@ export function Keyword(props: KeywordProps): React.FunctionComponentElement<Key
               postAnnotationAsSemantic();
             }}>
             Semantic
-            </button>
+          </button>
           <button type="button" className="btn btn-secondary"
             onClick={() => {
               setSemanticFound(false);
@@ -85,14 +85,14 @@ export function Keyword(props: KeywordProps): React.FunctionComponentElement<Key
           <button type="button" className="btn btn-warning"
             onClick={() => setSemanticFound(false)}>
             Cancel
-            </button>
+          </button>
         </div>
       </div>
     );
   }
 
   return (
-    <div>
+    <>
       <div className="d-flex flex-row" style={{margin: "10px"}}>
         <input className="form-control"
           value={label}
@@ -105,6 +105,6 @@ export function Keyword(props: KeywordProps): React.FunctionComponentElement<Key
         </button>
       </div>
       {semanticFound ? renderSemantisationDialog() : <></>}
-    </div>
+    </>
   );
 }

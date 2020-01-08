@@ -5,8 +5,9 @@ import { AsyncTypeahead } from "react-bootstrap-typeahead";
 
 export interface Suggestion {
   label: string;
-  labelOrig: string;
-  items: Array<OntologyInfo>;
+  labelOrig?: string;
+  items?: Array<OntologyInfo>;
+  customOption?: boolean;
 }
 
 function mkSuggestion(item: OntologyInfo): Suggestion {
@@ -38,6 +39,7 @@ function mkSuggestions(oDict: OntologyDict): Array<Suggestion> {
 interface Props {
   id?: string;
   defaultInputValue?: string;
+  allowNew?: boolean;
   onChange: (val: Array<Suggestion>) => void;
 }
 
@@ -78,7 +80,7 @@ export class SemanticAutocomplete extends React.Component<Props, State> {
         id={this.props.id}
         ref={(typeahead) => this.typeahead = typeahead}
         defaultInputValue={this.props.defaultInputValue}
-        allowNew={true}
+        allowNew={this.props.allowNew || false}
         isLoading={this.state.loading}
         onSearch={query => {
           this.setState({ loading: true });
