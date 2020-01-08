@@ -1,6 +1,7 @@
+import _ from "lodash";
+import { $enum } from "ts-enum-util";
 import * as React from "react";
 import * as ReactDOM from "react-dom";
-import { Page } from "../pages";
 import { matchSwitch } from "@babakness/exhaustive-type-checking";
 import { AnnotateHelp } from "./annotate";
 import { AnnotationsHelp } from "./annotations";
@@ -15,19 +16,36 @@ export enum HelpSection {
   TOC = "toc"
 }
 
+export function header(section: HelpSection): string {
+  return matchSwitch(section, {
+    [HelpSection.ANNOTATE]: () => "Annotating",
+    [HelpSection.ANNOTATIONS]: () => "List of Annotations",
+    [HelpSection.SEARCH]: () => "Searching Annotations",
+    [HelpSection.PROFILE]: () => "User Profile",
+    [HelpSection.TOC]: () => "Table of Contents"
+  });
+}
+
 interface ToCProps {
   sectionHandle(section: HelpSection): void;
+  header: string;
 }
 
 export function ToC(props: ToCProps): React.FunctionComponentElement<ToCProps> {
+
+  function butLast<T>(arr: T[]): T[] {
+    return arr.filter(i => i !== _.last(arr));
+  }
+
   return (
     <div className="mt-2">
-      <h2>Table of Contents</h2>
+      <h2>{props.header}</h2>
       <ul>
-        <li><a href="#" onClick={() => props.sectionHandle(HelpSection.ANNOTATE)}>Annotating</a></li>
-        <li><a href="#" onClick={() => props.sectionHandle(HelpSection.ANNOTATIONS)}>Annotations List</a></li>
-        <li><a href="#" onClick={() => props.sectionHandle(HelpSection.SEARCH)}>Searching Annotations</a></li>
-        <li><a href="#" onClick={() => props.sectionHandle(HelpSection.PROFILE)}>User Profile</a></li>
+        {butLast($enum(HelpSection).getKeys()).map(section =>
+          <li key={section}>
+            <a href="#" onClick={() => props.sectionHandle(HelpSection[section])}>{header(HelpSection[section])}</a>
+          </li>
+        )}
       </ul>
     </div>
   );
@@ -42,11 +60,11 @@ export function HelpPage(props: HelpPageProps): React.FunctionComponentElement<H
 
   function renderSection(section: HelpSection): React.ReactElement {
     return matchSwitch(section, {
-      [HelpSection.ANNOTATE]: () => <AnnotateHelp/>,
-      [HelpSection.ANNOTATIONS]: () => <AnnotationsHelp/>,
-      [HelpSection.SEARCH]: () => <SearchHelp/>,
-      [HelpSection.PROFILE]: () => <ProfileHelp/>,
-      [HelpSection.TOC]: () => <ToC sectionHandle={setSection}/>
+      [HelpSection.ANNOTATE]: () => <AnnotateHelp header={header(HelpSection.ANNOTATE)}/>,
+      [HelpSection.ANNOTATIONS]: () => <AnnotationsHelp header={header(HelpSection.ANNOTATIONS)}/>,
+      [HelpSection.SEARCH]: () => <SearchHelp header={header(HelpSection.SEARCH)}/>,
+      [HelpSection.PROFILE]: () => <ProfileHelp header={header(HelpSection.PROFILE)}/>,
+      [HelpSection.TOC]: () => <ToC sectionHandle={setSection} header={header(HelpSection.TOC)}/>
     });
   }
 
