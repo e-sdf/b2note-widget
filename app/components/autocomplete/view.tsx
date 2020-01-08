@@ -78,6 +78,7 @@ export class SemanticAutocomplete extends React.Component<Props, State> {
         id={this.props.id}
         ref={(typeahead) => this.typeahead = typeahead}
         defaultInputValue={this.props.defaultInputValue}
+        allowNew={true}
         isLoading={this.state.loading}
         onSearch={query => {
           this.setState({ loading: true });
