@@ -74,8 +74,8 @@ export const LoaderFilter = React.forwardRef((props: LoaderProps, ref: React.Ref
             targets: targets[i],
             showFilesFlag: false
           })));
-          setNoOfMine(anl.filter(a => a.creator.id === props.context.user.id).length);
-          setNoOfOthers(anl.filter(a => a.creator.id !== props.context.user.id).length);
+          setNoOfMine(anl.filter(a => a.creator.id === (props.context.user?.id || "")).length);
+          setNoOfOthers(anl.filter(a => a.creator.id !== (props.context.user?.id || "")).length);
           setNoOfSemantic(anl.filter(anModel.isSemantic).length);
           setNoOfKeyword(anl.filter(anModel.isKeyword).length);
           setNoOfComment(anl.filter(anModel.isComment).length);

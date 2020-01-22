@@ -1,6 +1,5 @@
 import { Target } from "./core/annotationsModel";
-import { User } from "./api/profile";
-import { Context } from "./components/context";
+import * as context from "./components/context";
 import * as widget from "./widget/view";
 
 const target: Target = {
@@ -8,16 +7,8 @@ const target: Target = {
   source: "https://b2share.eudat.eu/records/b1092be3cd4844e0bffd7b669521ba3c"
 };
 
-const user: User = {
-  id: "e4619431-6087-43bb-a241-1c48674f5156",
-  nickname: "Robert Pergl"
-};
-
-const context: Context = {
-  user,
-  target
-};
+const sampleContext = context.mkContext(target);
 
 $(document).ready(() => {
-  widget.render(context);
+  widget.render(sampleContext);
 });

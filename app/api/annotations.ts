@@ -5,7 +5,6 @@ import { Context } from "../components/context";
 import * as anModel from "../core/annotationsModel";
 import * as sModel from "../core/searchModel";
 import * as searchQueryParser from "../core/searchQueryParser";
-import { Format } from '../../b2note-core/app/annotationsModel';
 
 const annotationsUrl = endpointUrl + anModel.annotationsUrl;
 const targetsUrl = endpointUrl + anModel.targetsUrl;
@@ -20,8 +19,8 @@ function mkTarget(context: Context): anModel.AnTarget {
 
 function mkCreator(context: Context): anModel.AnCreator {
   return anModel.mkCreator({
-      id: context.user.id, 
-      nickname: context.user.nickname
+      id: context.user?.id || "", 
+      nickname: context.user?.name || ""
     });
 }
 
@@ -84,7 +83,7 @@ function mkTypeFilter(f: Filters): Query {
 }
 
 function mkCreatorFilter(context: Context, f: Filters): Query {
-  return !f.creator.others ? { creator: context.user.id } : {};
+  return !f.creator.others ? { creator: context.user?.id || "" } : {};
 }
 
 function mkTargetSourceFilter(context: Context, f: Filters): Query {
@@ -112,7 +111,7 @@ export function getAnnotationsJSON(context: Context, f: Filters, download = fals
     axios.get(annotationsUrl, { params }).then(res => {
       if(res.data) {
         const cleaned = !f.creator.mine ? 
-          res.data.filter((r: anModel.AnRecord) => r.creator.id !== context.user.id)
+          res.data.filter((r: anModel.AnRecord) => r.creator.id !== (context.user?.id || ""))
         : res.data;
         resolve(cleaned);
       } else {
@@ -178,5 +177,7 @@ export function searchAnnotations(query: anModel.SearchQuery): Promise<Array<anM
   });
 }
 
-
+// export function getSourceFilename(target: Target): Promise<string|null> {
+//   const handleURL = "http://hdl.handle.net/api/handles/; 
+// }
 

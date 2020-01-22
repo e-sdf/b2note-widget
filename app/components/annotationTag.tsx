@@ -1,7 +1,7 @@
 import { matchSwitch } from "@babakness/exhaustive-type-checking";
 import * as React from "react";
 import * as anModel from "../core/annotationsModel";
-import { shorten } from "./utils";
+import { shorten } from "../utils";
 import { SemanticIcon, KeywordIcon, CommentIcon } from "./icons";
 import { Context } from "./context";
 
@@ -21,7 +21,7 @@ export default function AnnotationTag(props: AnnotationProps): React.FunctionCom
     [anModel.AnRecordType.KEYWORD]: () => <KeywordIcon className="text-secondary" />,
     [anModel.AnRecordType.COMMENT]: () => <CommentIcon className="text-secondary" />,
   });
-  const itemStyle = anRecord.creator.id === props.context.user.id ? {} : { fontStyle: "italic" };
+  const itemStyle = anRecord.creator.id === (props.context.user?.id || "") ? {} : { fontStyle: "italic" };
   const shortened = props.maxLen ? shorten(label, props.maxLen) : label;
 
   function renderSemanticLabel(): React.ReactElement {

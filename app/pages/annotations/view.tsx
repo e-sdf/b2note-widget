@@ -229,7 +229,7 @@ export function Annotations(props: Props): React.FunctionComponentElement<Props>
               {renderFilesBadge()}
             </td>
             <td style={{whiteSpace: "nowrap", paddingLeft: 0, paddingRight: 0, visibility}}>
-              {anRecord.creator.id === props.context.user.id ? renderActionButtons() : ""}
+              {anRecord.creator.id === (props.context.user?.id || "") ? renderActionButtons() : ""}
             </td>
           </tr>
           {pendingDeleteId === anRecord.id ? 

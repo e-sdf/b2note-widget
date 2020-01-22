@@ -9,7 +9,7 @@ interface ProfileProps {
 export function ProfilePage(props: ProfileProps): React.FunctionComponentElement<ProfileProps> {
   return (
     <div>
-      Profile
+      {props.context.user?.name}
     </div>
   );
 }
