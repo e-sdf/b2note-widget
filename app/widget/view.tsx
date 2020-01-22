@@ -9,7 +9,7 @@ import { render as searchRender } from "../pages/search/view";
 import { HelpSection, render as helpRender } from "../pages/help/view";
 import { render as profileRender } from "../pages/profile/view";
 import { Context, isUserLogged } from "../components/context";
-import { login } from "../api/auth";
+import * as auth from "../api/auth";
 import { shorten } from "../utils";
 
 const AnnotateIcon = icons.FaEdit;
@@ -44,20 +44,29 @@ function Navbar(props: Props): React.FunctionComponentElement<Context> {
 
   const activeFlag = (p: Page): string => p === page ? " active" : "";
 
-  async function profileLoggedRenderPm(): Promise<RenderFn> {
-    if (isUserLogged(context)) {
-      return Promise.resolve(() => profileRender(context));
-    } else {
-      const user = await login();
-      console.log(user);
-      const newContext = { ...context, user };
-      setContext(newContext);
-      return Promise.resolve(() => profileRender(newContext));
+  function logout(): void {
+    if (context.user) {
+      auth.logout(context.user).then(() => {
+        selectPage(Page.ANNOTATE);
+        setContext({ ...context, user: null });
+      })
     }
   }
 
-  function renderPage(): void {
-    return matchSwitch(page, {
+  async function profileLoggedRenderPm(): Promise<RenderFn> {
+    if (isUserLogged(context)) {
+      return Promise.resolve(() => profileRender(context, logout));
+    } else {
+      const user = await auth.login();
+      console.log(user);
+      const newContext = { ...context, user };
+      setContext(newContext);
+      return Promise.resolve(() => profileRender(newContext, logout));
+    }
+  }
+
+  function renderPage(p: Page): void {
+    return matchSwitch(p, {
       [Page.ANNOTATE]: () => annotateRender(context),
       [Page.ANNOTATIONS]: () => annotationsRender(context),
       [Page.SEARCH]: () => searchRender(context),
@@ -70,12 +79,12 @@ function Navbar(props: Props): React.FunctionComponentElement<Context> {
     const node = document.getElementById("page");
     if (node) {
       ReactDOM.unmountComponentAtNode(node);
-      renderPage();
+      renderPage(p);
       setHelpPage(p === Page.HELP ? helpPage : page);
     }
   }
 
-  function pageSelected(p: Page): void {
+  function selectPage(p: Page): void {
     setPage(p);
     switchPage(p);
   }
@@ -89,7 +98,7 @@ function Navbar(props: Props): React.FunctionComponentElement<Context> {
           <a
             className={"nav-link" + activeFlag(Page.ANNOTATE)} href="#" 
             data-toggle="tooltip" data-placement="bottom" title="Annotate"
-            onClick={() => pageSelected(Page.ANNOTATE)}
+            onClick={() => selectPage(Page.ANNOTATE)}
             ><AnnotateIcon/>
           </a>
         </li>
@@ -97,7 +106,7 @@ function Navbar(props: Props): React.FunctionComponentElement<Context> {
           <a
             className={"nav-link" + activeFlag(Page.ANNOTATIONS)} href="#" 
             data-toggle="tooltip" data-placement="bottom" title="Annotations"
-            onClick={() => pageSelected(Page.ANNOTATIONS)}
+            onClick={() => selectPage(Page.ANNOTATIONS)}
             ><AnnotationsIcon/>
           </a>
         </li>
@@ -105,21 +114,21 @@ function Navbar(props: Props): React.FunctionComponentElement<Context> {
           <a
             className={"nav-link" + activeFlag(Page.SEARCH)} href="#" 
             data-toggle="tooltip" data-placement="bottom" title="Search"
-            onClick={() => pageSelected(Page.SEARCH)}
+            onClick={() => selectPage(Page.SEARCH)}
             ><SearchIcon/>
           </a>
         </li>
         <li className="nav-item">
           <a className="nav-link" href="#"data-toggle="tooltip" 
              data-placement="bottom" title="Context Help"
-            onClick={() => pageSelected(Page.HELP)}
+            onClick={() => selectPage(Page.HELP)}
           ><HelpIcon/></a>
         </li>
         <li className="nav-item ml-auto">
           <a
             className={"nav-link" + activeFlag(Page.PROFILE)} href="#" 
             data-toggle="tooltip" data-placement="bottom" title={context.user ? "Profile" : "Login"}
-            onClick={() => pageSelected(Page.PROFILE)}>
+            onClick={() => selectPage(Page.PROFILE)}>
             {context.user ? 
               <span><UserIcon/> {shorten(context.user.name, 15)}</span>
               : <LoginIcon/>

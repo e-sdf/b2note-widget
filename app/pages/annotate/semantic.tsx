@@ -4,6 +4,7 @@ import { Context } from "../../components/context";
 import { showAlertSuccess, showAlertWarning, showAlertError } from "../../components/ui"; 
 import * as ac from "../../components/autocomplete/view";
 import * as api from "../../api/annotations";
+import { SemanticIcon } from "../../components/icons";
 
 export interface SemanticProps {
   context: Context;
@@ -95,14 +96,16 @@ export function Semantic(props: SemanticProps): React.FunctionComponentElement<S
 
   return (
     <>
-      <div className="d-flex flex-row" style={{margin: "10px"}}>
+      <div className="d-flex flex-row align-items-center" style={{margin: "10px"}}>
+      <SemanticIcon className="mr-1"/>
         <ac.SemanticAutocomplete 
           ref={(comp) => setRef(comp)} 
           allowNew={true}
           onChange={gotSuggestion}
         />
         <button type="button" className="btn btn-primary"
-          disabled={label.length === 0}
+          data-toggle="tooltip" data-placement="bottom" title={props.context.user ? "" : "Not logged in"}
+          disabled={label.length === 0 || !props.context.user}
           onClick={() => {
             annotate();
             if (ref) { ref.clear(); }

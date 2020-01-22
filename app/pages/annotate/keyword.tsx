@@ -4,6 +4,7 @@ import { Context } from "../../components/context";
 import { showAlertSuccess, showAlertWarning, showAlertError } from "../../components/ui"; 
 import * as oreg from "../../core/ontologyRegister";
 import * as api from "../../api/annotations";
+import { KeywordIcon } from "../../components/icons";
 
 export interface KeywordProps {
   context: Context;
@@ -93,13 +94,15 @@ export function Keyword(props: KeywordProps): React.FunctionComponentElement<Key
 
   return (
     <>
-      <div className="d-flex flex-row" style={{margin: "10px"}}>
+      <div className="d-flex flex-row align-items-center" style={{margin: "10px"}}>
+        <KeywordIcon className="mr-1"/>
         <input className="form-control"
           value={label}
           onChange={ev => setLabel(ev.target?.value || "")} 
         />
         <button type="button" className="btn btn-primary"
-          disabled={label.length === 0}
+          data-toggle="tooltip" data-placement="bottom" title={props.context.user ? "" : "Not logged in"}
+          disabled={label.length === 0 || !props.context.user}
           onClick={annotate}>
           <FaPlus/>
         </button>

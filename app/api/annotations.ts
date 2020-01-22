@@ -1,10 +1,10 @@
 import axios from "axios";
-import * as secret from "../secret";
 import { endpointUrl } from "./server";
 import { Context } from "../components/context";
 import * as anModel from "../core/annotationsModel";
 import * as sModel from "../core/searchModel";
 import * as searchQueryParser from "../core/searchQueryParser";
+import { authHeader } from "./utils";
 
 const annotationsUrl = endpointUrl + anModel.annotationsUrl;
 const targetsUrl = endpointUrl + anModel.targetsUrl;
@@ -24,9 +24,12 @@ function mkCreator(context: Context): anModel.AnCreator {
     });
 }
 
-function postAnnotation(anRecord: anModel.AnRecord): Promise<any> {
-  const config = { headers: {'Creatorization': "bearer " + secret.token} };
-  return axios.post(annotationsUrl, anRecord, config);
+function postAnnotation(anRecord: anModel.AnRecord, token: string|undefined): Promise<any> {
+  if (token) {
+    return axios.post(annotationsUrl, anRecord, authHeader(token));
+  } else {
+    return Promise.reject("Token not present");
+  }
 }
 
 export function postAnnotationSemantic(uris: string[], label: string, context: Context): Promise<any> {
@@ -35,7 +38,7 @@ export function postAnnotationSemantic(uris: string[], label: string, context: C
   const creator = mkCreator(context);
   const generator = anModel.mkGenerator();
   const req = anModel.mkAnRecord(body, target, creator, generator, anModel.PurposeType.TAGGING);
-  return postAnnotation(req);
+  return postAnnotation(req, context.user?.accessToken);
 }
 
 export function postAnnotationKeyword(label: string, context: Context): Promise<any> {
@@ -44,7 +47,7 @@ export function postAnnotationKeyword(label: string, context: Context): Promise<
   const creator = mkCreator(context);
   const generator = anModel.mkGenerator();
   const req = anModel.mkAnRecord(body, target, creator, generator, anModel.PurposeType.TAGGING);
-  return postAnnotation(req);
+  return postAnnotation(req, context.user?.accessToken);
 }
 
 export function postAnnotationComment(comment: string, context: Context): Promise<any> {
@@ -53,7 +56,7 @@ export function postAnnotationComment(comment: string, context: Context): Promis
   const creator = mkCreator(context);
   const generator = anModel.mkGenerator();
   const req = anModel.mkAnRecord(body, target, creator, generator, anModel.PurposeType.COMMENTING);
-  return postAnnotation(req);
+  return postAnnotation(req, context.user?.accessToken);
 }
 
 export interface Filters {
@@ -140,13 +143,20 @@ function makeLocalUrl(url: string): string {
   return url.replace("https://b2note.bsc.es", "http://localhost:3050");
 }
 
-export function patchAnnotationBody(anIdUrl: string, body: anModel.AnBody): Promise<any> {
-  const config = { headers: {'Creatorization': "bearer " + secret.token} };
-  return axios.patch(makeLocalUrl(anIdUrl), { body }, config);
+export function patchAnnotationBody(anIdUrl: string, body: anModel.AnBody, context: Context): Promise<any> {
+  if (context.user) {
+    return axios.patch(makeLocalUrl(anIdUrl), { body }, authHeader(context.user.accessToken));
+  } else {
+    return Promise.reject("Token not present");
+  }
 }
 
-export function deleteAnnotation(anIdUrl: string): Promise<any> {
-  return axios.delete(makeLocalUrl(anIdUrl));
+export function deleteAnnotation(anIdUrl: string, context: Context): Promise<any> {
+  if (context.user) {
+    return axios.delete(makeLocalUrl(anIdUrl), authHeader(context.user.accessToken));
+  } else {
+    return Promise.reject("Token not present");
+  }
 }
 
 export function getTargets(tag: string): Promise<Array<anModel.AnTarget>> {

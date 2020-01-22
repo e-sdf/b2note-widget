@@ -1,4 +1,6 @@
+import axios from "axios";
 import { endpointUrl } from "../api/server";
+import { authHeader } from "./utils";
 import { User } from "../core/profile";
 
 export function login(): Promise<User> {
@@ -17,4 +19,8 @@ export function login(): Promise<User> {
     }
     window.addEventListener("message", receiveMessage, false);
   });
+}
+
+export function logout(user: User): Promise<any> {
+  return axios.get(endpointUrl + "/logout", authHeader(user.accessToken));
 }

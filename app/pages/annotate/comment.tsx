@@ -3,6 +3,7 @@ import { FaPlus } from "react-icons/fa";
 import { Context } from "../../components/context";
 import { showAlertSuccess, showAlertWarning, showAlertError } from "../../components/ui"; 
 import * as api from "../../api/annotations";
+import { CommentIcon } from "../../components/icons";
 
 export interface CommentProps {
   context: Context;
@@ -28,13 +29,15 @@ export function Comment(props: CommentProps): React.FunctionComponentElement<Com
   }
 
   return (
-    <div className="d-flex flex-row" style={{margin: "10px"}}>
+    <div className="d-flex flex-row align-items-center" style={{margin: "10px"}}>
+      <CommentIcon className="mr-1"/>
       <textarea className="form-control"
         value={comment}
         onChange={ev => setComment(ev.target?.value || "")} 
       />
       <button type="button" className="btn btn-primary"
-        disabled={comment.length === 0}
+        data-toggle="tooltip" data-placement="bottom" title={props.context.user ? "" : "Not logged in"}
+        disabled={comment.length === 0 || !props.context.user}
         onClick={annotate}
       ><FaPlus/></button>
     </div>

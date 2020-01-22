@@ -30,6 +30,7 @@ interface Props {
 }
 
 interface TagEditorProps {
+  context: Context;
   anRecord: anModel.AnRecord;
   doneHandler(): void;
 }
@@ -51,7 +52,7 @@ function TagEditor(props: TagEditorProps): React.FunctionComponentElement<TagEdi
      : anModel.isKeyword(props.anRecord) ?
        anModel.mkKeywordAnBody(label)
      : anModel.mkCommentAnBody(label);
-    api.patchAnnotationBody(props.anRecord.id, body)
+    api.patchAnnotationBody(props.anRecord.id, body, props.context)
     .then(() => {
       showAlertSuccess(alertId, "Annotation updated");
       props.doneHandler();
@@ -193,7 +194,7 @@ export function Annotations(props: Props): React.FunctionComponentElement<Props>
           style={{marginLeft: "5px", marginRight: "5px"}}
           onClick={() => {
             if (pendingDeleteId) {
-              api.deleteAnnotation(pendingDeleteId).then(
+              api.deleteAnnotation(pendingDeleteId, props.context).then(
                 () => {
                   if (loaderRef.current) { loaderRef.current.loadAnnotations(); }
                 },
@@ -254,7 +255,7 @@ export function Annotations(props: Props): React.FunctionComponentElement<Props>
     return (
       <React.Fragment key={anRecord.id}>
         {anRecord.id === editedRecordId ?
-          <TagEditor anRecord={anRecord} doneHandler={reload}/>
+          <TagEditor context={props.context} anRecord={anRecord} doneHandler={reload}/>
         : renderNormalRow()
         }
       </React.Fragment>
