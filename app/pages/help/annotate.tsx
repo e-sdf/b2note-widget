@@ -1,16 +1,37 @@
 import * as React from "react";
+import { SectionProps } from "./defs";
+import * as icons from "../../components/icons";
 
-interface AnnotateHelpProps {
-  header: string;
-}
+export function AnnotateSection(props: SectionProps): React.FunctionComponentElement<SectionProps> {
 
-export function AnnotateHelp(props: AnnotateHelpProps): React.FunctionComponentElement<AnnotateHelpProps> {
   return (
     <>
       <h2>{props.header}</h2>
       <p>
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam pharetra volutpat leo, quis posuere ex tempus et. Nam volutpat mauris nec quam vulputate, ut posuere nunc lacinia. Aliquam vulputate non mi suscipit elementum. Nam suscipit turpis non tellus viverra faucibus. Suspendisse enim ligula, rhoncus quis odio in, elementum gravida massa. Nullam eu enim porta, hendrerit orci sed, rhoncus nibh. Nullam commodo cursus sollicitudin. Nam nisl lectus, pellentesque nec ante id, tincidunt dapibus justo. Vestibulum et orci vel tortor convallis laoreet vestibulum at nibh. Quisque interdum lectus ipsum, vel gravida metus ornare ut. Praesent ac turpis luctus dolor sagittis consequat. Duis commodo massa et magna volutpat finibus. Suspendisse laoreet metus tincidunt ornare tristique. Nunc sit amet velit aliquet, tempus erat ut, vestibulum nisl. Suspendisse venenatis mollis nulla.
+        The main panel is divided into 3 tabs. Each tab contains a simple form for creating an annotation of one of the 3 types defined in B2NOTE:
       </p>
+      <table className="table">
+        <tbody>
+          <tr>
+            <th>Semantic tag:</th>
+            <td>
+              Create an annotation that uses a term defined in a controlled vocabulary as a tag. Semantic tags are distinguished in B2NOTE by symbol <icons.SemanticIcon/>.
+            </td>
+          </tr>
+          <tr>
+            <th>Free-text keyword:</th>
+            <td>
+              Create an annotation that uses your own keyword as a plain-text tag. Keyword tags are distinguished in B2NOTE by symbol <icons.KeywordIcon/>.
+            </td>
+          </tr>
+          <tr>
+            <th>Comment:</th>
+            <td>
+              Create an annotation containing a longer piece of text. Comments are distinguished in B2NOTE by symbol <icons.CommentIcon/>.
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </>
   );
 }

@@ -1,10 +1,7 @@
 import * as React from "react";
+import { SectionProps } from "./defs";
 
-interface SearchHelpProps {
-  header: string;
-}
-
-export function SearchHelp(props: SearchHelpProps): React.FunctionComponentElement<SearchHelpProps> {
+export function SearchSection(props: SectionProps): React.FunctionComponentElement<SectionProps> {
   return (
     <>
       <h2>{props.header}</h2>

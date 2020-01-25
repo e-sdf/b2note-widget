@@ -1,23 +1,17 @@
 import { matchSwitch } from '@babakness/exhaustive-type-checking';
 import * as React from "react";
 import * as ReactDOM from "react-dom";
-import * as icons from "react-icons/fa";
+import * as icons from "../components/icons";
 import { Page } from "../pages/pages";
 import { render as annotateRender } from "../pages/annotate/view";
 import { render as annotationsRender } from "../pages/annotations/view";
 import { render as searchRender } from "../pages/search/view";
-import { HelpSection, render as helpRender } from "../pages/help/view";
+import { render as helpRender } from "../pages/help/view";
 import { render as profileRender } from "../pages/profile/view";
+import { HelpSection } from "../pages/help/defs";
 import { Context, isUserLogged } from "../components/context";
 import * as auth from "../api/auth";
 import { shorten } from "../utils";
-
-const AnnotateIcon = icons.FaEdit;
-const AnnotationsIcon = icons.FaList;
-const SearchIcon = icons.FaSearch;
-const HelpIcon = icons.FaQuestionCircle;
-const LoginIcon = icons.FaSignInAlt;
-const UserIcon = icons.FaUser;
 
 function pageToHelp(page: Page): HelpSection {
   return matchSwitch(page, {
@@ -40,7 +34,7 @@ interface Props {
 function Navbar(props: Props): React.FunctionComponentElement<Context> {
   const [page, setPage] = React.useState(Page.ANNOTATE);
   const [helpPage, setHelpPage] = React.useState(Page.ANNOTATE);
-  const [context, setContext] = React.useState(props.context);
+  const [context, setContext] = React.useState({ ...props.context, user: auth.retrieveUser() });
 
   const activeFlag = (p: Page): string => p === page ? " active" : "";
 
@@ -91,15 +85,22 @@ function Navbar(props: Props): React.FunctionComponentElement<Context> {
 
   React.useEffect(() => switchPage(page));
 
+  function endSession(): void {
+    if (context.user) {
+      auth.logout(context.user);
+      setContext({ target: context.target, user: null });
+    }
+  }
+
   return (
-    <nav className="navbar navbar-expand navbar-dark">
+    <nav className="navbar navbar-expand navbar-dark pr-0">
       <ul className="navbar-nav" style={{width: "100%"}}>
         <li className="nav-item">
           <a
             className={"nav-link" + activeFlag(Page.ANNOTATE)} href="#" 
             data-toggle="tooltip" data-placement="bottom" title="Annotate"
             onClick={() => selectPage(Page.ANNOTATE)}
-            ><AnnotateIcon/>
+            ><icons.AnnotateIcon/>
           </a>
         </li>
         <li className="nav-item">
@@ -107,7 +108,7 @@ function Navbar(props: Props): React.FunctionComponentElement<Context> {
             className={"nav-link" + activeFlag(Page.ANNOTATIONS)} href="#" 
             data-toggle="tooltip" data-placement="bottom" title="Annotations"
             onClick={() => selectPage(Page.ANNOTATIONS)}
-            ><AnnotationsIcon/>
+            ><icons.AnnotationsIcon/>
           </a>
         </li>
         <li className="nav-item">
@@ -115,14 +116,14 @@ function Navbar(props: Props): React.FunctionComponentElement<Context> {
             className={"nav-link" + activeFlag(Page.SEARCH)} href="#" 
             data-toggle="tooltip" data-placement="bottom" title="Search"
             onClick={() => selectPage(Page.SEARCH)}
-            ><SearchIcon/>
+            ><icons.SearchIcon/>
           </a>
         </li>
         <li className="nav-item">
           <a className="nav-link" href="#"data-toggle="tooltip" 
              data-placement="bottom" title="Context Help"
             onClick={() => selectPage(Page.HELP)}
-          ><HelpIcon/></a>
+          ><icons.HelpIcon/></a>
         </li>
         <li className="nav-item ml-auto">
           <a
@@ -130,11 +131,21 @@ function Navbar(props: Props): React.FunctionComponentElement<Context> {
             data-toggle="tooltip" data-placement="bottom" title={context.user ? "Profile" : "Login"}
             onClick={() => selectPage(Page.PROFILE)}>
             {context.user ? 
-              <span><UserIcon/> {shorten(context.user.name, 15)}</span>
-              : <LoginIcon/>
+              <span><icons.UserIcon/> {shorten(context.user.name, 15)}</span>
+              : <icons.LoginIcon/>
             }
           </a>
         </li>
+        {context.user ? 
+          <li className="nav-item">
+            <a className="nav-link" style={{paddingLeft: 0}}
+              href="#"data-toggle="tooltip" 
+              data-placement="bottom" title="Logout"
+              onClick={endSession}
+            ><icons.LogoutIcon/></a>
+          </li>
+        : <></>
+        }
       </ul>
     </nav>
   );

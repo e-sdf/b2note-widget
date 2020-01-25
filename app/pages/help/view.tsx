@@ -1,34 +1,33 @@
 import _ from "lodash";
+import { matchSwitch } from "@babakness/exhaustive-type-checking";
 import { $enum } from "ts-enum-util";
 import * as React from "react";
 import * as ReactDOM from "react-dom";
-import { matchSwitch } from "@babakness/exhaustive-type-checking";
-import { AnnotateHelp } from "./annotate";
-import { AnnotationsHelp } from "./annotations";
-import { SearchHelp } from "./search";
-import { ProfileHelp } from "./profile";
-
-export enum HelpSection {
-  ANNOTATE = "annotate",
-  ANNOTATIONS = "annotations",
-  SEARCH = "search",
-  PROFILE = "profile",
-  TOC = "toc"
-}
-
-export function header(section: HelpSection): string {
-  return matchSwitch(section, {
-    [HelpSection.ANNOTATE]: () => "Annotating",
-    [HelpSection.ANNOTATIONS]: () => "List of Annotations",
-    [HelpSection.SEARCH]: () => "Searching Annotations",
-    [HelpSection.PROFILE]: () => "User Profile",
-    [HelpSection.TOC]: () => "Table of Contents"
-  });
-}
+import { HelpSection } from "./defs";
+import { AboutSection } from "./about";
+import { MenuSection } from "./menu";
+import { AnnotateSection } from "./annotate";
+import { AnnotationsSection } from "./annotations";
+import { SearchSection } from "./search";
+import { ProfileSection } from "./profile";
+import { SupportSection } from "./support";
 
 interface ToCProps {
   sectionHandle(section: HelpSection): void;
   header: string;
+}
+
+export function header(section: HelpSection): string {
+  return matchSwitch(section, {
+    [HelpSection.ABOUT]: () => "About B2NOTE",
+    [HelpSection.MENU]: () => "The Main Menu",
+    [HelpSection.ANNOTATE]: () => "Annotating",
+    [HelpSection.ANNOTATIONS]: () => "List of Annotations",
+    [HelpSection.SEARCH]: () => "Searching Annotations",
+    [HelpSection.PROFILE]: () => "User Profile",
+    [HelpSection.SUPPORT]: () => "Support",
+    [HelpSection.TOC]: () => "Table of Contents"
+  });
 }
 
 export function ToC(props: ToCProps): React.FunctionComponentElement<ToCProps> {
@@ -57,13 +56,18 @@ interface HelpPageProps {
 
 export function HelpPage(props: HelpPageProps): React.FunctionComponentElement<HelpPageProps> {
   const [section, setSection] = React.useState(props.section);
+  const sectionRef = React.useRef(null);
 
-  function renderSection(section: HelpSection): React.ReactElement {
+  function renderSection(): React.ReactElement {
+    if (sectionRef.current) { (sectionRef.current as any).scrollTop = 0; }
     return matchSwitch(section, {
-      [HelpSection.ANNOTATE]: () => <AnnotateHelp header={header(HelpSection.ANNOTATE)}/>,
-      [HelpSection.ANNOTATIONS]: () => <AnnotationsHelp header={header(HelpSection.ANNOTATIONS)}/>,
-      [HelpSection.SEARCH]: () => <SearchHelp header={header(HelpSection.SEARCH)}/>,
-      [HelpSection.PROFILE]: () => <ProfileHelp header={header(HelpSection.PROFILE)}/>,
+      [HelpSection.ABOUT]: () => <AboutSection header={header(HelpSection.ABOUT)} redirectFn={setSection}/>,
+      [HelpSection.MENU]: () => <MenuSection header={header(HelpSection.MENU)} redirectFn={setSection}/>,
+      [HelpSection.ANNOTATE]: () => <AnnotateSection header={header(HelpSection.ANNOTATE)} redirectFn={setSection}/>,
+      [HelpSection.ANNOTATIONS]: () => <AnnotationsSection header={header(HelpSection.ANNOTATIONS)} redirectFn={setSection}/>,
+      [HelpSection.SEARCH]: () => <SearchSection header={header(HelpSection.SEARCH)} redirectFn={setSection}/>,
+      [HelpSection.PROFILE]: () => <ProfileSection header={header(HelpSection.PROFILE)} redirectFn={setSection}/>,
+      [HelpSection.SUPPORT]: () => <SupportSection header={header(HelpSection.SUPPORT)} redirectFn={setSection}/>,
       [HelpSection.TOC]: () => <ToC sectionHandle={setSection} header={header(HelpSection.TOC)}/>
     });
   }
@@ -82,8 +86,8 @@ export function HelpPage(props: HelpPageProps): React.FunctionComponentElement<H
     <div className="container-fluid">
       {section === HelpSection.TOC ? <></> : renderTocLink()}
       <div className="row">
-        <div className="col-sm" style={{height: "422px", overflow: "auto"}}>
-          {renderSection(section)}
+        <div ref={sectionRef} className="col-sm" style={{height: "422px", overflow: "auto"}}>
+          {renderSection()}
         </div>
       </div>
     </div>

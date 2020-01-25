@@ -1,10 +1,7 @@
 import * as React from "react";
+import { SectionProps } from "./defs";
 
-interface AnnotationsHelpProps {
-  header: string;
-}
-
-export function AnnotationsHelp(props: AnnotationsHelpProps): React.FunctionComponentElement<AnnotationsHelpProps> {
+export function AnnotationsSection(props: SectionProps): React.FunctionComponentElement<SectionProps> {
   return (
     <>
       <h2>{props.header}</h2>

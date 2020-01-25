@@ -11,11 +11,39 @@ interface ProfileProps {
 
 export function ProfilePage(props: ProfileProps): React.FunctionComponentElement<ProfileProps> {
   return (
-    <div>
-      <button type="button" className="btn btn-primary"
-        onClick={() => props.logoutFn()}>
-        Logout
-      </button>
+    <div className="container-fluid mt-2" style={{height: "450px", overflow: "auto"}}>
+      <form>
+        <div className="form-group">
+          <label>Name</label>
+          <input type="text" className="form-control"/>
+        </div>
+        <div className="form-group">
+          <label>E-mail</label>
+          <input type="email" className="form-control"/>
+        </div>
+        <div className="form-group">
+          <label>Organisation</label>
+          <input type="text" className="form-control"/>
+        </div>
+        <div className="form-group">
+          <label>Job Title</label>
+          <input type="text" className="form-control"/>
+        </div>
+        <div className="form-group">
+          <label>Country</label>
+          <input type="text" className="form-control"/>
+        </div>
+        <div className="form-group">
+          <label>Annotator Experience</label>
+          <input type="text" className="form-control"/>
+        </div>
+      </form>
+      <div className="row">
+        <button type="button" className="btn btn-primary"
+          onClick={() => props.logoutFn()}>
+          Logout
+        </button>
+      </div>
     </div>
   );
 }
