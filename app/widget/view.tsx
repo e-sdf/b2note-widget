@@ -49,13 +49,13 @@ function Navbar(props: Props): React.FunctionComponentElement<Context> {
 
   async function profileLoggedRenderPm(): Promise<RenderFn> {
     if (isUserLogged(context)) {
-      return Promise.resolve(() => profileRender(context, logout));
+      return Promise.resolve(() => profileRender(context));
     } else {
       const user = await auth.login();
       console.log(user);
       const newContext = { ...context, user };
       setContext(newContext);
-      return Promise.resolve(() => profileRender(newContext, logout));
+      return Promise.resolve(() => profileRender(newContext));
     }
   }
 

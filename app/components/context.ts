@@ -1,8 +1,8 @@
-import { User } from "../core/profile";
+import { UserProfile } from "../core/profile";
 import { Target } from "../core/annotationsModel";
 
 export interface Context {
-  user: User|null;
+  user: UserProfile|null;
   target: Target;
 }
 

@@ -4,7 +4,7 @@ import { Context } from "../components/context";
 import * as anModel from "../core/annotationsModel";
 import * as sModel from "../core/searchModel";
 import * as searchQueryParser from "../core/searchQueryParser";
-import { authHeader } from "./utils";
+import { makeLocalUrl, authHeader } from "./utils";
 
 const annotationsUrl = endpointUrl + anModel.annotationsUrl;
 const targetsUrl = endpointUrl + anModel.targetsUrl;
@@ -137,10 +137,6 @@ export function getAnnotationsRDF(context: Context, f: Filters): Promise<string>
     },
     error => reject(error));
   });
-}
-
-function makeLocalUrl(url: string): string {
-  return url.replace("https://b2note.bsc.es", "http://localhost:3050");
 }
 
 export function patchAnnotationBody(anIdUrl: string, body: anModel.AnBody, context: Context): Promise<any> {
