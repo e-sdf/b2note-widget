@@ -1,6 +1,6 @@
 import * as React from "react";
 import { FaPlus } from "react-icons/fa";
-import { Context } from "../../components/context";
+import { Context } from "../../context";
 import { showAlertSuccess, showAlertWarning, showAlertError } from "../../components/ui"; 
 import * as oreg from "../../core/ontologyRegister";
 import * as api from "../../api/annotations";

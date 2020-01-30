@@ -7,7 +7,7 @@ import * as ReactDOM from "react-dom";
 import * as icons from "react-icons/fa";
 import * as anModel from "../../core/annotationsModel";
 import * as api from "../../api/annotations";
-import { Context } from "../../components/context";
+import { Context } from "../../context";
 import { showAlertSuccess, showAlertWarning, showAlertError } from "../../components/ui"; 
 import { LoaderFilter, AnItem } from "./loader";
 import AnnotationTag from "../../components/annotationTag";

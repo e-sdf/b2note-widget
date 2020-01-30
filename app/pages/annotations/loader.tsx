@@ -2,7 +2,7 @@ import * as React from "react";
 import * as icons from "react-icons/fa";
 import * as anModel from "../../core/annotationsModel";
 import * as api from "../../api/annotations";
-import { Context } from "../../components/context";
+import { Context } from "../../context";
 import { showAlertError } from "../../components/ui"; 
 import { DownloadIcon } from "../../components/icons";
 import { downloadJSON, downloadRDF } from "../../components/download";
@@ -81,7 +81,7 @@ export const LoaderFilter = React.forwardRef((props: LoaderProps, ref: React.Ref
           setNoOfComment(anl.filter(anModel.isComment).length);
         });
       },
-      error => { console.log(error); showAlertError(alertId, "Failed getting annotations"); }
+      error => { showAlertError(alertId, "Failed getting annotations"); }
     );
   }
 

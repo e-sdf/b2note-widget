@@ -1,11 +1,11 @@
 import axios from "axios";
 import { endpointUrl } from "../api/server";
 import { authHeader } from "./utils";
-import { UserProfile } from "../core/profile";
+import { User } from "../core/user";
 
 const storageKey = "user";
 
-function storeUser(user: UserProfile): void {
+function storeUser(user: User): void {
   if (typeof(Storage) !== "undefined") {
     window.localStorage.setItem(storageKey, JSON.stringify(user));
   }
@@ -15,19 +15,19 @@ function deleteUser(): void {
   window.localStorage.removeItem(storageKey);
 }
 
-export function retrieveUser(): UserProfile|null {
+export function retrieveUser(): User|null {
   const userStr = window.localStorage.getItem(storageKey);
   if (!userStr) {
     return null;
   } else {
     try {
-      const user: UserProfile = JSON.parse(userStr);
+      const user: User = JSON.parse(userStr);
       return user;
     } catch(err) { return null; }
   }
 }
 
-export function login(): Promise<UserProfile> {
+export function login(): Promise<User> {
   return new Promise((resolve, reject) => {
     let popup: Window|null = null;
 
@@ -36,7 +36,7 @@ export function login(): Promise<UserProfile> {
         popup?.close();
         window.removeEventListener("message", receiveMessage);
         try {
-          const user = JSON.parse(event.data) as UserProfile;
+          const user = JSON.parse(event.data) as User;
           storeUser(user);
           resolve(user);
         } catch (err) { reject("Error parsing user object: " + err); }
@@ -53,7 +53,14 @@ export function login(): Promise<UserProfile> {
   });
 }
 
-export function logout(user: UserProfile): Promise<any> {
-  deleteUser();
-  return axios.get(endpointUrl + "/logout", authHeader(user.accessToken));
+export function logout(): Promise<any> {
+  return new Promise((resolve, reject) => {
+    const mbUser = retrieveUser();
+    if (mbUser) {
+      deleteUser();
+      resolve(axios.get(endpointUrl + "/logout", authHeader(mbUser.accessToken)));
+    } else {
+      reject("Not logged in");
+    }
+  });
 }

@@ -1,15 +1,24 @@
 import axios from "axios";
 import { endpointUrl } from "./server";
-import { Context } from "../components/context";
-import * as profile from "../core/profile";
+import { User, UserProfile, profileUrl } from "../core/user";
 import { authHeader } from "./utils";
 
-const profileUrl = endpointUrl + profile.profileUrl;
+const url = endpointUrl + profileUrl;
 
-export function patchUserProfile(changes: Record<keyof profile.UserProfile, string>, context: Context): Promise<any> {
-  if (context.user) {
-    return axios.patch(profileUrl, { ...changes }, authHeader(context.user.accessToken));
-  } else {
-    return Promise.reject("Token not present");
-  }
+export function getUserProfile(user: User): Promise<UserProfile> {
+  return new Promise((resolve, reject) => {
+    axios.get(url, authHeader(user.accessToken)).then(
+      res => resolve(res.data as UserProfile),
+      err => reject(err)
+    );
+  });
+}
+
+export function patchUserProfile(changes: Record<string, any>, user: User): Promise<UserProfile> {
+  return new Promise((resolve, reject) => {
+    axios.patch(url, { ...changes }, authHeader(user.accessToken)).then(
+      res => resolve(res.data as UserProfile),
+      err => reject(err)
+    ).catch(err => reject(err));
+  });
 }

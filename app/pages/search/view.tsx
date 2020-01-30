@@ -1,7 +1,7 @@
 import _ from "lodash";
 import * as React from "react";
 import * as ReactDOM from "react-dom";
-import { Context } from "../../components/context";
+import { Context } from "../../context";
 import { Tabs, Tab } from "../../components/ui";
 import * as anModel from "../../core/annotationsModel";
 import { BasicSearch } from "./basicSearch";

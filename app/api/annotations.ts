@@ -1,6 +1,6 @@
 import axios from "axios";
 import { endpointUrl } from "./server";
-import { Context } from "../components/context";
+import { Context } from "../context";
 import * as anModel from "../core/annotationsModel";
 import * as sModel from "../core/searchModel";
 import * as searchQueryParser from "../core/searchQueryParser";
@@ -9,20 +9,6 @@ import { makeLocalUrl, authHeader } from "./utils";
 const annotationsUrl = endpointUrl + anModel.annotationsUrl;
 const targetsUrl = endpointUrl + anModel.targetsUrl;
 const searchUrl = endpointUrl + sModel.searchUrl;
-
-function mkTarget(context: Context): anModel.AnTarget {
-  return anModel.mkTarget({
-      id: context.target.pid, 
-      source: context.target.source
-  });
-}
-
-function mkCreator(context: Context): anModel.AnCreator {
-  return anModel.mkCreator({
-      id: context.user?.id || "", 
-      nickname: context.user?.name || ""
-    });
-}
 
 function postAnnotation(anRecord: anModel.AnRecord, token: string|undefined): Promise<any> {
   if (token) {
@@ -34,10 +20,8 @@ function postAnnotation(anRecord: anModel.AnRecord, token: string|undefined): Pr
 
 export function postAnnotationSemantic(uris: string[], label: string, context: Context): Promise<any> {
   const body = anModel.mkSemanticAnBody(uris, label);
-  const target = mkTarget(context);
-  const creator = mkCreator(context);
   const generator = anModel.mkGenerator();
-  const req = anModel.mkAnRecord(body, target, creator, generator, anModel.PurposeType.TAGGING);
+  const req = anModel.mkAnRecord(body, context.target, context.user, generator, anModel.PurposeType.TAGGING);
   return postAnnotation(req, context.user?.accessToken);
 }
 

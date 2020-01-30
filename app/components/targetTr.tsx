@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Context } from "./context";
+import { Context } from "../context";
 import * as anModel from "../core/annotationsModel";
 import { shorten } from "../utils";
 import * as icons from "react-icons/fa";

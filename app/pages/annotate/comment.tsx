@@ -1,6 +1,6 @@
 import * as React from "react";
 import { FaPlus } from "react-icons/fa";
-import { Context } from "../../components/context";
+import { Context } from "../../context";
 import { showAlertSuccess, showAlertWarning, showAlertError } from "../../components/ui"; 
 import * as api from "../../api/annotations";
 import { CommentIcon } from "../../components/icons";
@@ -14,7 +14,7 @@ export function Comment(props: CommentProps): React.FunctionComponentElement<Com
   const [comment, setComment] = React.useState("");
 
   function annotate(): void {
-    api.postAnnotationComment(comment, props.context)
+    api.postAnnotationComment(comment, props.context.user)
     .then(() => {
       showAlertSuccess(props.alertId, "Comment created");
       setComment("");

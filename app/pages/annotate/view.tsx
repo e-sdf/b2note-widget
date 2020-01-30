@@ -1,7 +1,7 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 import { Tabs, Tab } from "../../components/ui";
-import { Context } from "../../components/context";
+import { Context } from "../../context";
 import { Semantic } from "./semantic";
 import { Keyword } from "./keyword";
 import { Comment } from "./comment";

@@ -46,6 +46,7 @@ export function showAlertSuccess(domId: string, message: React.ReactNode): void 
 }
 
 export function showAlertWarning(domId: string, message: React.ReactNode): void {
+  console.warn(message);
   const dom = document.getElementById(domId);
   if (dom) {
     ReactDOM.unmountComponentAtNode(dom);
@@ -56,6 +57,7 @@ export function showAlertWarning(domId: string, message: React.ReactNode): void 
 }
 
 export function showAlertError(domId: string, message: React.ReactNode): void {
+  console.error(message);
   const dom = document.getElementById(domId);
   if (dom) {
     ReactDOM.unmountComponentAtNode(dom);

@@ -59,7 +59,10 @@ export function HelpPage(props: HelpPageProps): React.FunctionComponentElement<H
   const sectionRef = React.useRef(null);
 
   function renderSection(): React.ReactElement {
-    if (sectionRef.current) { (sectionRef.current as any).scrollTop = 0; }
+    if (sectionRef.current) {
+      const sectionDOM = (sectionRef.current as unknown) as Element;
+      sectionDOM.scrollTop = 0;
+    }
     return matchSwitch(section, {
       [HelpSection.ABOUT]: () => <AboutSection header={header(HelpSection.ABOUT)} redirectFn={setSection}/>,
       [HelpSection.MENU]: () => <MenuSection header={header(HelpSection.MENU)} redirectFn={setSection}/>,

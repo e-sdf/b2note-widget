@@ -2,6 +2,7 @@ import { matchSwitch } from '@babakness/exhaustive-type-checking';
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 import * as icons from "../components/icons";
+import { User } from "../core/user";
 import { Page } from "../pages/pages";
 import { render as annotateRender } from "../pages/annotate/view";
 import { render as annotationsRender } from "../pages/annotations/view";
@@ -9,7 +10,7 @@ import { render as searchRender } from "../pages/search/view";
 import { render as helpRender } from "../pages/help/view";
 import { render as profileRender } from "../pages/profile/view";
 import { HelpSection } from "../pages/help/defs";
-import { Context, isUserLogged } from "../components/context";
+import { Context, isUserLogged } from "../context";
 import * as auth from "../api/auth";
 import { shorten } from "../utils";
 
@@ -40,22 +41,28 @@ function Navbar(props: Props): React.FunctionComponentElement<Context> {
 
   function logout(): void {
     if (context.user) {
-      auth.logout(context.user).then(() => {
+      auth.logout()
+      .then(() => {
         selectPage(Page.ANNOTATE);
         setContext({ ...context, user: null });
       })
+      .catch(err => console.error(err));
     }
+  }
+
+  function setUser(user: User): void {
+    setContext({ ...context, user: user });
   }
 
   async function profileLoggedRenderPm(): Promise<RenderFn> {
     if (isUserLogged(context)) {
-      return Promise.resolve(() => profileRender(context));
+      return Promise.resolve(() => profileRender(context, setUser));
     } else {
       const user = await auth.login();
       console.log(user);
       const newContext = { ...context, user };
       setContext(newContext);
-      return Promise.resolve(() => profileRender(newContext));
+      return Promise.resolve(() => profileRender(newContext, setUser));
     }
   }
 
@@ -87,8 +94,7 @@ function Navbar(props: Props): React.FunctionComponentElement<Context> {
 
   function endSession(): void {
     if (context.user) {
-      auth.logout(context.user);
-      setContext({ target: context.target, user: null });
+      logout();
     }
   }
 
