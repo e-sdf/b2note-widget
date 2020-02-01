@@ -14,18 +14,15 @@ export function Comment(props: CommentProps): React.FunctionComponentElement<Com
   const [comment, setComment] = React.useState("");
 
   function annotate(): void {
-    api.postAnnotationComment(comment, props.context.user)
-    .then(() => {
-      showAlertSuccess(props.alertId, "Comment created");
-      setComment("");
-    })
-      .catch(error => {
-        if (error.response.data?.message) {
-          showAlertWarning(props.alertId, error.response.data.message);
-        } else {
-          showAlertError(props.alertId, "Failed: server error");
-        }
-      });
+    api.postAnnotationComment(comment, props.context).then(
+      () => {
+        showAlertSuccess(props.alertId, "Comment created");
+        setComment("");
+      },
+      (err) => {
+        showAlertError(props.alertId, err);
+      }
+    );
   }
 
   return (

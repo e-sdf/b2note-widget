@@ -52,18 +52,15 @@ function TagEditor(props: TagEditorProps): React.FunctionComponentElement<TagEdi
      : anModel.isKeyword(props.anRecord) ?
        anModel.mkKeywordAnBody(label)
      : anModel.mkCommentAnBody(label);
-    api.patchAnnotationBody(props.anRecord.id, body, props.context)
-    .then(() => {
-      showAlertSuccess(alertId, "Annotation updated");
-      props.doneHandler();
-    })
-    .catch(error => {
-      if (error.response.data && error.response.data.message) {
-        showAlertWarning(alertId, error.response.data.message);
-      } else {
-        showAlertError(alertId, "Failed: server error");
+    api.patchAnnotationBody(props.anRecord.id, body, props.context).then(
+      () => {
+        showAlertSuccess(alertId, "Annotation updated");
+        props.doneHandler();
+      },
+      (err) => {
+        showAlertError(alertId, err);
       }
-    });
+    );
   }
 
   React.useEffect(() => {
@@ -198,9 +195,10 @@ export function Annotations(props: Props): React.FunctionComponentElement<Props>
                 () => {
                   if (loaderRef.current) { loaderRef.current.loadAnnotations(); }
                 },
-                error => { console.log(error); showAlertError(alertId, "Deleting failed"); }
+                (err) => {
+                  showAlertError(alertId, err);
+                }
               );
-              setPendingDeleteId(null);
             }
           }}>
           Yes

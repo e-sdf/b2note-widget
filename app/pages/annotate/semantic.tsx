@@ -48,21 +48,16 @@ export function Semantic(props: SemanticProps): React.FunctionComponentElement<S
   }
 
   function postAnnotationAsKeyword(): void {
-    api.postAnnotationKeyword(label, props.context)
-      .then(() => {
+    api.postAnnotationKeyword(label, props.context).then(
+      () => {
         showAlertSuccess(props.alertId, "Keyword annotation created");
         setLabel("");
-      })
-      .catch((error: any) => {
-        console.error(error);
-        if (error?.response?.data?.message) {
-          showAlertWarning(props.alertId, error.response.data.message);
-        } else {
-          showAlertError(props.alertId, "Failed: server error");
-        }
-      });
+      },
+      (err) => {
+        showAlertError(props.alertId, err);
+      }
+    );
   }
-
 
   function renderKeywordDialog(): React.ReactElement {
     return (

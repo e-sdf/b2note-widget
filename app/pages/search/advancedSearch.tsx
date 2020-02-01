@@ -19,6 +19,7 @@ export interface AdvancedSearchProps {
 }
 
 export function AdvancedSearch(props: AdvancedSearchProps): React.FunctionComponentElement<AdvancedSearchProps> {
+  const [searching, setSearching] = React.useState(false);
   const [queryStr, setQueryStr] = React.useState("");
   const [queryError, setQueryError] = React.useState(null as queryParser.ParseError|null);
   const [semanticTagsList, setSemanticTagsList] = React.useState([] as Array<string>);
@@ -47,20 +48,17 @@ export function AdvancedSearch(props: AdvancedSearchProps): React.FunctionCompon
 
   function submitQuery(): void {
     const query = fillIdentifiers(queryStr);
-    //console.log(query);
-    api.searchAnnotations({ expression: query })
-    .then((anl: Array<anModel.AnRecord>) => {
-      // console.log(anl);
-      props.resultsHandle(anl);
-    })
-    .catch((error: any) => {
-      console.error(error);
-      if (error?.response?.data?.message) {
-        showAlertWarning(alertId, error.response.data.message);
-      } else {
-        showAlertError(alertId, "Failed: server error");
+    setSearching(true);
+    api.searchAnnotations({ expression: query }).then(
+      (anl: Array<anModel.AnRecord>) => {
+        setSearching(false);
+        props.resultsHandle(anl);
+      },
+      (err) => {
+        setSearching(false);
+        showAlertError(alertId, err);
       }
-    });
+    );
   }
 
   function Help(): React.FunctionComponentElement<{}> {
@@ -104,6 +102,13 @@ export function AdvancedSearch(props: AdvancedSearchProps): React.FunctionCompon
           </button>
         </div>
       </form>
+      {searching ?
+        <div className="row">
+          <div className="col-sm">
+            <h3>Searching...</h3>
+          </div>
+        </div>
+      : <></>}
       <div id={alertId}></div>
     </div>
   );

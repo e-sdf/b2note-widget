@@ -9,7 +9,7 @@ import * as ac from "../../components/autocomplete/view";
 import { SearchType, BiOperatorType } from "../../core/searchModel";
 import * as queryParser from "../../core/searchQueryParser";
 import * as api from "../../api/annotations";
-import { showAlertWarning, showAlertError } from "../../components/ui"; 
+import { showAlertError } from "../../components/ui"; 
 
 const AddIcon = icons.FaPlus;
 const SearchIcon = icons.FaSearch;
@@ -170,6 +170,7 @@ export interface BasicSearchProps {
 enum SearchMode { ANY = "any", ALL = "all" }
 
 export function BasicSearch(props: BasicSearchProps): React.FunctionComponentElement<BasicSearchProps> {
+  const [searching, setSearching] = React.useState(false);
   const [terms, dispatch] = React.useReducer(reducer, [] as Array<TermItem>);
   const [nonEmptyTerms, setNonEmptyTerms] = React.useState([] as Array<TermItem>);
   const [mode, setMode] = React.useState(SearchMode.ANY);
@@ -213,19 +214,17 @@ export function BasicSearch(props: BasicSearchProps): React.FunctionComponentEle
     const operator = mode === SearchMode.ANY ? BiOperatorType.OR : BiOperatorType.AND;
     const query: SearchQuery = 
       nonEmptyTerms.length > 1 ? { expression: mkExpression(operator, nonEmptyTerms) } : { expression: mkValue(nonEmptyTerms[0]) };
-    api.searchAnnotations(query)
-    .then((anl: Array<AnRecord>) => {
-      // console.log(anl);
-      props.resultsHandle(anl);
-    })
-    .catch((error: any) => {
-      console.error(error);
-      if (error?.response?.data?.message) {
-        showAlertWarning(alertId, error.response.data.message);
-      } else {
-        showAlertError(alertId, "Failed: server error");
+    setSearching(true);
+    api.searchAnnotations(query).then(
+      (anl: Array<AnRecord>) => {
+        setSearching(false);
+        props.resultsHandle(anl);
+      },
+      (err) => {
+        setSearching(false);
+        showAlertError(alertId, err);
       }
-    });
+    );
   }
 
   function renderModeSelection(): React.ReactElement {
@@ -266,6 +265,13 @@ export function BasicSearch(props: BasicSearchProps): React.FunctionComponentEle
           </button>
         </div>
       </form>
+      {searching ?
+        <div className="row">
+          <div className="col-sm">
+            <h3>Searching...</h3>
+          </div>
+        </div>
+      : <></>}
       <div id={alertId}></div>
     </div>
   );

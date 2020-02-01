@@ -5,43 +5,13 @@ import * as anModel from "../core/annotationsModel";
 import * as sModel from "../core/searchModel";
 import * as searchQueryParser from "../core/searchQueryParser";
 import { makeLocalUrl, authHeader } from "./utils";
+import { axiosErrToMsg } from "../components/utils";
 
 const annotationsUrl = endpointUrl + anModel.annotationsUrl;
 const targetsUrl = endpointUrl + anModel.targetsUrl;
 const searchUrl = endpointUrl + sModel.searchUrl;
 
-function postAnnotation(anRecord: anModel.AnRecord, token: string|undefined): Promise<any> {
-  if (token) {
-    return axios.post(annotationsUrl, anRecord, authHeader(token));
-  } else {
-    return Promise.reject("Token not present");
-  }
-}
-
-export function postAnnotationSemantic(uris: string[], label: string, context: Context): Promise<any> {
-  const body = anModel.mkSemanticAnBody(uris, label);
-  const generator = anModel.mkGenerator();
-  const req = anModel.mkAnRecord(body, context.target, context.user, generator, anModel.PurposeType.TAGGING);
-  return postAnnotation(req, context.user?.accessToken);
-}
-
-export function postAnnotationKeyword(label: string, context: Context): Promise<any> {
-  const body = anModel.mkKeywordAnBody(label);
-  const target = mkTarget(context);
-  const creator = mkCreator(context);
-  const generator = anModel.mkGenerator();
-  const req = anModel.mkAnRecord(body, target, creator, generator, anModel.PurposeType.TAGGING);
-  return postAnnotation(req, context.user?.accessToken);
-}
-
-export function postAnnotationComment(comment: string, context: Context): Promise<any> {
-  const body = anModel.mkCommentAnBody(comment);
-  const target = mkTarget(context);
-  const creator = mkCreator(context);
-  const generator = anModel.mkGenerator();
-  const req = anModel.mkAnRecord(body, target, creator, generator, anModel.PurposeType.COMMENTING);
-  return postAnnotation(req, context.user?.accessToken);
-}
+// Getting annotations
 
 export interface Filters {
   allFiles: boolean;
@@ -95,75 +65,153 @@ function mkQuery(context: Context, f: Filters, format: anModel.Format, download:
 export function getAnnotationsJSON(context: Context, f: Filters, download = false): Promise<Array<anModel.AnRecord>> {
   const params = mkQuery(context, f, anModel.Format.JSONLD, download);
   return new Promise((resolve, reject) => {
-    axios.get(annotationsUrl, { params }).then(res => {
-      if(res.data) {
+    axios.get(annotationsUrl, { params })
+    .then(resp => {
+      if(resp.data) {
         const cleaned = !f.creator.mine ? 
-          res.data.filter((r: anModel.AnRecord) => r.creator.id !== (context.user?.id || ""))
-        : res.data;
+          resp.data.filter((r: anModel.AnRecord) => r.creator.id !== (context.user?.id || ""))
+        : resp.data;
         resolve(cleaned);
       } else {
         reject(new Error("Empty data"));
       }
-    },
-    error => reject(error));
+    })
+    .catch(error => reject(axiosErrToMsg(error)));
   });
 }
 
 export function getAnnotationsRDF(context: Context, f: Filters): Promise<string> {
   const params = mkQuery(context, f, anModel.Format.RDF, true);
   return new Promise((resolve, reject) => {
-    axios.get(annotationsUrl, { params }).then(res => {
-      if(res.data) {
-        resolve(res.data);
+    axios.get(annotationsUrl, { params })
+    .then(resp => {
+      if(resp.data) {
+        resolve(resp.data);
       } else {
         reject(new Error("Empty data"));
       }
-    },
-    error => reject(error));
+    })
+    .catch(error => reject(axiosErrToMsg(error)));
   });
 }
 
-export function patchAnnotationBody(anIdUrl: string, body: anModel.AnBody, context: Context): Promise<any> {
-  if (context.user) {
-    return axios.patch(makeLocalUrl(anIdUrl), { body }, authHeader(context.user.accessToken));
+// Creating annotations
+
+function mkTarget(target: anModel.Target): anModel.AnTarget {
+  return anModel.mkTarget({
+      id: target.pid, 
+      source: target.source
+  });
+}
+
+function mkCreator(context: Context): anModel.AnCreator {
+  const mbUser = context.user;
+  if (mbUser) {
+    return anModel.mkCreator(mbUser.id);
   } else {
-    return Promise.reject("Token not present");
+    throw new Error("User not logged");
   }
 }
 
-export function deleteAnnotation(anIdUrl: string, context: Context): Promise<any> {
-  if (context.user) {
-    return axios.delete(makeLocalUrl(anIdUrl), authHeader(context.user.accessToken));
-  } else {
-    return Promise.reject("Token not present");
-  }
+async function postAnnotation(anRecord: anModel.AnRecord, context: Context): Promise<any> {
+  return new Promise((resolve, reject) => {
+    const mbUser = context.user;
+    if (mbUser) {
+      axios.post(annotationsUrl, anRecord, authHeader(mbUser.accessToken))
+      .then(resp => resolve(resp.data))
+      .catch(error => reject(axiosErrToMsg(error)));
+    } else {
+      reject("User not logged");
+    }
+  });
 }
+
+export async function postAnnotationSemantic(uris: string[], label: string, context: Context): Promise<any> {
+  const body = anModel.mkSemanticAnBody(uris, label);
+  const target = mkTarget(context.target);
+  const generator = anModel.mkGenerator();
+  const creator = mkCreator(context);
+  const req = anModel.mkAnRecord(body, target, creator, generator, anModel.PurposeType.TAGGING);
+  return postAnnotation(req, context);
+}
+
+export async function postAnnotationKeyword(label: string, context: Context): Promise<any> {
+  const body = anModel.mkKeywordAnBody(label);
+  const target = mkTarget(context.target);
+  const creator = mkCreator(context);
+  const generator = anModel.mkGenerator();
+  const req = anModel.mkAnRecord(body, target, creator, generator, anModel.PurposeType.TAGGING);
+  return postAnnotation(req, context);
+}
+
+export async function postAnnotationComment(comment: string, context: Context): Promise<any> {
+  const body = anModel.mkCommentAnBody(comment);
+  const target = mkTarget(context.target);
+  const creator = mkCreator(context);
+  const generator = anModel.mkGenerator();
+  const req = anModel.mkAnRecord(body, target, creator, generator, anModel.PurposeType.COMMENTING);
+  return postAnnotation(req, context);
+}
+
+// Changing annotatations
+
+export function patchAnnotationBody(anIdUrl: string, body: anModel.AnBody, context: Context): Promise<any> {
+  return new Promise((resolve, reject) => {
+    if (context.user) {
+      axios.patch(makeLocalUrl(anIdUrl), { body }, authHeader(context.user.accessToken))
+      .then(resp => resolve(resp))
+      .catch(error => reject(axiosErrToMsg(error)));
+    } else {
+      reject("Token not present");
+    }
+  });
+}
+
+// Deleting annotations
+
+export function deleteAnnotation(anIdUrl: string, context: Context): Promise<any> {
+  return new Promise((resolve, reject) => {
+    if (context.user) {
+      axios.delete(makeLocalUrl(anIdUrl), authHeader(context.user.accessToken))
+        .then(resp => resolve(resp))
+        .catch(error => reject(axiosErrToMsg(error)));
+    } else {
+      reject("Token not present");
+    }
+  });
+}
+
+// Getting targets
 
 export function getTargets(tag: string): Promise<Array<anModel.AnTarget>> {
   return new Promise((resolve, reject) => {
-    axios.get(targetsUrl, { params: { tag } }).then(res => {
-      if(res.data) {
-        resolve(res.data);
+    axios.get(targetsUrl, { params: { tag } })
+    .then(resp => {
+      if(resp.data) {
+        resolve(resp.data);
       } else {
-        reject(new Error("Empty data"));
+        reject("Empty data");
       }
-    },
-    error => reject(error));
+    })
+    .catch(error => reject(axiosErrToMsg(error)));
   });
 }
 
+// Searching annotations
+
 export function searchAnnotations(query: anModel.SearchQuery): Promise<Array<anModel.AnRecord>> {
-  const res = searchQueryParser.parse(query.expression);
-  if (res.error) { throw new Error("Query expression parse error: " + res.error); }
   return new Promise((resolve, reject) => {
-    axios.get(searchUrl, { params: query }).then(res => {
+    const res = searchQueryParser.parse(query.expression);
+    if (res.error) { reject("Query expression parse error: " + res.error); }
+    axios.get(searchUrl, { params: query })
+    .then(res => {
       if(res.data) {
         resolve(res.data);
       } else {
         reject(new Error("Empty data"));
       }
-    },
-    error => reject(error));
+    })
+    .catch(error => reject(axiosErrToMsg(error)));
   });
 }
 

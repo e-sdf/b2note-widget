@@ -2,7 +2,8 @@ import { matchSwitch } from '@babakness/exhaustive-type-checking';
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 import * as icons from "../components/icons";
-import { User } from "../core/user";
+import { User, UserProfile } from "../core/user";
+import { getUserProfile } from "../api/profile";
 import { Page } from "../pages/pages";
 import { render as annotateRender } from "../pages/annotate/view";
 import { render as annotationsRender } from "../pages/annotations/view";
@@ -36,6 +37,13 @@ function Navbar(props: Props): React.FunctionComponentElement<Context> {
   const [page, setPage] = React.useState(Page.ANNOTATE);
   const [helpPage, setHelpPage] = React.useState(Page.ANNOTATE);
   const [context, setContext] = React.useState({ ...props.context, user: auth.retrieveUser() });
+  const [userProfile, setUserProfile] = React.useState(null as UserProfile|null);
+
+  React.useEffect(() => {
+    if (context.user) {
+      getUserProfile(context.user).then(p => setUserProfile(p));
+    }
+  }, [context]);
 
   const activeFlag = (p: Page): string => p === page ? " active" : "";
 
@@ -43,6 +51,7 @@ function Navbar(props: Props): React.FunctionComponentElement<Context> {
     if (context.user) {
       auth.logout()
       .then(() => {
+        setUserProfile(null);
         selectPage(Page.ANNOTATE);
         setContext({ ...context, user: null });
       })
@@ -50,19 +59,15 @@ function Navbar(props: Props): React.FunctionComponentElement<Context> {
     }
   }
 
-  function setUser(user: User): void {
-    setContext({ ...context, user: user });
-  }
-
   async function profileLoggedRenderPm(): Promise<RenderFn> {
-    if (isUserLogged(context)) {
-      return Promise.resolve(() => profileRender(context, setUser));
+    if (isUserLogged(context) && userProfile !== null) {
+      return Promise.resolve(() => profileRender(userProfile, setUserProfile));
     } else {
       const user = await auth.login();
-      console.log(user);
       const newContext = { ...context, user };
       setContext(newContext);
-      return Promise.resolve(() => profileRender(newContext, setUser));
+      const p = await getUserProfile(user);
+      return Promise.resolve(() => profileRender(p, setUserProfile));
     }
   }
 
@@ -90,13 +95,13 @@ function Navbar(props: Props): React.FunctionComponentElement<Context> {
     switchPage(p);
   }
 
-  React.useEffect(() => switchPage(page));
-
   function endSession(): void {
     if (context.user) {
       logout();
     }
   }
+
+  React.useEffect(() => switchPage(page), []);
 
   return (
     <nav className="navbar navbar-expand navbar-dark pr-0">
@@ -136,8 +141,8 @@ function Navbar(props: Props): React.FunctionComponentElement<Context> {
             className={"nav-link" + activeFlag(Page.PROFILE)} href="#" 
             data-toggle="tooltip" data-placement="bottom" title={context.user ? "Profile" : "Login"}
             onClick={() => selectPage(Page.PROFILE)}>
-            {context.user ? 
-              <span><icons.UserIcon/> {shorten(context.user.name, 15)}</span>
+            {userProfile ? 
+              <span><icons.UserIcon/> {shorten(userProfile.name, 15)}</span>
               : <icons.LoginIcon/>
             }
           </a>

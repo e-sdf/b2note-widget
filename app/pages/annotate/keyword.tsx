@@ -17,35 +17,27 @@ export function Keyword(props: KeywordProps): React.FunctionComponentElement<Key
   const [semanticFound, setSemanticFound] = React.useState(false);
 
   function postAnnotation(): void {
-    api.postAnnotationKeyword(label, props.context)
-      .then(() => {
+    api.postAnnotationKeyword(label, props.context).then(
+      () => {
         showAlertSuccess(props.alertId, "Keyword annotation created");
         setLabel("");
-      })
-      .catch((error: any) => {
-        console.error(error);
-        if (error?.response?.data?.message) {
-          showAlertWarning(props.alertId, error.response.data.message);
-        } else {
-          showAlertError(props.alertId, "Failed: server error");
-        }
-      });
+      },
+      (err) => {
+        showAlertError(props.alertId, err);
+      }
+    );
   }
 
   function postAnnotationAsSemantic(): void {
-    api.postAnnotationSemantic(uris, label, props.context)
-      .then(() => {
+    api.postAnnotationSemantic(uris, label, props.context).then(
+      () => {
         showAlertSuccess(props.alertId, "Semantic annotation created");
         setLabel("");
-      })
-      .catch((error: any) => {
-        console.error(error);
-        if (error?.response?.data?.message) {
-          showAlertWarning(props.alertId, error.response.data.message);
-        } else {
-          showAlertError(props.alertId, "Failed: server error");
-        }
-      });
+      },
+      (err) => {
+        showAlertError(props.alertId, err);
+      }
+    );
   }
 
   function annotate(): void {

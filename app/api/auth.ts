@@ -2,6 +2,7 @@ import axios from "axios";
 import { endpointUrl } from "../api/server";
 import { authHeader } from "./utils";
 import { User } from "../core/user";
+import { axiosErrToMsg } from "../components/utils";
 
 const storageKey = "user";
 
@@ -58,7 +59,9 @@ export function logout(): Promise<any> {
     const mbUser = retrieveUser();
     if (mbUser) {
       deleteUser();
-      resolve(axios.get(endpointUrl + "/logout", authHeader(mbUser.accessToken)));
+      axios.get(endpointUrl + "/logout", authHeader(mbUser.accessToken))
+      .then((resp) => resolve(resp))
+      .catch(error => reject(axiosErrToMsg(error)));
     } else {
       reject("Not logged in");
     }
