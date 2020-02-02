@@ -1,2 +1,2 @@
 # B2Note-ReactJS
-B2Note app rewrite to ReactJS
+B2Note v3 widget in ReactJS 
