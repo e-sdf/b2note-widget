@@ -144,7 +144,7 @@ export function Navbar(props: Props): React.FunctionComponentElement<Context> {
             {context.user ? 
               userProfile ?
                 <span><icons.UserIcon/> {shorten(userProfile.name, 15)}</span>
-                : <span style={{color: "red", fontStyle: "italic"}}>Failed getting profile</span>
+                : <span style={{fontStyle: "italic"}}>Retrieving profile...</span>
               : <icons.LoginIcon/>
             }
           </a>

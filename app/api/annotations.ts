@@ -4,7 +4,7 @@ import { Context } from "../context";
 import * as anModel from "../core/annotationsModel";
 import * as sModel from "../core/searchModel";
 import * as searchQueryParser from "../core/searchQueryParser";
-import { makeLocalUrl, authHeader } from "./utils";
+import { makeLocalUrl, authHeader, getHandleFromUrl } from "./utils";
 import { axiosErrToMsg } from "../components/utils";
 
 const annotationsUrl = endpointUrl + anModel.annotationsUrl;
@@ -215,7 +215,17 @@ export function searchAnnotations(query: anModel.SearchQuery): Promise<Array<anM
   });
 }
 
-// export function getSourceFilename(target: Target): Promise<string|null> {
-//   const handleURL = "http://hdl.handle.net/api/handles/; 
-// }
+export function resolveSourceFilename(handleUrl: string): Promise<string|null> {
+  return new Promise((resolve, reject) => {
+    const handleResolveURL = "http://hdl.handle.net/api/handles/"; 
+    const mbHandle = getHandleFromUrl(handleUrl);
+    if (!mbHandle) {
+      resolve(handleUrl); // not a handle URL, return as is
+    } else {
+      axios.get(handleResolveURL + mbHandle)
+      .then(resp => { console.log(resp); resolve(handleUrl); })
+      .catch(error => reject(axiosErrToMsg(error)));
+    }
+  });
+}
 
