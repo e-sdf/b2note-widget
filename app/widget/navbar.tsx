@@ -141,8 +141,10 @@ export function Navbar(props: Props): React.FunctionComponentElement<Context> {
             className={"nav-link" + activeFlag(Page.PROFILE)} href="#" 
             data-toggle="tooltip" data-placement="bottom" title={context.user ? "Profile" : "Login"}
             onClick={() => selectPage(Page.PROFILE)}>
-            {userProfile ? 
-              <span><icons.UserIcon/> {shorten(userProfile.name, 15)}</span>
+            {context.user ? 
+              userProfile ?
+                <span><icons.UserIcon/> {shorten(userProfile.name, 15)}</span>
+                : <span style={{color: "red", fontStyle: "italic"}}>Failed getting profile</span>
               : <icons.LoginIcon/>
             }
           </a>
