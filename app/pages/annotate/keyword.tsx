@@ -1,10 +1,9 @@
 import * as React from "react";
-import { FaPlus } from "react-icons/fa";
 import { Context } from "../../context";
-import { showAlertSuccess, showAlertWarning, showAlertError } from "../../components/ui"; 
+import { showAlertSuccess, showAlertError } from "../../components/ui"; 
 import * as oreg from "../../core/ontologyRegister";
 import * as api from "../../api/annotations";
-import { KeywordIcon } from "../../components/icons";
+import { KeywordIcon, CreateIcon } from "../../components/icons";
 
 export interface KeywordProps {
   context: Context;
@@ -22,9 +21,7 @@ export function Keyword(props: KeywordProps): React.FunctionComponentElement<Key
         showAlertSuccess(props.alertId, "Keyword annotation created");
         setLabel("");
       },
-      (err) => {
-        showAlertError(props.alertId, err);
-      }
+      (err) => showAlertError(props.alertId, err)
     );
   }
 
@@ -34,9 +31,7 @@ export function Keyword(props: KeywordProps): React.FunctionComponentElement<Key
         showAlertSuccess(props.alertId, "Semantic annotation created");
         setLabel("");
       },
-      (err) => {
-        showAlertError(props.alertId, err);
-      }
+      (err) => showAlertError(props.alertId, err)
     );
   }
 
@@ -96,7 +91,7 @@ export function Keyword(props: KeywordProps): React.FunctionComponentElement<Key
           data-toggle="tooltip" data-placement="bottom" title={props.context.user ? "" : "Not logged in"}
           disabled={label.length === 0 || !props.context.user}
           onClick={annotate}>
-          <FaPlus/>
+          <CreateIcon/>
         </button>
       </div>
       {semanticFound ? renderSemantisationDialog() : <></>}

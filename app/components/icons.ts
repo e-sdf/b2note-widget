@@ -12,3 +12,5 @@ export const SemanticIcon = icons.FaCode;
 export const KeywordIcon = icons.FaQuoteRight;
 export const CommentIcon = icons.FaCommentDots;
 export const DownloadIcon = icons.FaDownload;
+
+export const CreateIcon = icons.FaPlus;

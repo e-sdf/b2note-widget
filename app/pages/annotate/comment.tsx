@@ -1,9 +1,8 @@
 import * as React from "react";
-import { FaPlus } from "react-icons/fa";
 import { Context } from "../../context";
-import { showAlertSuccess, showAlertWarning, showAlertError } from "../../components/ui"; 
+import { showAlertSuccess, showAlertError } from "../../components/ui"; 
 import * as api from "../../api/annotations";
-import { CommentIcon } from "../../components/icons";
+import { CommentIcon, CreateIcon } from "../../components/icons";
 
 export interface CommentProps {
   context: Context;
@@ -19,9 +18,7 @@ export function Comment(props: CommentProps): React.FunctionComponentElement<Com
         showAlertSuccess(props.alertId, "Comment created");
         setComment("");
       },
-      (err) => {
-        showAlertError(props.alertId, err);
-      }
+      (err) => showAlertError(props.alertId, err)
     );
   }
 
@@ -36,7 +33,7 @@ export function Comment(props: CommentProps): React.FunctionComponentElement<Com
         data-toggle="tooltip" data-placement="bottom" title={props.context.user ? "" : "Not logged in"}
         disabled={comment.length === 0 || !props.context.user}
         onClick={annotate}
-      ><FaPlus/></button>
+      ><CreateIcon/></button>
     </div>
   );
 }

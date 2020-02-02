@@ -1,10 +1,9 @@
 import * as React from "react";
-import { FaPlus } from "react-icons/fa";
 import { Context } from "../../context";
-import { showAlertSuccess, showAlertWarning, showAlertError } from "../../components/ui"; 
+import { showAlertSuccess, showAlertError } from "../../components/ui"; 
 import * as ac from "../../components/autocomplete/view";
 import * as api from "../../api/annotations";
-import { SemanticIcon } from "../../components/icons";
+import { SemanticIcon, CreateIcon } from "../../components/icons";
 
 export interface SemanticProps {
   context: Context;
@@ -36,15 +35,10 @@ export function Semantic(props: SemanticProps): React.FunctionComponentElement<S
   }
 
   function annotate(): void {
-    api.postAnnotationSemantic(uris, label, props.context)
-      .then(() => showAlertSuccess(props.alertId, "Semantic annotation created"))
-      .catch(error => {
-        if (error.response?.data?.message) {
-          showAlertWarning(props.alertId, error.response.data.message);
-        } else {
-          showAlertError(props.alertId, "Failed: server error");
-        }
-      });
+    api.postAnnotationSemantic(uris, label, props.context).then(
+      () => showAlertSuccess(props.alertId, "Semantic annotation created"),
+      (err) => showAlertError(props.alertId, err)
+    );
   }
 
   function postAnnotationAsKeyword(): void {
@@ -53,9 +47,7 @@ export function Semantic(props: SemanticProps): React.FunctionComponentElement<S
         showAlertSuccess(props.alertId, "Keyword annotation created");
         setLabel("");
       },
-      (err) => {
-        showAlertError(props.alertId, err);
-      }
+      (err) => showAlertError(props.alertId, err)
     );
   }
 
@@ -105,7 +97,7 @@ export function Semantic(props: SemanticProps): React.FunctionComponentElement<S
             annotate();
             if (ref) { ref.clear(); }
           }}
-        ><FaPlus/></button>
+        ><CreateIcon/></button>
       </div>
       { isNew ? renderKeywordDialog() : <></>}
     </>
