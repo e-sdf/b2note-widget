@@ -1,5 +1,7 @@
 import { AxiosError } from "axios";
 
+export const shorten = (lbl: string, lng: number): string => lbl.length > lng ? lbl.substring(0, lng) + "..." : lbl;
+
 export function axiosErrToMsg(error: AxiosError): string {
   if (error.response) {
     // Request made and server responded

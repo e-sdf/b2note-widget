@@ -1,5 +1,5 @@
 import axios from "axios";
-import { endpointUrl } from "../api/server";
+import { endpointUrl } from "../config";
 import { authHeader } from "./utils";
 import { User } from "../core/user";
 import { axiosErrToMsg } from "../components/utils";

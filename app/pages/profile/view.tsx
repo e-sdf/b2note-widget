@@ -59,7 +59,6 @@ export function ProfilePage(props: ProfileProps): React.FunctionComponentElement
         <label>Country</label>
         <Typeahead
           options={countries}
-          defaultInputValue={props.profile?.country}
           selected={[country]}
           onChange={selected => {
             if (selected.length > 0) {

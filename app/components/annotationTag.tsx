@@ -1,7 +1,7 @@
 import { matchSwitch } from "@babakness/exhaustive-type-checking";
 import * as React from "react";
 import * as anModel from "../core/annotationsModel";
-import { shorten } from "../utils";
+import { shorten } from "../components/utils";
 import { SemanticIcon, KeywordIcon, CommentIcon } from "./icons";
 import { Context } from "../context";
 

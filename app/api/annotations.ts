@@ -1,5 +1,5 @@
 import axios from "axios";
-import { endpointUrl } from "./server";
+import { endpointUrl } from "../config";
 import { Context } from "../context";
 import * as anModel from "../core/annotationsModel";
 import * as sModel from "../core/searchModel";
