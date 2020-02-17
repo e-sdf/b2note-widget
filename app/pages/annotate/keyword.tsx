@@ -14,6 +14,10 @@ export function Keyword(props: KeywordProps): React.FunctionComponentElement<Key
   const [label, setLabel] = React.useState("");
   const [uris, setUris] = React.useState([] as Array<string>);
   const [semanticFound, setSemanticFound] = React.useState(false);
+  const [tooLong, setTooLong] = React.useState(false);
+  const lengthLimit = 60;
+
+  React.useEffect(() => setTooLong(label.length > lengthLimit), [label]);
 
   function postAnnotation(): void {
     api.postAnnotationKeyword(label, props.context).then(
@@ -35,7 +39,18 @@ export function Keyword(props: KeywordProps): React.FunctionComponentElement<Key
     );
   }
 
+  function postAnnotationAsComment(): void {
+    api.postAnnotationComment(label, props.context).then(
+      () => {
+        showAlertSuccess(props.alertId, "Comment annotation created");
+        setLabel("");
+      },
+      (err) => showAlertError(props.alertId, err)
+    );
+  }
+
   function annotate(): void {
+    // Check the existence of a semantic tag
     oreg.getOntologies(label).then(oDict => {
       if (oDict[label]) {
         setUris(oDict[label].map(i => i.uris));
@@ -79,6 +94,29 @@ export function Keyword(props: KeywordProps): React.FunctionComponentElement<Key
     );
   }
 
+  function renderTooLongSubmitVersion(): React.ReactElement {
+    return (
+      <div style={{ margin: "15px" }}>
+        <p>
+          This text seems long for a keyword (&gt;{lengthLimit} characters).
+        </p>
+        <p>
+          Do you want to use it as:  
+        </p>
+        <div className="d-flex flex-row justify-content-between" style={{ margin: "10px" }}>
+          <button type="button" className="btn btn-primary"
+            onClick={() => postAnnotationAsComment()}>
+            Comment
+          </button>
+          <button type="button" className="btn btn-secondary"
+            onClick={() => postAnnotation()}>
+            Keyword
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <>
       <div className="d-flex flex-row align-items-center" style={{margin: "10px"}}>
@@ -87,13 +125,20 @@ export function Keyword(props: KeywordProps): React.FunctionComponentElement<Key
           value={label}
           onChange={ev => setLabel(ev.target?.value || "")} 
         />
-        <button type="button" className="btn btn-primary"
-          data-toggle="tooltip" data-placement="bottom" title={props.context.user ? "" : "Not logged in"}
-          disabled={label.length === 0 || !props.context.user}
-          onClick={annotate}>
-          <CreateIcon/>
-        </button>
+        {tooLong ? 
+          <></>
+        : <button type="button" className="btn btn-primary"
+            data-toggle="tooltip" data-placement="bottom" title={props.context.user ? "" : "Not logged in"}
+            disabled={label.length === 0 || !props.context.user}
+            onClick={annotate}>
+            <CreateIcon/>
+          </button>
+        }
       </div>
+      {tooLong ?
+        renderTooLongSubmitVersion()
+      : <></>
+      }
       {semanticFound ? renderSemantisationDialog() : <></>}
     </>
   );

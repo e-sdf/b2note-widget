@@ -4,11 +4,12 @@ import { Context } from "../context";
 import * as anModel from "../core/annotationsModel";
 import * as sModel from "../core/searchModel";
 import * as searchQueryParser from "../core/searchQueryParser";
-import { makeLocalUrl, authHeader, getHandleFromUrl } from "./utils";
-import { axiosErrToMsg } from "../components/utils";
+import { makeLocalUrl, authHeader } from "./utils";
+import { axiosErrToMsg } from "../core/utils";
 
 const annotationsUrl = endpointUrl + anModel.annotationsUrl;
 const targetsUrl = endpointUrl + anModel.targetsUrl;
+const resolveSourceUrl = endpointUrl + anModel.resolveSourceUrl;
 const searchUrl = endpointUrl + sModel.searchUrl;
 
 // Getting annotations
@@ -215,17 +216,12 @@ export function searchAnnotations(query: anModel.SearchQuery): Promise<Array<anM
   });
 }
 
-export function resolveSourceFilename(handleUrl: string): Promise<string|null> {
+// Resolving source URL
+
+export function resolveSourceFilename(handleUrl: string): Promise<string> {
   return new Promise((resolve, reject) => {
-    const handleResolveURL = "http://hdl.handle.net/api/handles/"; 
-    const mbHandle = getHandleFromUrl(handleUrl);
-    if (!mbHandle) {
-      resolve(handleUrl); // not a handle URL, return as is
-    } else {
-      axios.get(handleResolveURL + mbHandle)
-      .then(resp => { console.log(resp); resolve(handleUrl); })
-      .catch(error => reject(axiosErrToMsg(error)));
-    }
+    axios.get<string>(resolveSourceUrl, { params: { handleUrl }})
+    .then(res => resolve(res.data))
+    .catch(error => reject(axiosErrToMsg(error)));
   });
 }
-

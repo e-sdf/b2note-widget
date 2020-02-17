@@ -57,10 +57,6 @@ export function AnnotateSection(props: SectionProps): React.FunctionComponentEle
       <p>
         After typing the text for your custom keyword in the input, click <span className="btn btn-sm btn-primary"><icons.CreateIcon/></span>&nbsp;to create the annotation.
       </p>
-      <p>
-        B2NOTE then checks if the provided keyword is not present in the index of semantic tags. In case it finds a match, it offers to create a semantic tag instead of the keyword, which is highly advised.
-      </p>
-      <img src={imgUrl + "keywordSemantic.png"}/>
 
       <h3 id="comment">Creating a comment annotation</h3>
       <p>
@@ -73,6 +69,36 @@ export function AnnotateSection(props: SectionProps): React.FunctionComponentEle
       <p>
         After typing-in the text of the comment, click <span className="btn btn-sm btn-primary"><icons.CreateIcon/></span>&nbsp;to create the annotation.
       </p>
+
+      <h3 id="special">Special situations</h3>
+      <ol>
+        <li>
+          <img src={imgUrl + "exists.png"}/>
+          <p>
+            <strong>Duplicate</strong>: it is not possible to create an annotation that would be a duplicate of an existing annotation. So a semantic tag or free-text tag annotation can not use <em>the same tag about the same file</em> as another annotation. When attempting to do so, an alert will be displayed informing you that this is the case.
+          </p>
+        </li>
+        <li>
+          <p>
+            <strong>Semantic equivalent</strong>: an attempt to create a <em>free-text keyword</em> annotation using a label identical to an ontology term referenced by B2NOTE triggers an alert asking you to confirm the type of annotation you want to create:
+          </p>
+          <ul>
+            <li><strong>Semantic</strong>: select a semantic tag instead of your free-text keyword (recommended).</li>
+            <li><strong>Keyword</strong>: confirm creating an annotation using your free-text keyword.</li>
+            <li><strong>Cancel</strong>: cancel the annotation creation.</li>
+          </ul>
+        </li>
+        <li>
+          <p>
+            <strong>Long keyword</strong>: attempting to create a free-text keyword annotation with a tag label longer than 60 characters will trigger an alert asking to confirm the type of annotation you want to create:
+          </p>
+          <ul>
+            <li><strong>Keyword</strong>: for an annotation of the Free-text Keyword type.</li>
+            <li><strong>Comment</strong>: for an annotation of the Comment type.</li>
+            <li><strong>Cancel</strong>: to cancel the annotation creation.</li>
+          </ul>
+        </li>
+      </ol>
     </>
   );
 }

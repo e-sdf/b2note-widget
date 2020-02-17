@@ -112,7 +112,7 @@ export function Annotations(props: Props): React.FunctionComponentElement<Props>
   const [pendingDeleteId, setPendingDeleteId] = React.useState(null as string|null);
   const [showOntologyInfos, setShowOntologyInfos] = React.useState(null as Array<oreg.OntologyInfo>|null);
 
-  React.useEffect(() => console.log(annotations), [annotations]);
+  // React.useEffect(() => console.log(annotations), [annotations]);
 
   function loadOntologiesInfo(anRecord: anModel.AnRecord): void {
     const iris = anModel.getSources(anRecord);
@@ -145,7 +145,7 @@ export function Annotations(props: Props): React.FunctionComponentElement<Props>
         <React.Fragment>
           <span className="badge badge-secondary" style={{verticalAlign: "middle"}}
             data-toggle="tooltip" data-placement="bottom" title="Number of files with this annotation"
-          >{anItem.resTargets.length}</span>
+          >{anItem.targets.length}</span>
           <button type="button" 
             className="btn btn-sm btn-outline-primary list-action-button"
             style={{padding: "0 4px 3px 0"}}
@@ -178,8 +178,8 @@ export function Annotations(props: Props): React.FunctionComponentElement<Props>
     function renderTargets(): React.ReactElement {
       return (
         <table className="table mb-0">
-          {anItem.resTargets.map(rt =>
-            <TargetTr key={rt.target.source} context={props.context} resTarget={rt}/>)}
+          {anItem.targets.map(t =>
+            <TargetTr key={t.source} context={props.context} target={t}/>)}
         </table>
       );
     }

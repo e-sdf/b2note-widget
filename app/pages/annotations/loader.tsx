@@ -17,14 +17,19 @@ const CommentIcon = icons.FaCommentDots;
 
 const alertId = "anlAlert";
 
-export interface ResolvedTarget {
-  target: anModel.AnTarget;
-  filename: string|null;
-}
+// Prepared for target resolving:
+// https://esciencedatalab.atlassian.net/browse/B2NT-137
+// export interface ResolvedTarget {
+//   target: anModel.AnTarget;
+//   filename: string|null;
+// }
 
 export interface AnItem {
   anRecord: anModel.AnRecord;
-  resTargets: Array<ResolvedTarget>;
+  // Prepared for target resolving:
+  // https://esciencedatalab.atlassian.net/browse/B2NT-137
+  // resTargets: Array<ResolvedTarget>;
+  targets: Array<anModel.AnTarget>;
   showFilesFlag: boolean;
 }
 
@@ -74,17 +79,24 @@ export const LoaderFilter = React.forwardRef((props: LoaderProps, ref: React.Ref
         setAnRecords(anl);
         const targetsPms = anl.map(a => api.getTargets(anModel.getLabel(a)));
         Promise.all(targetsPms).then(targets => {
-          anl.map((an, ani) => {
-            const targetsItem = targets[ani];
-            const filenamePms = targetsItem.map(t => api.resolveSourceFilename(t.id));
-            Promise.all(filenamePms).then(filenames => 
-              props.setAnItems(anl.map(an2 => ({
-                anRecord: an2,
-                resTargets: targetsItem.map((t, ti) => ({ target: t, filename: filenames[ti] })),
-                showFilesFlag: false
-              })))
-            );
-          });
+          props.setAnItems(anl.map((an, i) => ({
+            anRecord: an,
+            targets: targets[i],
+            showFilesFlag: false
+          })));
+          // Prepared for target resolving:
+          // https://esciencedatalab.atlassian.net/browse/B2NT-137
+          // anl.map((an, ani) => {
+          //   const targetsItem = targets[ani];
+          //   const filenamePms = targetsItem.map(t => api.resolveSourceFilename(t.id));
+          //   Promise.all(filenamePms).then(filenames => 
+          //     props.setAnItems(anl.map(an2 => ({
+          //       anRecord: an2,
+          //       resTargets: targetsItem.map((t, ti) => ({ target: t, filename: filenames[ti] })),
+          //       showFilesFlag: false
+          //     })))
+          //   );
+          // });
           setNoOfMine(anl.filter(a => a.creator.id === (props.context.user?.id || "")).length);
           setNoOfOthers(anl.filter(a => a.creator.id !== (props.context.user?.id || "")).length);
           setNoOfSemantic(anl.filter(anModel.isSemantic).length);

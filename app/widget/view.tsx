@@ -24,7 +24,7 @@ function Widget(props: Props): React.FunctionComponentElement<Context> {
 }
 
 export function render(context: Context): void {
-  const container = document.getElementById("widget");
+  const container = document.getElementById("b2note-widget");
   if (container) {
     ReactDOM.render(<Widget context={context}/>, container);
     console.log(`Annotating pid="${context.target.pid}" source="${context.target.source}"`);
