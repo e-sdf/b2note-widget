@@ -1,5 +1,5 @@
 import * as React from "react";
-import { SectionProps } from "./defs";
+import type { SectionProps } from "./defs";
 import * as icons from "../../components/icons";
 import { b2noteBlue } from "../../components/defs";
 

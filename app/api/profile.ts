@@ -1,6 +1,7 @@
 import axios from "axios";
 import { endpointUrl } from "../config";
-import { User, UserProfile, profileUrl } from "../core/user";
+import type { User, UserProfile } from "../core/user";
+import { profileUrl } from "../core/user";
 import { authHeader } from "./utils";
 import { axiosErrToMsg } from "../core/utils";
 

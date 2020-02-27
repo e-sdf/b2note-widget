@@ -1,7 +1,7 @@
 import * as _ from "lodash";
 import * as React from "react";
 import * as icons from "react-icons/fa";
-import { OntologyInfo } from "../../core/ontologyRegister";
+import type { OntologyInfo } from "../../core/ontologyRegister";
 
 const LeftIcon = icons.FaCaretLeft; 
 const RightIcon = icons.FaCaretRight; 

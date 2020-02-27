@@ -1,12 +1,11 @@
 import _ from "lodash";
 import * as React from "react";
 import * as ReactDOM from "react-dom";
-import { Context } from "../../context";
+import type { Context } from "../../context";
 import { Tabs, Tab } from "../../components/ui";
 import * as anModel from "../../core/annotationsModel";
 import { BasicSearch } from "./basicSearch";
 import { AdvancedSearch } from "./advancedSearch";
-import TargetTr from "../../components/targetTr";
 import AnnotationTag from "../../components/annotationTag";
 import { DownloadIcon } from "../../components/icons";
 import { downloadJSON, downloadRDF } from "../../components/download";

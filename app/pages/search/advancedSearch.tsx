@@ -5,7 +5,7 @@ import * as icons from "react-icons/fa";
 import * as anModel from "../../core/annotationsModel";
 import * as ac from "../../components/autocomplete/view";
 import * as api from "../../api/annotations";
-import { showAlertWarning, showAlertError } from "../../components/ui"; 
+import { showAlertError } from "../../components/ui"; 
 import * as queryParser from "../../core/searchQueryParser";
 
 const OKIcon = icons.FaCheck;

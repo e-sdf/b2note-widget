@@ -1,5 +1,5 @@
 import * as React from "react";
-import { SectionProps } from "./defs";
+import type { SectionProps } from "./defs";
 
 export function AboutSection(props: SectionProps): React.FunctionComponentElement<SectionProps> {
   return (

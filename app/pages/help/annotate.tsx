@@ -1,6 +1,6 @@
 import * as React from "react";
 import { serverUrl } from "../../config";
-import { SectionProps } from "./defs";
+import type { SectionProps } from "./defs";
 import * as icons from "../../components/icons";
 
 const imgUrl = serverUrl + "/img/help/";

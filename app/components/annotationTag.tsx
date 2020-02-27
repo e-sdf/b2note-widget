@@ -3,7 +3,7 @@ import * as React from "react";
 import * as anModel from "../core/annotationsModel";
 import { shorten } from "../components/utils";
 import { SemanticIcon, KeywordIcon, CommentIcon } from "./icons";
-import { Context } from "../context";
+import type { Context } from "../context";
 
 interface AnnotationProps {
   anRecord: anModel.AnRecord;

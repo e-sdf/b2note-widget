@@ -1,5 +1,5 @@
-import { User } from "./core/user";
-import { Target } from "./core/annotationsModel";
+import type { User } from "./core/user";
+import type { Target } from "./core/annotationsModel";
 
 export interface Context {
   user: User|null;

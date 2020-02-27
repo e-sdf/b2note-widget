@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Context } from "../../context";
+import type { Context } from "../../context";
 import { showAlertSuccess, showAlertError } from "../../components/ui"; 
 import * as ac from "../../components/autocomplete/view";
 import * as api from "../../api/annotations";

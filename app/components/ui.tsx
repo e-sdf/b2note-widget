@@ -2,7 +2,6 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 
-
 // Alerts {{{1
 
 interface AlertProps {

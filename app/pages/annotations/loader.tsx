@@ -2,7 +2,7 @@ import * as React from "react";
 import * as icons from "react-icons/fa";
 import * as anModel from "../../core/annotationsModel";
 import * as api from "../../api/annotations";
-import { Context } from "../../context";
+import type { Context } from "../../context";
 import { showAlertError } from "../../components/ui"; 
 import { DownloadIcon } from "../../components/icons";
 import { downloadJSON, downloadRDF } from "../../components/download";

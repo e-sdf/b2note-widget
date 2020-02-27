@@ -1,5 +1,6 @@
 import * as React from "react";
-import { HelpSection, SectionProps } from "./defs";
+import type { SectionProps } from "./defs";
+import { HelpSection } from "./defs";
 
 export function ProfileSection(props: SectionProps): React.FunctionComponentElement<SectionProps> {
   return (

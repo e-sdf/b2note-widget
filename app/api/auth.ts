@@ -1,7 +1,7 @@
 import axios from "axios";
 import { endpointUrl } from "../config";
 import { authHeader } from "./utils";
-import { User } from "../core/user";
+import type { User } from "../core/user";
 import { axiosErrToMsg } from "../core/utils";
 
 const storageKey = "user";

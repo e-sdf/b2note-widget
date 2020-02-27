@@ -1,6 +1,7 @@
 import _ from "lodash";
 import * as React from "react";
-import { OntologyInfo, OntologyDict, getOntologies } from "../../core/ontologyRegister";
+import type { OntologyInfo, OntologyDict } from "../../core/ontologyRegister";
+import { getOntologies } from "../../core/ontologyRegister";
 import { AsyncTypeahead } from "react-bootstrap-typeahead";
 
 export interface Suggestion {

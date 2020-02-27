@@ -1,9 +1,9 @@
 import * as React from "react";
-import { Context } from "../context";
+import type { Context } from "../context";
 import { shorten } from "../components/utils";
 import * as icons from "react-icons/fa";
 import { DownloadIcon } from "./icons";
-import { AnTarget } from "../core/annotationsModel";
+import type { AnTarget } from "../core/annotationsModel";
 // import { ResolvedTarget } from "../pages/annotations/loader";
 
 const LookIcon = icons.FaEye;

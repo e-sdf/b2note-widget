@@ -2,7 +2,7 @@ import * as React from "react";
 import * as ReactDOM from "react-dom";
 import { $enum } from "ts-enum-util";
 import { Typeahead } from "react-bootstrap-typeahead";
-import { UserProfile } from "../../core/user";
+import type { UserProfile } from "../../core/user";
 import { countries, Experience } from "../../core/user";
 import * as api from "../../api/profile";
 import { showAlertSuccess, showAlertError } from "../../components/ui"; 
