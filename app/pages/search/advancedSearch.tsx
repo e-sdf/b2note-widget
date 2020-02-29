@@ -1,16 +1,12 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as React from "react";
-import * as icons from "react-icons/fa";
+import * as icons from "../../components/icons";
 import * as anModel from "../../core/annotationsModel";
 import * as ac from "../../components/autocomplete/view";
 import * as api from "../../api/annotations";
 import { showAlertError } from "../../components/ui"; 
 import * as queryParser from "../../core/searchQueryParser";
-
-const OKIcon = icons.FaCheck;
-const ErrorIcon = icons.FaExclamation;
-const SearchIcon = icons.FaSearch;
 
 const alertId = "advanced-search-alert";
 
@@ -84,7 +80,7 @@ export function AdvancedSearch(props: AdvancedSearchProps): React.FunctionCompon
           {queryStr.length > 0 ? 
             <div className="ml-1"
               data-toggle="tooltip" data-placement="bottom" title={queryError ? `Error at ${queryError.location}: ${queryError.message}` : ""}>
-              {queryError ? <ErrorIcon className="text-danger"/> : <OKIcon className="text-success"/> }
+              {queryError ? <icons.ErrorIcon className="text-danger"/> : <icons.OKIcon className="text-success"/> }
             </div>
           : ""}
         </div>
@@ -98,7 +94,7 @@ export function AdvancedSearch(props: AdvancedSearchProps): React.FunctionCompon
           <button type="button" className="btn btn-primary" style={{marginLeft: "10px"}}
             data-toggle="tooltip" data-placement="bottom" title="Make search"
             onClick={submitQuery}>
-            <SearchIcon/> 
+            <icons.SearchIcon/> 
           </button>
         </div>
       </form>

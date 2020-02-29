@@ -13,7 +13,7 @@ export function ProfileSection(props: SectionProps): React.FunctionComponentElem
         During the authentication in B2ACCESS, you are given the option to check a checkbox that says &quot;Remember the settings for this service and do not show this dialog again&quot;. If you wish to use multiple accounts, it is advised not to check that checkbox.
       </p>
       <p>
-        After the authentication with B2ACCESS, if it is your first time using B2NOTE, you will be asked some B2NOTE-specific information, such as your pseudonym that will be used to publish your annotations.
+        After the authentication with B2ACCESS, if it is your first time using B2NOTE, you will be asked some B2NOTE-specific information used for anonymous statistics.
       </p>
       <p>
         Upon successful registration you will be automatically logged in and redirected to the <a href="#" onClick={() => props.redirectFn(HelpSection.ANNOTATE)}>Annotate page</a>.

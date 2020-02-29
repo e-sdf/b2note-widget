@@ -1,19 +1,10 @@
 import * as React from "react";
-import * as icons from "react-icons/fa";
+import * as icons from "../../components/icons";
 import * as anModel from "../../core/annotationsModel";
 import * as api from "../../api/annotations";
 import type { Context } from "../../context";
 import { showAlertError } from "../../components/ui"; 
-import { DownloadIcon } from "../../components/icons";
 import { downloadJSON, downloadRDF } from "../../components/download";
-
-const QuestionIcon = icons.FaQuestionCircle;
-const AllFilesIcon = icons.FaCopy;
-const MineIcon = icons.FaUser;
-const OthersIcon = icons.FaUserFriends;
-const SemanticIcon = icons.FaCode;
-const KeywordIcon = icons.FaQuoteRight;
-const CommentIcon = icons.FaCommentDots;
 
 const alertId = "anlAlert";
 
@@ -123,7 +114,7 @@ export const LoaderFilter = React.forwardRef((props: LoaderProps, ref: React.Ref
           <h5 className="mb-0 mt-1">
             Filters
             <span> </span>
-            <QuestionIcon
+            <icons.QuestionIcon
               style={{fontSize: "80%", color: "#aaa", verticalAlign: "top", marginTop: "0.4em"}}
               data-toggle="tooltip" data-placement="bottom" title="Toggle the buttons to switch a specific filter on/off"
             />
@@ -144,7 +135,7 @@ export const LoaderFilter = React.forwardRef((props: LoaderProps, ref: React.Ref
           className={`btn btn-sm btn-${btnState(allFilesFilter)}secondary`}
           data-toggle="tooltip" data-placement="bottom" title="All Files"
           onClick={() => setAllFilesFilter(!allFilesFilter)}
-        ><AllFilesIcon/></button>
+        ><icons.AllFilesIcon/></button>
       </div>
     );
   }
@@ -156,12 +147,12 @@ export const LoaderFilter = React.forwardRef((props: LoaderProps, ref: React.Ref
           className={`btn btn-sm btn-${btnState(mineFilter)}secondary`}
           data-toggle="tooltip" data-placement="bottom" title={"My annotations" + (noOfMine ? ` (${noOfMine})` : "")}
           onClick={() => setMineFilter(!mineFilter)}
-        ><MineIcon/></button>
+        ><icons.MineIcon/></button>
         <button type="button"
           className={`btn btn-sm btn-${btnState(othersFilter)}secondary`}
           data-toggle="tooltip" data-placement="bottom" title={"Other's annotations /displayed in italic/" + (noOfOthers ? ` (${noOfOthers})` : "")}
           onClick={() => setOthersFilter(!othersFilter)}
-        ><OthersIcon/></button>
+        ><icons.OthersIcon/></button>
       </div>
     );
   }
@@ -173,17 +164,17 @@ export const LoaderFilter = React.forwardRef((props: LoaderProps, ref: React.Ref
           className={`btn btn-sm btn-${btnState(semanticFilter)}secondary`}
           data-toggle="tooltip" data-placement="bottom" title={"Sematic tags" + (noOfSematic ? ` (${noOfSematic})` : "")}
           onClick={() => setSemanticFilter(!semanticFilter)}
-        ><SemanticIcon/></button>
+        ><icons.SemanticIcon/></button>
         <button type="button"
           className={`btn btn-sm btn-${btnState(keywordFilter)}secondary`}
           data-toggle="tooltip" data-placement="bottom" title={"Free-text keywords" + (noOfKeyword ? ` (${noOfKeyword})` : "")}
           onClick={() => setKeywordFilter(!keywordFilter)}
-        ><KeywordIcon/></button>
+        ><icons.KeywordIcon/></button>
         <button type="button"
           className={`btn btn-sm btn-${btnState(commentFilter)}secondary`}
           data-toggle="tooltip" data-placement="bottom" title={"Comments" +  (noOfComment ? ` (${noOfComment})` : "")}
           onClick={() => setCommentFilter(!commentFilter)}
-        ><CommentIcon/></button>
+        ><icons.CommentIcon/></button>
       </div>
     );
   }
@@ -192,7 +183,7 @@ export const LoaderFilter = React.forwardRef((props: LoaderProps, ref: React.Ref
     return (
       <div className="dropdown ml-auto">
         <button className="btn btn-sm btn-outline-primary dropdown-toggle" type="button" id="anl-ddd" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-          <DownloadIcon/>
+          <icons.DownloadIcon/>
         </button>
         <div className="dropdown-menu" aria-labelledby="anl-ddd">
           <button type="button"

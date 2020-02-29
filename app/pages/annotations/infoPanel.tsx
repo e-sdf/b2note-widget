@@ -12,7 +12,6 @@ interface Props {
   closeFn(): void;
 }
 
-
 export function InfoPanel(props: Props): React.FunctionComponentElement<Props> {
   const [activePage, setActivePage] = React.useState(1);
 

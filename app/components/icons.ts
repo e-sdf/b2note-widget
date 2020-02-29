@@ -13,4 +13,15 @@ export const KeywordIcon = icons.FaQuoteRight;
 export const CommentIcon = icons.FaCommentDots;
 export const DownloadIcon = icons.FaDownload;
 
+export const QuestionIcon = icons.FaQuestionCircle;
+export const AllFilesIcon = icons.FaCopy;
+export const MineIcon = icons.FaUser;
+export const OthersIcon = icons.FaUserFriends;
+
 export const CreateIcon = icons.FaPlus;
+
+export const AddIcon = icons.FaPlus;
+export const DeleteIcon = icons.FaTrashAlt;
+
+export const OKIcon = icons.FaCheck;
+export const ErrorIcon = icons.FaExclamation;

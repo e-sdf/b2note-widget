@@ -86,7 +86,7 @@ export function Navbar(props: Props): React.FunctionComponentElement<Context> {
     if (node) {
       ReactDOM.unmountComponentAtNode(node);
       renderPage(p);
-      setHelpPage(p === Page.HELP ? helpPage : page);
+      setHelpPage(p === Page.HELP ? helpPage : p);
     }
   }
 

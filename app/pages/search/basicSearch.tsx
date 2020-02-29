@@ -3,17 +3,13 @@
 import _ from "lodash";
 import { matchSwitch } from "@babakness/exhaustive-type-checking";
 import * as React from "react";
-import * as icons from "react-icons/fa";
+import * as icons from "../../components/icons";
 import type { AnRecord, SearchQuery } from "../../core/annotationsModel";
 import * as ac from "../../components/autocomplete/view";
 import { SearchType, BiOperatorType } from "../../core/searchModel";
 import * as queryParser from "../../core/searchQueryParser";
 import * as api from "../../api/annotations";
 import { showAlertError } from "../../components/ui"; 
-
-const AddIcon = icons.FaPlus;
-const SearchIcon = icons.FaSearch;
-const DeleteIcon = icons.FaTrashAlt;
 
 const alertId = "basic-search-alert";
 
@@ -85,7 +81,7 @@ function TermComp(props: TermCompProps): TermComp {
       {props.isFirst ? "" :
         <button type="button" className="btn btn-sm btn-danger"
           onClick={() => { if (props.deleteHandle) { props.deleteHandle(); } }}>
-          <DeleteIcon/>
+          <icons.DeleteIcon/>
         </button>
       }
     </div>
@@ -255,13 +251,13 @@ export function BasicSearch(props: BasicSearchProps): React.FunctionComponentEle
           <button type="button" className="btn btn-secondary"
             data-toggle="tooltip" data-placement="bottom" title="Add another expression"
             onClick={addTerm}>
-            <AddIcon/> 
+            <icons.AddIcon/> 
           </button>
           <button type="button" className="btn btn-primary" style={{marginLeft: "10px"}}
             data-toggle="tooltip" data-placement="bottom" title="Make search"
             disabled={nonEmptyTerms.length === 0}
             onClick={submitQuery}>
-            <SearchIcon/> 
+            <icons.SearchIcon/> 
           </button>
         </div>
       </form>
