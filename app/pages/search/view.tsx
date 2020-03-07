@@ -7,6 +7,7 @@ import * as anModel from "../../core/annotationsModel";
 import { BasicSearch } from "./basicSearch";
 import { AdvancedSearch } from "./advancedSearch";
 import AnnotationTag from "../../components/annotationTag";
+import TargetTr from "../../components/targetTr";
 import { DownloadIcon } from "../../components/icons";
 import { downloadJSON, downloadRDF } from "../../components/download";
 
@@ -66,7 +67,7 @@ export function SearchPage(props: SearchProps): React.FunctionComponentElement<S
           <table className="table">
             {Object.keys(resultsDict).map(source => 
               <>
-                {/*<TargetTr key={source} context={props.context} target={resultsDict[source][0].target}/>*/}
+                {<TargetTr key={source} context={props.context} target={resultsDict[source][0].target}/>}
                 {renderAnTags(resultsDict[source])}
               </>
             )}
