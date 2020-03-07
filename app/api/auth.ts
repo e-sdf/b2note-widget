@@ -38,6 +38,8 @@ export function login(): Promise<User> {
         window.removeEventListener("message", receiveMessage);
         try {
           const user = JSON.parse(event.data) as User;
+          console.log("Logged user:");
+          console.log(user);
           storeUser(user);
           resolve(user);
         } catch (err) { reject("Error parsing user object: " + err); }
