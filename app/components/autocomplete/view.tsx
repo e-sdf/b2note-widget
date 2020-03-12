@@ -1,5 +1,6 @@
 import _ from "lodash";
 import * as React from "react";
+import { solrUrl } from "../../config";
 import type { OntologyInfo, OntologyDict } from "../../core/ontologyRegister";
 import { getOntologies } from "../../core/ontologyRegister";
 import { AsyncTypeahead } from "react-bootstrap-typeahead";
@@ -85,7 +86,7 @@ export class SemanticAutocomplete extends React.Component<Props, State> {
         isLoading={this.state.loading}
         onSearch={query => {
           this.setState({ loading: true });
-          getOntologies(query)
+          getOntologies(solrUrl, query)
           .then((ontologiesDict) => {
             this.setState({ 
               loading: false,

@@ -2,6 +2,7 @@ import * as React from "react";
 import type { Context } from "../../context";
 import { showAlertSuccess, showAlertError } from "../../components/ui"; 
 import * as oreg from "../../core/ontologyRegister";
+import { solrUrl } from "../../config";
 import * as api from "../../api/annotations";
 import { KeywordIcon, CreateIcon } from "../../components/icons";
 
@@ -51,7 +52,7 @@ export function Keyword(props: KeywordProps): React.FunctionComponentElement<Key
 
   function annotate(): void {
     // Check the existence of a semantic tag
-    oreg.getOntologies(label).then(oDict => {
+    oreg.getOntologies(solrUrl, label).then(oDict => {
       if (oDict[label]) {
         setUris(oDict[label].map(i => i.uris));
         setSemanticFound(true);

@@ -50,7 +50,8 @@ export function login(): Promise<User> {
     if (user) {
       resolve(user);
     } else {
-      popup = window.open(endpointUrl + "/login", "B2ACCESS", "width=800");
+       popup = window.open("https://b2note-dev.bsc.es/api/login", "B2ACCESS", "width=800");
+      // popup = window.open(endpointUrl + "/login", "B2ACCESS", "width=800");
       window.addEventListener("message", receiveMessage, false);
     }
   });

@@ -8,6 +8,17 @@ interface Props {
   context: Context;
 }
 
+function WidgetInfo(): React.ReactElement {
+  return (
+    <div>
+      <img src="img/logo.png" width="100%"/>
+      <p style={{fontStyle: "italic"}}>
+        Use POST request to load the annotation target.
+      </p>
+    </div>
+  );
+}
+
 function Widget(props: Props): React.FunctionComponentElement<Context> {
   return (
     <div>
@@ -23,7 +34,24 @@ function Widget(props: Props): React.FunctionComponentElement<Context> {
   );
 }
 
-export function render(context: Context): void {
+export function canRenderWidgetInfo(): boolean {
+ return document.getElementById("b2note-widget-info") ? true : false;
+}
+
+export function canRenderWidget(): boolean {
+ return document.getElementById("b2note-widget") ? true : false;
+}
+
+export function renderWidgetInfo(): void {
+  const container = document.getElementById("b2note-widget-info");
+  if (container) {
+    ReactDOM.render(<WidgetInfo/>, container);
+  } else {
+    console.error("widget DOM element missing");
+  }
+}
+
+export function renderWidget(context: Context): void {
   const container = document.getElementById("b2note-widget");
   if (container) {
     ReactDOM.render(<Widget context={context}/>, container);
@@ -32,4 +60,3 @@ export function render(context: Context): void {
     console.error("widget DOM element missing");
   }
 }
-

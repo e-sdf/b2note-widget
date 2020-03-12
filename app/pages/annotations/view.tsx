@@ -14,6 +14,7 @@ import AnnotationTag from "../../components/annotationTag";
 import TargetTr from "../../components/targetTr";
 import * as ac from "../../components/autocomplete/view";
 import * as oreg from "../../core/ontologyRegister";
+import { solrUrl } from "../../config";
 import { InfoPanel } from "./infoPanel";
 
 const EditIcon = icons.FaEdit;
@@ -116,7 +117,7 @@ export function Annotations(props: Props): React.FunctionComponentElement<Props>
 
   function loadOntologiesInfo(anRecord: anModel.AnRecord): void {
     const iris = anModel.getSources(anRecord);
-    const infoPms = iris.map((iri: string) => oreg.getInfo(iri));
+    const infoPms = iris.map((iri: string) => oreg.getInfo(solrUrl, iri));
     allSettled<oreg.OntologyInfo>(infoPms).then(
       (results) => {
         const settled = results.filter(r => r.status === "fulfilled") as Array<allSettled.PromiseResolution<oreg.OntologyInfo>>;
