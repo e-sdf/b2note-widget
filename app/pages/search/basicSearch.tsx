@@ -53,7 +53,10 @@ function TermComp(props: TermCompProps): TermComp {
       </select>
       {inputType === SearchType.SEMANTIC ? 
         <>
-          <ac.SemanticAutocomplete onChange={gotSuggestion}/>
+          <ac.SemanticAutocomplete 
+            id="basicSearch-semantic-autocomplete"
+            onChange={gotSuggestion}
+           />
           <div className="form-group">
             <div className="form-check">
               <input className="form-check-input" type="checkbox"

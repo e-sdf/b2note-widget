@@ -86,6 +86,7 @@ export function Semantic(props: SemanticProps): React.FunctionComponentElement<S
       <div className="d-flex flex-row align-items-center" style={{margin: "10px"}}>
       <SemanticIcon className="mr-1"/>
         <ac.SemanticAutocomplete 
+          id="annotate-semantic-autocomplete"
           ref={(comp) => setRef(comp)} 
           allowNew={true}
           onChange={gotSuggestion}

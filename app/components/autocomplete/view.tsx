@@ -39,7 +39,7 @@ function mkSuggestions(oDict: OntologyDict): Array<Suggestion> {
 
 
 interface Props {
-  id?: string;
+  id: string;
   defaultInputValue?: string;
   allowNew?: boolean;
   onChange: (val: Array<Suggestion>) => void;
@@ -62,21 +62,21 @@ export class SemanticAutocomplete extends React.Component<Props, State> {
     };
   }
 
-  public clear = () => {
+  public clear = (): void => {
     const ta = this.typeahead;
     if (ta) {
       ta.getInstance().clear();
     }
   }
 
-  public focus = () => {
+  public focus = (): void => {
     const ta = this.typeahead;
     if (ta) {
       ta.getInstance().focus();
     }
   }
 
-  public render = () => {
+  public render = (): React.ReactElement => {
     return (
       <AsyncTypeahead
         id={this.props.id}

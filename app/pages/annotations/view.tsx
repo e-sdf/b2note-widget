@@ -76,6 +76,7 @@ function TagEditor(props: TagEditorProps): React.FunctionComponentElement<TagEdi
         <div className="d-flex flex-row">
           {anModel.isSemantic(props.anRecord) ?
             <ac.SemanticAutocomplete 
+              id="annotations-semantic-autocomplete"
               ref={(comp) => setRef(comp)} 
               defaultInputValue={label}
               onChange={gotSuggestion}

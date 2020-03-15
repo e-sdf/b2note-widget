@@ -44,7 +44,7 @@ export function ProfilePage(props: ProfileProps): React.FunctionComponentElement
           //TODO: does not show due to update of context.user prop
           showAlertSuccess(alertId, "Profile updated");
         },
-        (err: any) => {
+        () => {
           showAlertError(alertId, "Failed");
         }
       );
@@ -58,6 +58,7 @@ export function ProfilePage(props: ProfileProps): React.FunctionComponentElement
       <div className="form-group">
         <label>Country</label>
         <Typeahead
+          id="profile-country-autocomplete"
           options={countries}
           selected={[country]}
           onChange={selected => {

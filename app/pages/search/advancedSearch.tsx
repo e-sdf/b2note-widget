@@ -87,7 +87,10 @@ export function AdvancedSearch(props: AdvancedSearchProps): React.FunctionCompon
         {semanticTagsList.map((st, i) => 
           <div key={i} className="form-group">
             <span>{st}: </span>
-            <ac.SemanticAutocomplete onChange={suggestions => tagFilled(st, suggestions)}/>
+            <ac.SemanticAutocomplete
+              id="advancedSearch-semantic-autocomplete"
+              onChange={suggestions => tagFilled(st, suggestions)}
+            />
           </div>)
         }
         <div className="form-group">
