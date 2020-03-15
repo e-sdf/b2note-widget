@@ -181,11 +181,11 @@ export const LoaderFilter = React.forwardRef((props: LoaderProps, ref: React.Ref
 
   function renderDownloadButton(): React.ReactElement {
     return (
-      <div className="dropdown ml-auto">
+      <div className="dropleft ml-auto">
         <button className="btn btn-sm btn-outline-primary dropdown-toggle" type="button" id="anl-ddd" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
           <icons.DownloadIcon/>
         </button>
-        <div className="dropdown-menu" aria-labelledby="anl-ddd">
+        <div className="dropdown-menu drop-down-menu-left" aria-labelledby="anl-ddd">
           <button type="button"
             className="dropdown-item"
             onClick={() => downloadJSON(anRecords)}
