@@ -1,5 +1,5 @@
 import axios from "axios";
-import { endpointUrl } from "../config";
+import { endpointUrl, serverUrl } from "../config";
 import { authHeader } from "./utils";
 import type { User } from "../core/user";
 import { axiosErrToMsg } from "../core/utils";
@@ -50,8 +50,7 @@ export function login(): Promise<User> {
     if (user) {
       resolve(user);
     } else {
-       popup = window.open("https://b2note-dev.bsc.es/api/login", "B2ACCESS", "width=800");
-      // popup = window.open(endpointUrl + "/login", "B2ACCESS", "width=800");
+       popup = window.open(serverUrl + "/api/b2access/login", "B2ACCESS", "width=800");
       window.addEventListener("message", receiveMessage, false);
     }
   });
