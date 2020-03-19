@@ -10,4 +10,5 @@ export const serverUrl = confRec?.serverUrl ? confRec.serverUrl : "http://localh
 export const endpointUrl = serverUrl + apiUrl;
 export const solrUrl = "https://b2note.eudat.eu/solr/b2note_index/select";
 
-export const version = "v3.0 ALPHA2";
+export const version = "v3.0";
+export const subversion = "ALPHA3";
