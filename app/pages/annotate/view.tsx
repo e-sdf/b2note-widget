@@ -23,7 +23,7 @@ function AnnotatePage(props: PageProps): React.FunctionComponentElement<PageProp
         <Tab tabId={TabType.SEMANTIC} title={<span>Semantic<br/>tag</span>}>
           <Semantic context={props.context} alertId={alertId}/>
         </Tab>
-        <Tab tabId={TabType.KEYWORD} title={<span>Fee-text<br/>keyword</span>}>
+        <Tab tabId={TabType.KEYWORD} title={<span>Free-text<br/>keyword</span>}>
           <Keyword context={props.context} alertId={alertId}/>
         </Tab>
         <Tab tabId={TabType.COMMENT} title={<span>Comment<br/>&nbsp;</span>}>
