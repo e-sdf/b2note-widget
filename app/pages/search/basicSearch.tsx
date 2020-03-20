@@ -19,6 +19,7 @@ interface TermCompProps {
   updateValueHandle(value: string): void;
   updateSynonymsHandle(flag: boolean): void;
   deleteHandle?(): void;
+  submitHandle(): void;
 }
 
 type TermComp = React.FunctionComponentElement<TermCompProps>;
@@ -75,6 +76,7 @@ function TermComp(props: TermCompProps): TermComp {
         </>
         : <input type="text" className="form-control"
           value={value} 
+          // onKeyPress={(ev) => { if (ev.charCode == 13) { props.submitHandle(); } }}
           onChange={ev => {
             const val: string = ev.target.value;
             setValue(val);
@@ -111,7 +113,7 @@ function mkTermId(): number {
   return Date.now();
 }
 
-function mkTermItem(id: number, isFirst: boolean, dispatch: React.Dispatch<TermsAction>): TermItem {
+function mkTermItem(id: number, isFirst: boolean, dispatch: React.Dispatch<TermsAction>, submitFn: () => void): TermItem {
   return {
     id,
     sType: SearchType.REGEX,
@@ -123,7 +125,8 @@ function mkTermItem(id: number, isFirst: boolean, dispatch: React.Dispatch<Terms
       updateAnTypeHandle={(sType: SearchType): void => dispatch({ type: TermsActionType.UPDATE_STYPE, termId: id, sType })}
       updateValueHandle={(value: string): void => dispatch({ type: TermsActionType.UPDATE_VALUE, termId: id, value })}
       updateSynonymsHandle={(flag: boolean): void => dispatch({ type: TermsActionType.UPDATE_SYNONYMS_FLAG, termId: id, includeSynonyms: flag })}
-      deleteHandle={() => dispatch({ type: TermsActionType.DELETE, termId: id })}/>
+      deleteHandle={() => dispatch({ type: TermsActionType.DELETE, termId: id })}
+      submitHandle={submitFn}/>
   };
 }
 
@@ -175,7 +178,7 @@ export function BasicSearch(props: BasicSearchProps): React.FunctionComponentEle
   const [mode, setMode] = React.useState(SearchMode.ANY);
 
   React.useEffect(() => {
-    const firstTerm = mkTermItem(0, true, dispatch);
+    const firstTerm = mkTermItem(0, true, dispatch, submitQuery);
     dispatch({ type: TermsActionType.ADD, termId: firstTerm.id, newTerm: firstTerm });
   }, []);
 
@@ -187,7 +190,7 @@ export function BasicSearch(props: BasicSearchProps): React.FunctionComponentEle
 
   function addTerm(): void {
     const termId = mkTermId();
-    const newTerm = mkTermItem(termId, false, dispatch);
+    const newTerm = mkTermItem(termId, false, dispatch, submitQuery);
     dispatch({ 
       type: TermsActionType.ADD,
       termId,
@@ -247,7 +250,7 @@ export function BasicSearch(props: BasicSearchProps): React.FunctionComponentEle
 
   return (
     <div className="container-fluid">
-      <form>
+      <div>
         {terms.map((term: TermItem) => term.termComp)}
         {terms.length > 1 ? renderModeSelection() : ""}
         <div className="form-group">
@@ -263,7 +266,7 @@ export function BasicSearch(props: BasicSearchProps): React.FunctionComponentEle
             <icons.SearchIcon/> 
           </button>
         </div>
-      </form>
+      </div>
       {searching ?
         <div className="row">
           <div className="col-sm">
