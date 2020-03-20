@@ -40,6 +40,12 @@ export function Navbar(props: Props): React.FunctionComponentElement<Context> {
   const [userProfile, setUserProfile] = React.useState(null as UserProfile|null);
 
   React.useEffect(() => {
+    if (!context.user) {
+      auth.login().then(user => setContext({ ...context, user }));
+    }
+  }, []);
+
+  React.useEffect(() => {
     if (context.user) {
       getUserProfile(context.user).then(p => setUserProfile(p));
     }
