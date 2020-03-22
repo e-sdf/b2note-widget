@@ -1,6 +1,6 @@
 import * as React from "react";
 import type { Context } from "../../context";
-import { showAlertSuccess, showAlertError } from "../../components/ui"; 
+import { showAlertSuccess, showAlertError, SpinningWheel } from "../../components/ui"; 
 import * as ac from "../../components/autocomplete/view";
 import * as api from "../../api/annotations";
 import { SemanticIcon, CreateIcon } from "../../components/icons";
@@ -10,12 +10,12 @@ export interface SemanticProps {
   alertId: string;
 }
 
-
 export function Semantic(props: SemanticProps): React.FunctionComponentElement<SemanticProps> {
   const [uris, setUris] = React.useState([] as Array<string>);
   const [label, setLabel] = React.useState("");
   const [isNew, setIsNew] = React.useState(false);
   const [ref, setRef] = React.useState(null as any);
+  const [loading, setLoading] = React.useState(false);
 
   function gotSuggestion(suggestions: Array<ac.Suggestion>): void {
     if (suggestions.length > 0) {
@@ -35,9 +35,10 @@ export function Semantic(props: SemanticProps): React.FunctionComponentElement<S
   }
 
   function annotate(): void {
+    setLoading(true);
     api.postAnnotationSemantic(uris, label, props.context).then(
-      () => showAlertSuccess(props.alertId, "Semantic annotation created"),
-      (err) => showAlertError(props.alertId, err)
+      () => { setLoading(false); showAlertSuccess(props.alertId, "Semantic annotation created"); },
+      (err) => { setLoading(false); showAlertError(props.alertId, err); }
     );
   }
 
@@ -99,6 +100,9 @@ export function Semantic(props: SemanticProps): React.FunctionComponentElement<S
             if (ref) { ref.clear(); }
           }}
         ><CreateIcon/></button>
+      </div>
+      <div className="d-flex flex-row justify-content-center">
+        <SpinningWheel show={loading}/>
       </div>
       { isNew ? renderKeywordDialog() : <></>}
     </>

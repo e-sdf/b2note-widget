@@ -4,11 +4,11 @@ import _ from "lodash";
 import allSettled from "promise.allsettled";
 import * as React from "react";
 import * as ReactDOM from "react-dom";
-import * as icons from "react-icons/fa";
+import * as icons from "../../components/icons";
 import * as anModel from "../../core/annotationsModel";
 import * as api from "../../api/annotations";
 import type { Context } from "../../context";
-import { showAlertSuccess, showAlertError } from "../../components/ui"; 
+import { showAlertSuccess, showAlertError, SpinningWheel } from "../../components/ui"; 
 import { LoaderFilter, AnItem } from "./loader";
 import AnnotationTag from "../../components/annotationTag";
 import TargetTr from "../../components/targetTr";
@@ -16,13 +16,6 @@ import * as ac from "../../components/autocomplete/view";
 import * as oreg from "../../core/ontologyRegister";
 import { solrUrl } from "../../config";
 import { InfoPanel } from "./infoPanel";
-
-const EditIcon = icons.FaEdit;
-const DeleteIcon = icons.FaTrashAlt;
-const ShowFilesIcon = icons.FaChevronRight;
-const HideFilesIcon = icons.FaChevronDown;
-const SaveIcon = icons.FaSave;
-const CancelIcon = icons.FaTimes;
 
 const alertId = "anlAlert";
 
@@ -94,11 +87,11 @@ function TagEditor(props: TagEditorProps): React.FunctionComponentElement<TagEdi
                 ref.clear();
               }
             }}>
-            <SaveIcon/>
+            <icons.SaveIcon/>
           </button>
           <button type="button" className="btn btn-danger"
             onClick={() => props.doneHandler()}>
-            <CancelIcon/>
+            <icons.CancelIcon/>
           </button>
         </div>
         </td>
@@ -109,6 +102,7 @@ function TagEditor(props: TagEditorProps): React.FunctionComponentElement<TagEdi
 export function Annotations(props: Props): React.FunctionComponentElement<Props> {
   const loaderRef = React.useRef(null as any);
   const [annotations, setAnnotations] = React.useState([] as Array<AnItem>);
+  const [loading, setLoading] = React.useState(false);
   const [activeItem, setActiveItem] = React.useState(null as string|null);
   const [editedRecordId, setEditedRecordId] = React.useState(null as string|null);
   const [pendingDeleteId, setPendingDeleteId] = React.useState(null as string|null);
@@ -144,7 +138,7 @@ export function Annotations(props: Props): React.FunctionComponentElement<Props>
   
     function renderFilesBadge(): React.ReactElement {
       return (
-        <React.Fragment>
+        <div className="d-flex flex-row">
           <span className="badge badge-secondary" style={{verticalAlign: "middle"}}
             data-toggle="tooltip" data-placement="bottom" title="Number of files with this annotation"
           >{anItem.targets.length}</span>
@@ -152,28 +146,28 @@ export function Annotations(props: Props): React.FunctionComponentElement<Props>
             className="btn btn-sm btn-outline-primary list-action-button"
             style={{padding: "0 4px 3px 0"}}
             onClick={() => toggleShowFilesFlag(anItem)}>
-            {anItem.showFilesFlag ? <HideFilesIcon/> : <ShowFilesIcon/>}
+            {anItem.showFilesFlag ? <icons.HideIcon/> : <icons.ShowIcon/>}
           </button>
-        </React.Fragment>
+        </div>
       );
     }
 
     function renderActionButtons(): React.ReactElement {
       return (
-        <React.Fragment>
+        <>
           <button type="button"
             className="btn btn-sm btn-outline-primary list-action-button mr-1"
             data-toggle="tooltip" data-placement="bottom" title="Edit"
             onClick={() => setEditedRecordId(anRecord.id)}
-          ><EditIcon/>
+          ><icons.EditIcon/>
           </button>
           <button type="button"
             className="btn btn-sm btn-outline-primary list-action-button"
             data-toggle="tooltip" data-placement="bottom" title="Delete"
             onClick={() => setPendingDeleteId(anRecord.id)}
-          ><DeleteIcon/>
+          ><icons.DeleteIcon/>
           </button>
-        </React.Fragment>
+        </>
       );
     }
 
@@ -189,46 +183,56 @@ export function Annotations(props: Props): React.FunctionComponentElement<Props>
     function renderDeleteConfirmation(): React.ReactElement {
       return (
         <td colSpan={3} className="alert alert-danger" style={{borderTop: "none", borderRight: "none"}}>
-        <span className="font-italic">Really delete the annotation?</span>
-        <button type="button" 
-          className="btn btn-sm btn-danger"
-          style={{marginLeft: "5px", marginRight: "5px"}}
-          onClick={() => {
-            if (pendingDeleteId) {
-              api.deleteAnnotation(pendingDeleteId, props.context).then(
-                () => {
-                  if (loaderRef.current) { loaderRef.current.loadAnnotations(); }
-                },
-                (err) => {
-                  showAlertError(alertId, err);
-                }
-              );
-            }
-          }}>
-          Yes
-        </button>
-          <button type="button"
-            className="btn btn-sm btn-success"
-            style={{marginLeft: "5px"}}
-            onClick={() => setPendingDeleteId(null)}>
-            No
-          </button>
+          <div className="container-fluid">
+            <div className="row justify-content-center">
+              <div className="col-sm font-italic">Really delete the annotation?</div>
+            </div>
+            <div className="row justify-content-center">
+              <div className="col-sm">
+                <button type="button" 
+                  className="btn btn-sm btn-danger"
+                  style={{marginLeft: "5px", marginRight: "5px"}}
+                  onClick={() => {
+                    if (pendingDeleteId) {
+                      api.deleteAnnotation(pendingDeleteId, props.context).then(
+                        () => {
+                          if (loaderRef.current) { loaderRef.current.loadAnnotations(); }
+                        },
+                        (err) => {
+                          showAlertError(alertId, err);
+                        }
+                      );
+                    }
+                  }}>
+                  Yes
+                </button>
+              </div>
+              <div className="col-sm">
+                <button type="button"
+                  className="btn btn-sm btn-success"
+                  style={{marginLeft: "5px"}}
+                  onClick={() => setPendingDeleteId(null)}>
+                  No
+                </button>
+              </div>
+            </div>
+          </div>
         </td>
       );
     }
 
     function renderNormalRow(): React.ReactElement {
       return (
-        <React.Fragment>
+        <>
           <tr onMouseOver={() => setActiveItem(label)} onMouseLeave={() => setActiveItem(null)}>
             <td style={{verticalAlign: "middle", whiteSpace: "nowrap"}}>
               <AnnotationTag 
                 context={props.context}
                 anRecord={anRecord}
-                maxLen={14}
+                maxLen={17}
                 onClick={() => loadOntologiesInfo(anRecord)}/>
             </td>
-            <td style={{paddingLeft: 0}}>
+            <td style={{paddingLeft: 0, paddingRight: 0}}>
               {renderFilesBadge()}
             </td>
             <td style={{whiteSpace: "nowrap", paddingLeft: 0, paddingRight: 0, visibility}}>
@@ -245,7 +249,7 @@ export function Annotations(props: Props): React.FunctionComponentElement<Props>
                 {renderTargets()}
               </td>
             </tr> : ""}
-        </React.Fragment>
+        </>
       );
     }
     
@@ -267,13 +271,20 @@ export function Annotations(props: Props): React.FunctionComponentElement<Props>
   function renderAnnotationsTable(): React.ReactElement {
     return (
       <div className="container-fluid">
-        <LoaderFilter ref={loaderRef} context={props.context} setAnItems={setAnnotations}/>
+        <LoaderFilter 
+          ref={loaderRef}
+          context={props.context}
+          setAnItemsFn={setAnnotations}
+          setLoaderFlagFn={setLoading}/>
         <div className="row mt-2">
           <div className="col-sm">
             <div id={alertId}></div>
           </div>
         </div>
-        <div className="row mt-2">
+        <div className="row mt-2 justify-content-center">
+            <SpinningWheel show={loading}/>
+        </div>
+        <div className="row">
           <table className="table anl-table">
             <tbody>
               {annotations.map(anItem=> renderAnItem(anItem))}

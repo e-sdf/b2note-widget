@@ -1,6 +1,6 @@
 import * as React from "react";
 import type { Context } from "../../context";
-import { showAlertSuccess, showAlertError } from "../../components/ui"; 
+import { showAlertSuccess, showAlertError, SpinningWheel } from "../../components/ui"; 
 import * as api from "../../api/annotations";
 import { CommentIcon, CreateIcon } from "../../components/icons";
 
@@ -11,14 +11,17 @@ export interface CommentProps {
 
 export function Comment(props: CommentProps): React.FunctionComponentElement<CommentProps> {
   const [comment, setComment] = React.useState("");
+  const [loading, setLoading] = React.useState(false);
 
   function annotate(): void {
+    setLoading(true);
     api.postAnnotationComment(comment, props.context).then(
       () => {
+        setLoading(false);
         showAlertSuccess(props.alertId, "Comment created");
         setComment("");
       },
-      (err) => showAlertError(props.alertId, err)
+      (err) => { setLoading(false); showAlertError(props.alertId, err); }
     );
   }
 
@@ -34,6 +37,9 @@ export function Comment(props: CommentProps): React.FunctionComponentElement<Com
         disabled={comment.length === 0 || !props.context.user}
         onClick={annotate}
       ><CreateIcon/></button>
+      <div className="d-flex flex-row justify-content-center">
+        <SpinningWheel show={loading}/>
+      </div>
     </div>
   );
 }

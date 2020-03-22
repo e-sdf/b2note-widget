@@ -26,7 +26,8 @@ export interface AnItem {
 
 interface LoaderProps {
   context: Context;
-  setAnItems: (anItems: Array<AnItem>) => void;
+  setAnItemsFn: (anItems: Array<AnItem>) => void;
+  setLoaderFlagFn?: (flag: boolean) => void;
 }
 
 export interface LoaderInputHandles {
@@ -65,12 +66,14 @@ export const LoaderFilter = React.forwardRef((props: LoaderProps, ref: React.Ref
 
   function loadAnnotations(): void {
     const filters = mkFilters();
+    if (props.setLoaderFlagFn) { props.setLoaderFlagFn(true); }
     api.getAnnotationsJSON(props.context, filters).then(
       anl => {
+        if (props.setLoaderFlagFn) { props.setLoaderFlagFn(false); }
         setAnRecords(anl);
         const targetsPms = anl.map(a => api.getTargets(anModel.getLabel(a)));
         Promise.all(targetsPms).then(targets => {
-          props.setAnItems(anl.map((an, i) => ({
+          props.setAnItemsFn(anl.map((an, i) => ({
             anRecord: an,
             targets: targets[i],
             showFilesFlag: false

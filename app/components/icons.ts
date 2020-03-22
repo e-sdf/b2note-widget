@@ -19,9 +19,16 @@ export const MineIcon = icons.FaUser;
 export const OthersIcon = icons.FaUserFriends;
 
 export const CreateIcon = icons.FaPlus;
+export const EditIcon = icons.FaEdit;
+export const SaveIcon = icons.FaSave;
+
+export const ShowIcon = icons.FaChevronRight;
+export const HideIcon = icons.FaChevronDown;
 
 export const AddIcon = icons.FaPlus;
 export const DeleteIcon = icons.FaTrashAlt;
 
 export const OKIcon = icons.FaCheck;
+export const CancelIcon = icons.FaTimes;
 export const ErrorIcon = icons.FaExclamation;
+

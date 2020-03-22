@@ -9,7 +9,7 @@ import * as ac from "../../components/autocomplete/view";
 import { SearchType, BiOperatorType } from "../../core/searchModel";
 import * as queryParser from "../../core/searchQueryParser";
 import * as api from "../../api/annotations";
-import { showAlertError } from "../../components/ui"; 
+import { showAlertError, SpinningWheel } from "../../components/ui"; 
 
 const alertId = "basic-search-alert";
 
@@ -267,13 +267,9 @@ export function BasicSearch(props: BasicSearchProps): React.FunctionComponentEle
           </button>
         </div>
       </div>
-      {searching ?
-        <div className="row">
-          <div className="col-sm">
-            <h3>Searching...</h3>
-          </div>
-        </div>
-      : <></>}
+      <div className="row justify-content-center">
+        <SpinningWheel show={searching}/>
+      </div>
       <div id={alertId}></div>
     </div>
   );

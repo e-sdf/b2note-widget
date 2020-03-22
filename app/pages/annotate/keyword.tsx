@@ -1,6 +1,6 @@
 import * as React from "react";
 import type { Context } from "../../context";
-import { showAlertSuccess, showAlertError } from "../../components/ui"; 
+import { showAlertSuccess, showAlertError, SpinningWheel } from "../../components/ui"; 
 import * as oreg from "../../core/ontologyRegister";
 import { solrUrl } from "../../config";
 import * as api from "../../api/annotations";
@@ -14,6 +14,7 @@ export interface KeywordProps {
 export function Keyword(props: KeywordProps): React.FunctionComponentElement<KeywordProps> {
   const [label, setLabel] = React.useState("");
   const [uris, setUris] = React.useState([] as Array<string>);
+  const [loading, setLoading] = React.useState(false);
   const [semanticFound, setSemanticFound] = React.useState(false);
   const [tooLong, setTooLong] = React.useState(false);
   const lengthLimit = 60;
@@ -52,7 +53,9 @@ export function Keyword(props: KeywordProps): React.FunctionComponentElement<Key
 
   function annotate(): void {
     // Check the existence of a semantic tag
+    setLoading(true);
     oreg.getOntologies(solrUrl, label).then(oDict => {
+      setLoading(false);
       if (oDict[label]) {
         setUris(oDict[label].map(i => i.uris));
         setSemanticFound(true);
@@ -135,6 +138,9 @@ export function Keyword(props: KeywordProps): React.FunctionComponentElement<Key
             <CreateIcon/>
           </button>
         }
+      </div>
+      <div className="d-flex flex-row justify-content-center">
+        <SpinningWheel show={loading}/>
       </div>
       {tooLong ?
         renderTooLongSubmitVersion()

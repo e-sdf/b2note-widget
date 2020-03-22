@@ -22,7 +22,7 @@ export default function TargetTr(props: TargetTrProps): React.FunctionComponentE
         <span 
           data-toggle="tooltip" data-placement="bottom" title={props.target.source + (thisFile ? " (this file)" : " (other file)")}
         >
-          <span className={thisFile ? "font-weight-bold" : ""}>{shorten(props.target.source, 27)}</span>
+          <span className={thisFile ? "font-weight-bold" : ""}>{shorten(props.target.source, 23)}</span>
         </span>
       </td>
       <td style={{border: "none", padding: 0}}>

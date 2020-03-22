@@ -22,9 +22,9 @@ export default function AnnotationTag(props: AnnotationProps): React.FunctionCom
     [anModel.AnRecordType.COMMENT]: () => <CommentIcon className="text-secondary" />,
   });
   const itemStyle = anRecord.creator.id === (props.context.user?.id || "") ? {} : { fontStyle: "italic" };
-  const shortened = props.maxLen ? shorten(label, props.maxLen) : label;
 
   function renderSemanticLabel(): React.ReactElement {
+    const shortened = props.maxLen ? shorten(label, props.maxLen - 4) : label;
     const ontologiesNo = anModel.getSources(anRecord).length;
     return (
       <a
@@ -43,6 +43,7 @@ export default function AnnotationTag(props: AnnotationProps): React.FunctionCom
   }
 
   function renderOtherLabel(): React.ReactElement {
+    const shortened = props.maxLen ? shorten(label, props.maxLen) : label;
     return (
       <span
         style={itemStyle}

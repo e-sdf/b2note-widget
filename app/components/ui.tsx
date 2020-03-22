@@ -10,7 +10,7 @@ interface AlertProps {
   closeHandle(): void;
 }
 
-function Alert(props: AlertProps): React.ReactElement {
+function Alert(props: AlertProps): React.FunctionComponentElement<AlertProps> {
   return (
     <div 
       className={`alert alert-${props.type} fade show` }
@@ -250,3 +250,16 @@ export class Confirm extends React.Component<ConfirmProps> {
   //});
 //}
 
+export interface SpinningWheelProps {
+  show: boolean;
+}
+
+export function SpinningWheel(props: SpinningWheelProps): React.FunctionComponentElement<SpinningWheelProps> {
+  return (
+    props.show ?
+      <div className="spinner-border text-primary" role="status">
+        <span className="sr-only">Loading...</span>
+      </div>
+    : <></>
+  );
+}
