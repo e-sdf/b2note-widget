@@ -133,7 +133,7 @@ export function Keyword(props: KeywordProps): React.FunctionComponentElement<Key
           <></>
         : <button type="button" className="btn btn-primary"
             data-toggle="tooltip" data-placement="bottom" title={props.context.user ? "" : "Not logged in"}
-            disabled={label.length === 0 || !props.context.user}
+            disabled={label.length === 0 || !props.context.user || loading}
             onClick={annotate}>
             <CreateIcon/>
           </button>

@@ -34,7 +34,7 @@ export function Comment(props: CommentProps): React.FunctionComponentElement<Com
       />
       <button type="button" className="btn btn-primary"
         data-toggle="tooltip" data-placement="bottom" title={props.context.user ? "" : "Not logged in"}
-        disabled={comment.length === 0 || !props.context.user}
+        disabled={comment.length === 0 || !props.context.user || loading}
         onClick={annotate}
       ><CreateIcon/></button>
       <div className="d-flex flex-row justify-content-center">
