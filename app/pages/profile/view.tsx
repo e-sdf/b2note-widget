@@ -41,7 +41,6 @@ export function ProfilePage(props: ProfileProps): React.FunctionComponentElement
       api.patchUserProfile(changes, mbUser).then(
         updatedProfile => {
           props.updateProfileFn(updatedProfile);
-          //TODO: does not show due to update of context.user prop
           showAlertSuccess(alertId, "Profile updated");
         },
         () => {

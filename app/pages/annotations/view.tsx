@@ -285,11 +285,13 @@ export function Annotations(props: Props): React.FunctionComponentElement<Props>
             <SpinningWheel show={loading}/>
         </div>
         <div className="row">
-          <table className="table anl-table">
-            <tbody>
-              {annotations.map(anItem=> renderAnItem(anItem))}
-            </tbody>
-          </table>
+          {annotations.length > 0 ?
+            <table className="table anl-table">
+              <tbody>
+                {annotations.map(anItem=> renderAnItem(anItem))}
+              </tbody>
+            </table>
+          : <div className="col-sm" style={{fontStyle: "italic"}}>No annotations matching the filters</div>}
         </div>
       </div>
     );
