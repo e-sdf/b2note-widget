@@ -1,0 +1,59 @@
+.rbt {
+  flex-grow: 1;
+}
+#b2note-widget {
+  height: 564px;
+  width: 310px;
+}
+#widget-version {
+  position: absolute;
+  top: 10px;
+  left: 260px;
+  font-size: 11px;
+}
+#widget-version a {
+  color: white;
+}
+.list-action-button {
+  border: none;
+  margin: 0;
+}
+.anl-table {
+  display: block;
+  height: 368px;
+  overflow: auto;
+}
+.anl-ontology-pane {
+  display: block;
+  height: 435px;
+  overflow: auto;
+}
+.search-panel {
+  margin-top: 15px;
+  height: 402px;
+  overflow: auto;
+}
+.text-smaller {
+  font-size: 90%;
+}
+nav {
+  background-color: #1c418f;
+}
+h2 {
+  font-size: 1.6rem;
+  margin-top: 0.5rem;
+}
+h3 {
+  font-size: 1.2rem;
+  margin-top: 0.3rem;
+}
+h4 {
+  font-size: 100%;
+  font-weight: bold;
+  margin-top: 0.2rem;
+}
+.icon {
+  height: 16px;
+  width: 16px;
+}
+

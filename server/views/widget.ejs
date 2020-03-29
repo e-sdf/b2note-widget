@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>B2Note widget</title>
+
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/bootstrap-grid.min.css">
+    <link rel="stylesheet" href="/css/Typeahead-bs4.min.css">
+    <link rel="stylesheet" href="/css/bundle.css">
+    <script src="/js/config.js"></script>
+  </head>
+  <body>
+    <!-- Hidden inputs for the widget -->
+    <input type="hidden" id="pid-input" value="<%- pid %>">
+    <input type="hidden" id="source-input" value="<%- source %>">
+    <!-- This is the DOM element where the B2NOTE widget will be rendered -->
+    <div id="b2note-widget"></div>
+  </body>
+  <script src="/js/jquery.min.js"></script>
+  <script src="/js/bootstrap.bundle.min.js"></script>
+  <script src="/js/app.js"></script>
+</html>
