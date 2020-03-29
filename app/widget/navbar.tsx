@@ -53,12 +53,17 @@ export function Navbar(props: Props): React.FunctionComponentElement<Context> {
 
   const activeFlag = (p: Page): string => p === page ? " active" : "";
 
+  function profileSavedHandle(profile: UserProfile) {
+    setUserProfile(profile);
+    gotoPage(Page.ANNOTATE);
+  }
+
   function logout(): void {
     if (context.user) {
       auth.logout()
       .then(() => {
         setUserProfile(null);
-        selectPage(Page.ANNOTATE);
+        gotoPage(Page.ANNOTATE);
         setContext({ ...context, user: null });
       })
       .catch(err => console.error(err));
@@ -67,13 +72,13 @@ export function Navbar(props: Props): React.FunctionComponentElement<Context> {
 
   async function profileLoggedRenderPm(): Promise<RenderFn> {
     if (isUserLogged(context) && userProfile !== null) {
-      return Promise.resolve(() => profileRender(userProfile, setUserProfile));
+      return Promise.resolve(() => profileRender(userProfile, profileSavedHandle));
     } else {
       const user = await auth.login();
       const newContext = { ...context, user };
       setContext(newContext);
       const p = await getUserProfile(user);
-      return Promise.resolve(() => profileRender(p, setUserProfile));
+      return Promise.resolve(() => profileRender(p, profileSavedHandle));
     }
   }
 
@@ -96,7 +101,7 @@ export function Navbar(props: Props): React.FunctionComponentElement<Context> {
     }
   }
 
-  function selectPage(p: Page): void {
+  function gotoPage(p: Page): void {
     setPage(p);
     switchPage(p);
   }
@@ -116,7 +121,7 @@ export function Navbar(props: Props): React.FunctionComponentElement<Context> {
           <a
             className={"nav-link" + activeFlag(Page.ANNOTATE)} href="#" 
             data-toggle="tooltip" data-placement="bottom" title="Annotate"
-            onClick={() => selectPage(Page.ANNOTATE)}
+            onClick={() => gotoPage(Page.ANNOTATE)}
             ><icons.AnnotateIcon/>
           </a>
         </li>
@@ -124,7 +129,7 @@ export function Navbar(props: Props): React.FunctionComponentElement<Context> {
           <a
             className={"nav-link" + activeFlag(Page.ANNOTATIONS)} href="#" 
             data-toggle="tooltip" data-placement="bottom" title="Annotations"
-            onClick={() => selectPage(Page.ANNOTATIONS)}
+            onClick={() => gotoPage(Page.ANNOTATIONS)}
             ><icons.AnnotationsIcon/>
           </a>
         </li>
@@ -132,21 +137,21 @@ export function Navbar(props: Props): React.FunctionComponentElement<Context> {
           <a
             className={"nav-link" + activeFlag(Page.SEARCH)} href="#" 
             data-toggle="tooltip" data-placement="bottom" title="Search"
-            onClick={() => selectPage(Page.SEARCH)}
+            onClick={() => gotoPage(Page.SEARCH)}
             ><icons.SearchIcon/>
           </a>
         </li>
         <li className="nav-item">
           <a className={"nav-link" + activeFlag(Page.HELP)} href="#"data-toggle="tooltip" 
              data-placement="bottom" title="Context Help"
-            onClick={() => selectPage(Page.HELP)}
+            onClick={() => gotoPage(Page.HELP)}
           ><icons.HelpIcon/></a>
         </li>
         <li className="nav-item ml-auto">
           <a
             className={"nav-link" + activeFlag(Page.PROFILE)} href="#" 
             data-toggle="tooltip" data-placement="bottom" title={context.user ? "Profile" : "Login"}
-            onClick={() => selectPage(Page.PROFILE)}>
+            onClick={() => gotoPage(Page.PROFILE)}>
             {context.user ? 
               userProfile ?
                 <span><icons.UserIcon/> {shorten(userProfile.name, 15)}</span>
