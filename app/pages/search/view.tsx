@@ -2,10 +2,8 @@ import _ from "lodash";
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 import type { Context } from "../../context";
-import { Tabs, Tab } from "../../components/ui";
 import * as anModel from "../../core/annotationsModel";
-import { BasicSearch } from "./basicSearch";
-import { AdvancedSearch } from "./advancedSearch";
+import { Search } from "./search";
 import AnnotationTag from "../../components/annotationTag";
 import TargetTr from "../../components/targetTr";
 import { DownloadIcon } from "../../components/icons";
@@ -18,8 +16,7 @@ interface SearchProps {
 }
 
 export function SearchPage(props: SearchProps): React.FunctionComponentElement<SearchProps> {
-  const [resultsBasic, setResultsBasic] = React.useState(null as Array<anModel.AnRecord>|null);
-  const [resultsAdv, setResultsAdv] = React.useState(null as Array<anModel.AnRecord>|null);
+  const [results, setResults] = React.useState(null as Array<anModel.AnRecord>|null);
 
 
   function renderDownloadButton(results: anModel.AnRecord[]): React.ReactElement {
@@ -83,7 +80,7 @@ export function SearchPage(props: SearchProps): React.FunctionComponentElement<S
           <h3>No results</h3> 
           : 
           <>
-            <h3>Results</h3>
+            <h3>Targets found:</h3>
             {renderItems()}
           </>
         }
@@ -92,22 +89,10 @@ export function SearchPage(props: SearchProps): React.FunctionComponentElement<S
   }
 
   return (
-    <>
-      <Tabs id="searchTabs" activeTab={"basic" as TabType}>
-        <Tab tabId={"basic" as TabType} title="Basic Search">
-          <div className="search-panel">
-            <BasicSearch resultsHandle={setResultsBasic}/>
-            {resultsBasic ? renderResults(resultsBasic) : ""}
-          </div>
-        </Tab>
-        <Tab tabId={"advanced" as TabType} title="Advanced Search">
-          <div className="search-panel">
-            <AdvancedSearch resultsHandle={setResultsAdv}/>
-            {resultsAdv ? renderResults(resultsAdv) : ""}
-          </div>
-        </Tab>
-      </Tabs>
-    </> 
+    <div className="container-fluid mt-2">
+      <Search resultsHandle={setResults}/>
+      {results ? renderResults(results) : ""}
+    </div>
   );
 }
 
