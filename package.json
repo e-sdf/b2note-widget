@@ -13,7 +13,7 @@
     "docker-build": "docker build -t b2note/b2note-widget .",
     "docker-tag": "docker tag b2note/b2note-widget b2note/b2note-widget:3.0-beta2",
     "docker-push": "docker push b2note/b2note-widget",
-    "docker-run": "docker run b2note/b2note-widget"
+    "docker-run": "docker run -p 3061:3061 b2note/b2note-widget"
   },
   "devDependencies": {
     "@babakness/exhaustive-type-checking": "^0.1.3",
