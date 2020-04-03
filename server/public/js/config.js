@@ -1,0 +1,1 @@
+window.b2note = { serverUrl: 'http://localhost:3060', solrUrl: 'https://b2note.eudat.eu/solr/b2note_index/select' };
