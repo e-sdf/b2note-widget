@@ -1,0 +1,14 @@
+version: '3.7'
+
+services:
+  b2note-widget:
+    image: b2note/b2note-widget:latest
+    restart: always
+    network_mode: host
+    build: .
+    environment:
+      NODE_ENV: production
+    env_file:
+      ./.env
+    ports:
+      - 3061:3061

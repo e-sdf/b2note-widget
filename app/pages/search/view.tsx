@@ -18,7 +18,6 @@ interface SearchProps {
 export function SearchPage(props: SearchProps): React.FunctionComponentElement<SearchProps> {
   const [results, setResults] = React.useState(null as Array<anModel.AnRecord>|null);
 
-
   function renderDownloadButton(results: anModel.AnRecord[]): React.ReactElement {
     return (
       <div className="dropdown ml-auto">
@@ -75,7 +74,7 @@ export function SearchPage(props: SearchProps): React.FunctionComponentElement<S
     }
 
     return (
-      <div className="container-fluid">
+      <div className="container-fluid mt-3" style={{height: "440px", overflow: "auto"}}>
         {results.length === 0 ? 
           <h3>No results</h3> 
           : 
@@ -89,10 +88,9 @@ export function SearchPage(props: SearchProps): React.FunctionComponentElement<S
   }
 
   return (
-    <div className="container-fluid mt-2">
-      <Search resultsHandle={setResults}/>
-      {results ? renderResults(results) : ""}
-    </div>
+    results ? 
+      renderResults(results)
+    : <Search resultsHandle={setResults}/>
   );
 }
 

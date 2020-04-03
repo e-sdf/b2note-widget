@@ -43,20 +43,18 @@ export function TermComp(props: TermCompProps): React.FunctionComponentElement<T
             id="basicSearch-semantic-autocomplete"
             onChange={gotSuggestion}
            />
-          <div className="form-group">
-            <div className="form-check">
-              <input className="form-check-input" type="checkbox"
-                checked={includeSynonyms} 
-                onChange={ev => {
-                  const val = ev.target.checked;
-                  setIncludeSynonyms(val);
-                  props.updateSynonymsHandle(val);
-                }}
-              />
-              <label className="form-check-label">
-                Include synonym matches
-              </label>
-            </div>
+          <div className="form-check mt-2">
+            <input className="form-check-input" type="checkbox"
+              checked={includeSynonyms} 
+              onChange={ev => {
+                const val = ev.target.checked;
+                setIncludeSynonyms(val);
+                props.updateSynonymsHandle(val);
+              }}
+            />
+            <label className="form-check-label">
+              Include synonym matches
+            </label>
           </div>
         </>
         : <input type="text" className="form-control"

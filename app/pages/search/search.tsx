@@ -61,49 +61,82 @@ export function Search(props: SearchProps): React.FunctionComponentElement<Searc
 
   function renderAddTermButton(): React.ReactElement {
     return (
-      <div style={{paddingLeft: "5px"}}>
+      <div style={{paddingLeft: "10px"}}>
         <button type="button" className="btn btn-block btn-outline-primary" style={{height: "100%"}}
-          data-toggle="tooltip" data-placement="bottom" title="Add another expression"
-          onClick={() => add(termStr(termType, termValue, includeSynonyms))}>
+          data-toggle="tooltip" data-placement="bottom" title="Add"
+          onClick={() => { 
+            add(termStr(termType, termValue, includeSynonyms));
+            setTermValue("");
+          }}>
           <icons.AddIcon/> 
         </button>
       </div>
     );
   }
 
-  function renderOperators(): React.ReactElement {
+  function renderConnectives(): React.ReactElement {
     return (
-      <div>
-        <button type="button" className="btn btn-sm btn-outline-primary ml-1 mr-1"
-          onClick={() => add(" AND ")}>AND</button>
-        <button type="button" className="btn btn-sm btn-outline-primary ml-1 mr-1"
-          onClick={() => add(" OR ")}>OR</button>
-        <button type="button" className="btn btn-sm btn-outline-primary ml-1 mr-1"
-          onClick={() => add(" XOR ")}>XOR</button>
-        <button type="button" className="btn btn-sm btn-outline-primary ml-1 mr-1"
-          onClick={() => add(" NOT ")}>NOT</button>
+      <>
+        <label>Add logical connective:</label>
+        <div>
+          <button type="button" className="btn btn-sm btn-outline-primary ml-1 mr-1"
+            onClick={() => add(" AND ")}>AND</button>
+          <button type="button" className="btn btn-sm btn-outline-primary ml-1 mr-1"
+            onClick={() => add(" OR ")}>OR</button>
+          <button type="button" className="btn btn-sm btn-outline-primary ml-1 mr-1"
+            onClick={() => add(" XOR ")}>XOR</button>
+          <button type="button" className="btn btn-sm btn-outline-primary ml-1 mr-1"
+            onClick={() => add(" NOT ")}>NOT</button>
+        </div>
+      </> 
+    );
+  }
+
+  function renderQueryBuilder(): React.ReactElement {
+    return (
+      <div className="card">
+        <div className="card-header" style={{padding: "5px 10px"}}
+          data-toggle="tooltip" data-placement="bottom" title="Here you can build your search query graphically">
+          Query Builder <icons.HelpIcon/>
+        </div>
+        <div className="card-body" style={{padding: "10px"}}>
+          <label>Add search term:</label>
+          <div className="form-group d-flex flex-row">
+            <TermComp 
+              updateAnTypeHandle={setTermType}
+              updateValueHandle={setTermValue}
+              updateSynonymsHandle={setIncludeSynonyms}/>
+            {renderAddTermButton()}
+          </div>
+          {renderConnectives()}
+        </div>
       </div>
-        
     );
   }
 
   function renderQueryEditor(): React.ReactElement {
     return (
-      <div className="form-group mt-3">
-        <label>Search query</label>
-        <div className="d-flex flex-row">
-          <textarea style={{ width: "100%" }}
-            value={queryStr}
-            onChange={(ev) => queryChanged(ev.target.value)}
-          />
-          {queryStr.length > 0 ?
-            <div className="ml-1"
-              data-toggle="tooltip" data-placement="bottom" title={queryError ? `Error at ${queryError.location}: ${queryError.message}` : ""}>
-              {queryError ? 
-                <icons.ErrorIcon className="text-danger" /> 
-                : <icons.OKIcon className="text-success" />}
-            </div>
-            : ""}
+      <div className="card mb-2">
+        <div className="card-header" style={{padding: "5px 10px"}}
+          data-toggle="tooltip" data-placement="bottom" title="Here you can adjust the resulting query or write it manually. Check the help for the exact syntax.">
+          Resulting search query <icons.HelpIcon/>
+        </div>
+        <div className="card-body" style={{padding: "10px"}}>
+          <label>Query Editor</label>
+          <div className="d-flex flex-row">
+            <textarea style={{ width: "100%" }}
+              value={queryStr}
+              onChange={(ev) => queryChanged(ev.target.value)}
+            />
+            {queryStr.length > 0 ?
+              <div className="ml-1"
+                data-toggle="tooltip" data-placement="bottom" title={queryError ? `Error at ${queryError.location}: ${queryError.message}` : ""}>
+                {queryError ? 
+                  <icons.ErrorIcon className="text-danger" /> 
+                  : <icons.OKIcon className="text-success" />}
+              </div>
+              : ""}
+          </div>
         </div>
       </div>
     );
@@ -114,6 +147,7 @@ export function Search(props: SearchProps): React.FunctionComponentElement<Searc
       <div className="d-flex flex-row justify-content-center">
         <button type="button" className="btn btn-primary" style={{width: "100px"}}
           data-toggle="tooltip" data-placement="bottom" title="Make search"
+          disabled={queryStr.length === 0 || queryError !== null}
           onClick={submitQuery}>
           <icons.SearchIcon/> Search 
         </button>
@@ -123,14 +157,7 @@ export function Search(props: SearchProps): React.FunctionComponentElement<Searc
 
   return (
     <div className="mt-2">
-      <div className="form-group d-flex flex-row">
-        <TermComp 
-          updateAnTypeHandle={setTermType}
-          updateValueHandle={setTermValue}
-          updateSynonymsHandle={setIncludeSynonyms}/>
-        {renderAddTermButton()}
-      </div>
-      {renderOperators()}
+      {renderQueryBuilder()}
       {renderQueryEditor()}
       {renderSearchButton()}
       <div className="row justify-content-center">
