@@ -3,8 +3,8 @@ import { matchSwitch } from "@babakness/exhaustive-type-checking";
 import * as React from "react";
 import * as icons from "../../components/icons";
 import * as anModel from "../../core/annotationsModel";
-import type { AnRecord, SearchQuery } from "../../core/annotationsModel";
-import { SearchType, BiOperatorType } from "../../core/searchModel";
+import type { AnRecord } from "../../core/annotationsModel";
+import { SearchType } from "../../core/searchModel";
 import * as queryParser from "../../core/searchQueryParser";
 import * as api from "../../api/annotations";
 import { showAlertError, SpinningWheel } from "../../components/ui"; 
@@ -16,7 +16,7 @@ export interface SearchProps {
   resultsHandle(results: Array<AnRecord>): void;
 }
 
-export function Search(props: SearchProps): React.FunctionComponentElement<SearchProps> {
+export function AdvancedSearch(props: SearchProps): React.FunctionComponentElement<SearchProps> {
   const [termType, setTermType] = React.useState(SearchType.REGEX);
   const [termValue, setTermValue] = React.useState("");
   const [includeSynonyms, setIncludeSynonyms] = React.useState(false);
@@ -122,7 +122,6 @@ export function Search(props: SearchProps): React.FunctionComponentElement<Searc
           Resulting search query <icons.HelpIcon/>
         </div>
         <div className="card-body" style={{padding: "10px"}}>
-          <label>Query Editor</label>
           <div className="d-flex flex-row">
             <textarea style={{ width: "100%" }}
               value={queryStr}
@@ -144,7 +143,7 @@ export function Search(props: SearchProps): React.FunctionComponentElement<Searc
 
   function renderSearchButton(): React.ReactElement {
     return (
-      <div className="d-flex flex-row justify-content-center">
+      <div className="d-flex flex-row justify-content-center mt-2">
         <button type="button" className="btn btn-primary" style={{width: "100px"}}
           data-toggle="tooltip" data-placement="bottom" title="Make search"
           disabled={queryStr.length === 0 || queryError !== null}

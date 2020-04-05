@@ -1,8 +1,9 @@
 import axios from "axios";
 import { endpointUrl, serverUrl } from "../config";
 import { authHeader } from "./utils";
-import type { User } from "../core/user";
+import type { User, UserProfile } from "../core/user";
 import { axiosErrToMsg } from "../core/utils";
+import { getUserProfile } from "./profile";
 
 const storageKey = "user";
 
@@ -16,19 +17,24 @@ function deleteUser(): void {
   window.localStorage.removeItem(storageKey);
 }
 
-export function retrieveUser(): User|null {
-  const userStr = window.localStorage.getItem(storageKey);
-  if (!userStr) {
-    return null;
-  } else {
-    try {
-      const user: User = JSON.parse(userStr);
-      return user;
-    } catch(err) { return null; }
-  }
+export function retrieveUserPm(): Promise<[User, UserProfile]> {
+  return new Promise((resolve, reject) => {
+    const userStr = window.localStorage.getItem(storageKey);
+    if (!userStr) {
+      return reject();
+    } else {
+      try {
+        const user: User = JSON.parse(userStr);
+        getUserProfile(user).then(
+          profile => resolve([user, profile]),
+            err => reject(err)
+        );
+      } catch(err) { reject("Error parsing user object: " + err); }
+    }
+  });
 }
 
-export function login(): Promise<User> {
+export function loginPm(): Promise<[User, UserProfile]> {
   return new Promise((resolve, reject) => {
     let popup: Window|null = null;
 
@@ -38,34 +44,37 @@ export function login(): Promise<User> {
         window.removeEventListener("message", receiveMessage);
         try {
           const user = JSON.parse(event.data) as User;
-          console.log("Logged user:");
-          console.log(user);
+          //console.log("Logged user:");
+          //console.log(user);
           storeUser(user);
-          resolve(user);
+          getUserProfile(user).then(
+            profile => resolve([user, profile]),
+            err => reject(err)
+          );
         } catch (err) { reject("Error parsing user object: " + err); }
       }
     }
 
-    const user = retrieveUser();
-    if (user) {
-      resolve(user);
-    } else {
-       popup = window.open(serverUrl + "/api/b2access/login", "B2ACCESS", "width=800");
-      window.addEventListener("message", receiveMessage, false);
-    }
+    retrieveUserPm().then(
+      res => resolve(res),
+      () => {
+        popup = window.open(serverUrl + "/api/b2access/login", "B2ACCESS", "width=800");
+        window.addEventListener("message", receiveMessage, false);
+      }
+    );
   });
 }
 
-export function logout(): Promise<any> {
+export function logoutPm(): Promise<any> {
   return new Promise((resolve, reject) => {
-    const mbUser = retrieveUser();
-    if (mbUser) {
-      deleteUser();
-      axios.get(endpointUrl + "/logout", authHeader(mbUser.accessToken))
-      .then((resp) => resolve(resp))
-      .catch(error => reject(axiosErrToMsg(error)));
-    } else {
-      reject("Not logged in");
-    }
+    retrieveUserPm().then(
+      ([user, userProfile]) => {
+        deleteUser();
+        axios.get(endpointUrl + "/logout", authHeader(user.accessToken))
+        .then((resp) => resolve(resp))
+        .catch(error => reject(axiosErrToMsg(error)));
+      },
+      () => reject("Not logged in")
+    );
   });
 }

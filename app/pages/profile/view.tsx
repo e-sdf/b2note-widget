@@ -15,6 +15,7 @@ interface ProfileProps {
 }
 
 export function ProfilePage(props: ProfileProps): React.FunctionComponentElement<ProfileProps> {
+  const [orcid, setOrcid] = React.useState(props.profile.orcid);
   const [organisation, setOrganisation] = React.useState(props.profile.organisation);
   const [jobTitle, setJobTitle] = React.useState(props.profile.jobTitle);
   const [country, setCountry] = React.useState(props.profile.country);
@@ -23,7 +24,7 @@ export function ProfilePage(props: ProfileProps): React.FunctionComponentElement
 
   function changeMade(): boolean {
     const orig = props.profile;
-    return organisation !== orig?.organisation || jobTitle !== orig?.jobTitle || country !== orig?.country || experience !== orig?.experience;
+    return orcid !== orig?.orcid || organisation !== orig?.organisation || jobTitle !== orig?.jobTitle || country !== orig?.country || experience !== orig?.experience;
   }
 
   function postProfile(): void {
@@ -31,11 +32,12 @@ export function ProfilePage(props: ProfileProps): React.FunctionComponentElement
       const panelDOM = (panelRef.current as unknown) as Element;
       panelDOM.scrollTop = 0;
     }
+    const orcid2 = orcid.length > 0 ? { orcid } : {};
     const organisation2 = organisation.length > 0 ? { organisation } : {};
     const jobTitle2 = jobTitle.length > 0 ? { jobTitle } : {};
     const country2 = country.length > 0 ? { country } : {};
     const experience2 = experience.length > 0 ? { experience } : {};
-    const changes = { ...organisation2, ...jobTitle2, ...country2, ...experience2 };
+    const changes = { ...orcid2, ...organisation2, ...jobTitle2, ...country2, ...experience2 };
     const mbUser = props.profile;
     if (mbUser) {
       api.patchUserProfile(changes, mbUser).then(
@@ -116,6 +118,12 @@ export function ProfilePage(props: ProfileProps): React.FunctionComponentElement
           <input type="email" className="form-control" readOnly
             data-toggle="tooltip" data-placement="bottom" title="Read-only, value provided by B2ACCESS"
             value={props.profile?.email || ""} />
+        </div>
+        <div className="form-group">
+          <label>ORCID ID</label>
+          <input type="text" className="form-control"
+            value={orcid}
+            onChange={ev => setOrcid(ev.target.value)} />
         </div>
         <div className="form-group">
           <label>Organisation</label>

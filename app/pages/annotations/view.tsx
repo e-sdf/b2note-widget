@@ -101,14 +101,14 @@ function TagEditor(props: TagEditorProps): React.FunctionComponentElement<TagEdi
 
 export function Annotations(props: Props): React.FunctionComponentElement<Props> {
   const loaderRef = React.useRef(null as any);
-  const [annotations, setAnnotations] = React.useState([] as Array<AnItem>);
+  const [annotations, setAnnotations] = React.useState(null as Array<AnItem>|null);
   const [loading, setLoading] = React.useState(false);
   const [activeItem, setActiveItem] = React.useState(null as string|null);
   const [editedRecordId, setEditedRecordId] = React.useState(null as string|null);
   const [pendingDeleteId, setPendingDeleteId] = React.useState(null as string|null);
   const [showOntologyInfos, setShowOntologyInfos] = React.useState(null as Array<oreg.OntologyInfo>|null);
 
-  // React.useEffect(() => console.log(annotations), [annotations]);
+  //React.useEffect(() => console.log(annotations), [annotations]);
 
   function loadOntologiesInfo(anRecord: anModel.AnRecord): void {
     const iris = anModel.getSources(anRecord);
@@ -132,8 +132,8 @@ export function Annotations(props: Props): React.FunctionComponentElement<Props>
     const visibility = activeItem === label ? "visible" : "hidden";
 
     function toggleShowFilesFlag(anItem: AnItem): void {
-      const anl2 = annotations.map(a => _.isEqual(a, anItem) ? { ...a, showFilesFlag: !a.showFilesFlag } : a);
-      setAnnotations(anl2);
+      const anl2 = annotations?.map(a => _.isEqual(a, anItem) ? { ...a, showFilesFlag: !a.showFilesFlag } : a);
+      setAnnotations(anl2 || []);
     }
   
     function renderFilesBadge(): React.ReactElement {
@@ -285,13 +285,15 @@ export function Annotations(props: Props): React.FunctionComponentElement<Props>
             <SpinningWheel show={loading}/>
         </div>
         <div className="row">
-          {annotations.length > 0 ?
-            <table className="table anl-table">
-              <tbody>
-                {annotations.map(anItem=> renderAnItem(anItem))}
-              </tbody>
-            </table>
-          : <div className="col-sm" style={{fontStyle: "italic"}}>No annotations matching the filters</div>}
+          {annotations !== null ?
+            annotations.length > 0 ? 
+              <table className="table anl-table">
+                <tbody>
+                  {annotations.map(anItem=> renderAnItem(anItem))}
+                </tbody>
+              </table>
+            : <div className="col-sm" style={{fontStyle: "italic"}}>No annotations matching the filters</div>
+          : ""}
         </div>
       </div>
     );

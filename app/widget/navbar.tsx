@@ -2,8 +2,7 @@ import { matchSwitch } from '@babakness/exhaustive-type-checking';
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 import * as icons from "../components/icons";
-import { UserProfile } from "../core/user";
-import { getUserProfile } from "../api/profile";
+import type { User, UserProfile } from "../core/user";
 import { Page } from "../pages/pages";
 import { render as annotateRender } from "../pages/annotate/view";
 import { render as annotationsRender } from "../pages/annotations/view";
@@ -11,7 +10,7 @@ import { render as searchRender } from "../pages/search/view";
 import { render as helpRender } from "../pages/help/view";
 import { render as profileRender } from "../pages/profile/view";
 import { HelpSection } from "../pages/help/defs";
-import { Context, isUserLogged } from "../context";
+import type { Context } from "../context";
 import * as auth from "../api/auth";
 import { shorten } from "../components/utils";
 
@@ -36,50 +35,71 @@ interface Props {
 export function Navbar(props: Props): React.FunctionComponentElement<Context> {
   const [page, setPage] = React.useState(Page.ANNOTATE);
   const [helpPage, setHelpPage] = React.useState(Page.ANNOTATE);
-  const [context, setContext] = React.useState({ ...props.context, user: auth.retrieveUser() });
-  const [userProfile, setUserProfile] = React.useState(null as UserProfile|null);
+  const [context, setContext] = React.useState(props.context);
 
-  React.useEffect(() => {
-    if (!context.user) {
-      auth.login().then(user => setContext({ ...context, user }));
-    }
+  function loginPm(): Promise<[User, UserProfile]> {
+    return new Promise((resolve, reject) => {
+      if (!context.user) {
+        auth.retrieveUserPm().then(
+          ([user, userProfile]) => {
+            console.log("retrieved user");
+            console.log(user);
+            console.log(userProfile);
+            resolve([user, userProfile]);
+          },
+          () => {
+            console.log("going to loign");
+            auth.loginPm().then(
+              ([user, userProfile]) => {
+                console.log("user from login");
+                console.log(user);
+                console.log(userProfile);
+                setContext({ ...context, user, userProfile });
+                resolve();
+              },
+              err => {
+                console.error(err);
+                reject();
+              }
+            );
+          }
+        );
+      } else {
+        if (context.userProfile) {
+          resolve([context.user, context.userProfile]);
+        } else {
+          reject("User profile not present for current user!");
+        }
+      }
+    });
+  }
+
+  React.useEffect(() => { 
+    loginPm().then(([user, userProfile]) => console.log("logged"));
   }, []);
-
-  React.useEffect(() => {
-    if (context.user) {
-      getUserProfile(context.user).then(p => setUserProfile(p));
-    }
-  }, [context]);
 
   const activeFlag = (p: Page): string => p === page ? " active" : "";
 
-  function profileSavedHandle(profile: UserProfile) {
-    setUserProfile(profile);
-    gotoPage(Page.ANNOTATE);
-  }
-
   function logout(): void {
     if (context.user) {
-      auth.logout()
-      .then(() => {
-        setUserProfile(null);
-        gotoPage(Page.ANNOTATE);
-        setContext({ ...context, user: null });
-      })
-      .catch(err => console.error(err));
+      auth.logoutPm().then(
+        () => {
+          gotoPage(Page.ANNOTATE);
+          setContext({ ...context, user: null, userProfile: null });
+        }
+      );
     }
   }
 
-  async function profileLoggedRenderPm(): Promise<RenderFn> {
-    if (isUserLogged(context) && userProfile !== null) {
-      return Promise.resolve(() => profileRender(userProfile, profileSavedHandle));
-    } else {
-      const user = await auth.login();
-      const newContext = { ...context, user };
-      setContext(newContext);
-      const p = await getUserProfile(user);
-      return Promise.resolve(() => profileRender(p, profileSavedHandle));
-    }
+  function profileLoggedRenderPm(): Promise<RenderFn> {
+    return new Promise((resolve, reject) => {
+      const p = context.userProfile;
+      if (p) {
+        resolve(() => profileRender(p, () => gotoPage(Page.ANNOTATE)));
+      } else {
+        loginPm().then(([user, userProfile]) => resolve(() => profileRender(userProfile, () => gotoPage(Page.ANNOTATE))));
+      }
+    });
   }
 
   function renderPage(p: Page): void {
@@ -152,10 +172,8 @@ export function Navbar(props: Props): React.FunctionComponentElement<Context> {
             className={"nav-link" + activeFlag(Page.PROFILE)} href="#" 
             data-toggle="tooltip" data-placement="bottom" title={context.user ? "Profile" : "Login"}
             onClick={() => gotoPage(Page.PROFILE)}>
-            {context.user ? 
-              userProfile ?
-                <span><icons.UserIcon/> {shorten(userProfile.name, 15)}</span>
-                : <span style={{fontStyle: "italic"}}>Retrieving profile...</span>
+            {context.userProfile ? 
+              <span><icons.UserIcon/> {shorten(context.userProfile.name, 15)}</span>
               : <icons.LoginIcon/>
             }
           </a>

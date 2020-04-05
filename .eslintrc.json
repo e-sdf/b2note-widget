@@ -17,6 +17,8 @@
     "semi": 2,
     "no-console": "off",
     "explicit-function-return-type": "off",
+    "no-explicit-any": "off",
+    "no-use-before-define": 0,
     "react-hooks/rules-of-hooks": "error",
     "react-hooks/exhaustive-deps": "warn"
   },
