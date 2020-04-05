@@ -65,14 +65,16 @@ export function SearchPage(props: SearchProps): React.FunctionComponentElement<S
 
     function renderItems(): React.ReactElement {
       return (
-        <table className="table mb-2">
+        <>
           {Object.keys(resultsDict).map(source => 
-            <>
-              {<TargetTr key={source} context={props.context} target={resultsDict[source][0].target}/>}
-              {renderAnTags(resultsDict[source])}
-            </>
+            <li key={source} className="list-group-item pt-2 pl-0 pr-0 pb-2">
+              <table className="table mb-2">
+                {<TargetTr key={source} context={props.context} target={resultsDict[source][0].target}/>}
+                {renderAnTags(resultsDict[source])}
+              </table>
+            </li>
           )}
-        </table>
+        </>
       );
     }
 
@@ -83,9 +85,9 @@ export function SearchPage(props: SearchProps): React.FunctionComponentElement<S
             {results.length === 0 ? "No results" : "Targets found:"}
           </div>
           { results.length > 0 ?
-            <div className="card-body" style={{padding: "10px", maxHeight: "372px", overflow: "auto"}}>
+            <ul className="list-group list-group-flush" style={{padding: "10px", maxHeight: "372px", overflow: "auto"}}>
               {renderItems()}
-            </div>
+            </ul>
           : ""}
         </div>
         {renderDownloadButton(results)}
