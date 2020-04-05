@@ -12,6 +12,7 @@ import { render as profileRender } from "../pages/profile/view";
 import { HelpSection } from "../pages/help/defs";
 import type { Context } from "../context";
 import * as auth from "../api/auth";
+import * as profile from "../api/profile";
 import { shorten } from "../components/utils";
 
 function pageToHelp(page: Page): HelpSection {
@@ -37,25 +38,25 @@ export function Navbar(props: Props): React.FunctionComponentElement<Context> {
   const [helpPage, setHelpPage] = React.useState(Page.ANNOTATE);
   const [context, setContext] = React.useState(props.context);
 
-  function loginPm(): Promise<[User, UserProfile]> {
+  function ensureLoginPm(): Promise<[User, UserProfile]> {
     return new Promise((resolve, reject) => {
       if (!context.user) {
         auth.retrieveUserPm().then(
           ([user, userProfile]) => {
-            console.log("retrieved user");
-            console.log(user);
-            console.log(userProfile);
+            //console.log("retrieved user");
+            //console.log(user);
+            //console.log(userProfile);
+            setContext({ ...context, user, userProfile });
             resolve([user, userProfile]);
           },
           () => {
-            console.log("going to loign");
             auth.loginPm().then(
               ([user, userProfile]) => {
-                console.log("user from login");
-                console.log(user);
-                console.log(userProfile);
+                //console.log("user from login");
+                //console.log(user);
+                //console.log(userProfile);
                 setContext({ ...context, user, userProfile });
-                resolve();
+                resolve([user, userProfile]);
               },
               err => {
                 console.error(err);
@@ -75,7 +76,7 @@ export function Navbar(props: Props): React.FunctionComponentElement<Context> {
   }
 
   React.useEffect(() => { 
-    loginPm().then(([user, userProfile]) => console.log("logged"));
+    ensureLoginPm().then(([user, userProfile]) => setContext({ ...context, user, userProfile }));
   }, []);
 
   const activeFlag = (p: Page): string => p === page ? " active" : "";
@@ -84,10 +85,18 @@ export function Navbar(props: Props): React.FunctionComponentElement<Context> {
     if (context.user) {
       auth.logoutPm().then(
         () => {
-          gotoPage(Page.ANNOTATE);
           setContext({ ...context, user: null, userProfile: null });
+          gotoPage(Page.ANNOTATE);
         }
       );
+    }
+  }
+
+  function updateUserProfile(): void {
+    if (context.user) {
+      profile.getUserProfilePm(context.user).then(userProfile => setContext({ ...context, userProfile }));
+    } else {
+      throw new Error("context.user is null");
     }
   }
 
@@ -95,9 +104,13 @@ export function Navbar(props: Props): React.FunctionComponentElement<Context> {
     return new Promise((resolve, reject) => {
       const p = context.userProfile;
       if (p) {
-        resolve(() => profileRender(p, () => gotoPage(Page.ANNOTATE)));
+        resolve(() => profileRender(p, () => { updateUserProfile(); gotoPage(Page.ANNOTATE); }));
       } else {
-        loginPm().then(([user, userProfile]) => resolve(() => profileRender(userProfile, () => gotoPage(Page.ANNOTATE))));
+        ensureLoginPm().then(
+          ([user, userProfile]) => {
+            resolve(() => profileRender(userProfile, () => { updateUserProfile(); gotoPage(Page.ANNOTATE); }));
+          }
+        );
       }
     });
   }

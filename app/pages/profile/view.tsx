@@ -40,7 +40,7 @@ export function ProfilePage(props: ProfileProps): React.FunctionComponentElement
     const changes = { ...orcid2, ...organisation2, ...jobTitle2, ...country2, ...experience2 };
     const mbUser = props.profile;
     if (mbUser) {
-      api.patchUserProfile(changes, mbUser).then(
+      api.patchUserProfilePm(changes, mbUser).then(
         updatedProfile => {
           props.updateProfileFn(updatedProfile);
           showAlertSuccess(alertId, "Profile updated");
@@ -89,7 +89,7 @@ export function ProfilePage(props: ProfileProps): React.FunctionComponentElement
 
   function renderSaveButton(): React.ReactElement {
     return (
-      <div className="form-group">
+      <div className="form-group d-flex flex-row justify-content-center">
         <button type="button" className="btn btn-primary"
           disabled={!changeMade()}
           onClick={() => postProfile()}>

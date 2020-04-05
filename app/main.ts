@@ -15,7 +15,6 @@ $(document).ready(() => {
         console.error(`<input type="hidden" id="${sourceInputElemId}" value="..."> element not found in DOM`);
       } else {
         const context = mkContext({ pid: pidDOM.value, source: sourceDOM.value });
-        console.log(context);
         widget.renderWidget(context);
       }
     }

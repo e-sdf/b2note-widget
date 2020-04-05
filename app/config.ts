@@ -12,4 +12,4 @@ export const solrUrl = confRec?.solrUrl ? confRec.solrUrl : "https://b2note.euda
 export const endpointUrl = serverUrl + apiUrl;
 
 export const version = "v3.0";
-export const subversion = "BETA2"
+export const subversion = "BETA4";

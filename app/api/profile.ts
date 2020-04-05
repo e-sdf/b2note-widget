@@ -7,7 +7,7 @@ import { axiosErrToMsg } from "../core/utils";
 
 const url = endpointUrl + profileUrl;
 
-export function getUserProfile(user: User): Promise<UserProfile> {
+export function getUserProfilePm(user: User): Promise<UserProfile> {
   return new Promise((resolve, reject) => {
     axios.get(url, authHeader(user.accessToken))
     .then(resp => resolve(resp.data as UserProfile))
@@ -15,7 +15,7 @@ export function getUserProfile(user: User): Promise<UserProfile> {
   });
 }
 
-export function patchUserProfile(changes: Record<string, any>, user: User): Promise<UserProfile> {
+export function patchUserProfilePm(changes: Record<string, any>, user: User): Promise<UserProfile> {
   return new Promise((resolve, reject) => {
     axios.patch(url, { ...changes }, authHeader(user.accessToken))
     .then(resp => resolve(resp.data as UserProfile))

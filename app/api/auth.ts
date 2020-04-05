@@ -3,7 +3,7 @@ import { endpointUrl, serverUrl } from "../config";
 import { authHeader } from "./utils";
 import type { User, UserProfile } from "../core/user";
 import { axiosErrToMsg } from "../core/utils";
-import { getUserProfile } from "./profile";
+import { getUserProfilePm } from "./profile";
 
 const storageKey = "user";
 
@@ -25,7 +25,7 @@ export function retrieveUserPm(): Promise<[User, UserProfile]> {
     } else {
       try {
         const user: User = JSON.parse(userStr);
-        getUserProfile(user).then(
+        getUserProfilePm(user).then(
           profile => resolve([user, profile]),
             err => reject(err)
         );
@@ -47,7 +47,7 @@ export function loginPm(): Promise<[User, UserProfile]> {
           //console.log("Logged user:");
           //console.log(user);
           storeUser(user);
-          getUserProfile(user).then(
+          getUserProfilePm(user).then(
             profile => resolve([user, profile]),
             err => reject(err)
           );
