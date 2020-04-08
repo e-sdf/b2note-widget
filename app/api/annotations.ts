@@ -1,6 +1,7 @@
 import axios from "axios";
 import { endpointUrl } from "../config";
 import type { Context } from "../context";
+import { version } from "../config";
 import * as anModel from "../core/annotationsModel";
 import * as sModel from "../core/searchModel";
 import * as searchQueryParser from "../core/searchQueryParser";
@@ -130,7 +131,7 @@ async function postAnnotation(anRecord: anModel.AnRecord, context: Context): Pro
 export async function postAnnotationSemantic(uris: string[], label: string, context: Context): Promise<any> {
   const body = anModel.mkSemanticAnBody(uris, label);
   const target = mkTarget(context.target);
-  const generator = anModel.mkGenerator();
+  const generator = anModel.mkGenerator(version);
   const creator = mkCreator(context);
   const req = anModel.mkAnRecord(body, target, creator, generator, anModel.PurposeType.TAGGING);
   return postAnnotation(req, context);
@@ -140,7 +141,7 @@ export async function postAnnotationKeyword(label: string, context: Context): Pr
   const body = anModel.mkKeywordAnBody(label);
   const target = mkTarget(context.target);
   const creator = mkCreator(context);
-  const generator = anModel.mkGenerator();
+  const generator = anModel.mkGenerator(version);
   const req = anModel.mkAnRecord(body, target, creator, generator, anModel.PurposeType.TAGGING);
   return postAnnotation(req, context);
 }
@@ -149,7 +150,7 @@ export async function postAnnotationComment(comment: string, context: Context): 
   const body = anModel.mkCommentAnBody(comment);
   const target = mkTarget(context.target);
   const creator = mkCreator(context);
-  const generator = anModel.mkGenerator();
+  const generator = anModel.mkGenerator(version);
   const req = anModel.mkAnRecord(body, target, creator, generator, anModel.PurposeType.COMMENTING);
   return postAnnotation(req, context);
 }
