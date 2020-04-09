@@ -11,7 +11,7 @@
     "test": "jest",
     "clean": "npm cache clean --force",
     "docker-build": "docker-compose build; docker image prune -f",
-    "docker-tag": "docker tag b2note/b2note-widget b2note/b2note-widget:3.0-beta3",
+    "docker-tag": "docker tag b2note/b2note-widget b2note/b2note-widget:3.0-beta6",
     "docker-push": "docker push b2note/b2note-widget",
     "docker-deploy": "npm run docker-build && npm run docker-tag && npm run docker-push",
     "docker-run": "docker-compose up --build"
