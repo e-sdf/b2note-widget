@@ -5,7 +5,7 @@ import { version } from "../config";
 import * as anModel from "../core/annotationsModel";
 import * as sModel from "../core/searchModel";
 import * as searchQueryParser from "../core/searchQueryParser";
-import { makeLocalUrl, authHeader } from "./utils";
+import { authHeader } from "./utils";
 import { axiosErrToMsg } from "../core/utils";
 
 const annotationsUrl = endpointUrl + anModel.annotationsUrl;
@@ -160,7 +160,7 @@ export async function postAnnotationComment(comment: string, context: Context): 
 export function patchAnnotationBody(anIdUrl: string, body: anModel.AnBody, context: Context): Promise<any> {
   return new Promise((resolve, reject) => {
     if (context.user) {
-      axios.patch(makeLocalUrl(anIdUrl), { body }, authHeader(context.user.accessToken))
+      axios.patch(anIdUrl, { body }, authHeader(context.user.accessToken))
       .then(resp => resolve(resp))
       .catch(error => reject(axiosErrToMsg(error)));
     } else {
@@ -174,7 +174,7 @@ export function patchAnnotationBody(anIdUrl: string, body: anModel.AnBody, conte
 export function deleteAnnotation(anIdUrl: string, context: Context): Promise<any> {
   return new Promise((resolve, reject) => {
     if (context.user) {
-      axios.delete(makeLocalUrl(anIdUrl), authHeader(context.user.accessToken))
+      axios.delete(anIdUrl, authHeader(context.user.accessToken))
         .then(resp => resolve(resp))
         .catch(error => reject(axiosErrToMsg(error)));
     } else {
