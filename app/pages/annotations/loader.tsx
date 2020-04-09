@@ -1,3 +1,4 @@
+import _ from "lodash";
 import * as React from "react";
 import * as icons from "../../components/icons";
 import * as anModel from "../../core/annotationsModel";
@@ -49,57 +50,67 @@ export const LoaderFilter = React.forwardRef((props: LoaderProps, ref: React.Ref
   const [noOfKeyword, setNoOfKeyword] = React.useState(null as number|null);
   const [noOfComment, setNoOfComment] = React.useState(null as number|null);
 
-  function mkFilters(): api.Filters {
-    return {
-      allFiles: allFilesFilter, 
-      creator: {
-        mine: mineFilter,
-        others: othersFilter
-      },
-      type: {
-        semantic: semanticFilter,
-        keyword: keywordFilter,
-        comment: commentFilter
-      }
-    };
+  const allFilters = [allFilesFilter, mineFilter, othersFilter, semanticFilter, keywordFilter, commentFilter];
+
+  function mkFilters(): api.Filters|null {
+    return (
+      _.some(allFilters) ?
+        {
+          allFiles: allFilesFilter, 
+          creator: {
+            mine: mineFilter,
+            others: othersFilter
+          },
+          type: {
+            semantic: semanticFilter,
+            keyword: keywordFilter,
+            comment: commentFilter
+          }
+        }
+      : null
+    );
   }
 
   function loadAnnotations(): void {
-    const filters = mkFilters();
-    if (props.setLoaderFlagFn) { props.setLoaderFlagFn(true); }
-    api.getAnnotationsJSON(props.context, filters).then(
-      anl => {
-        if (props.setLoaderFlagFn) { props.setLoaderFlagFn(false); }
-        setAnRecords(anl);
-        const targetsPms = anl.map(a => api.getTargets(anModel.getLabel(a)));
-        Promise.all(targetsPms).then(targets => {
-          props.setAnItemsFn(anl.map((an, i) => ({
-            anRecord: an,
-            targets: targets[i],
-            showFilesFlag: false
-          })));
-          // Prepared for target resolving:
-          // https://esciencedatalab.atlassian.net/browse/B2NT-137
-          // anl.map((an, ani) => {
-          //   const targetsItem = targets[ani];
-          //   const filenamePms = targetsItem.map(t => api.resolveSourceFilename(t.id));
-          //   Promise.all(filenamePms).then(filenames => 
-          //     props.setAnItems(anl.map(an2 => ({
-          //       anRecord: an2,
-          //       resTargets: targetsItem.map((t, ti) => ({ target: t, filename: filenames[ti] })),
-          //       showFilesFlag: false
-          //     })))
-          //   );
-          // });
-          setNoOfMine(anl.filter(a => a.creator.id === (props.context.user?.id || "")).length);
-          setNoOfOthers(anl.filter(a => a.creator.id !== (props.context.user?.id || "")).length);
-          setNoOfSemantic(anl.filter(anModel.isSemantic).length);
-          setNoOfKeyword(anl.filter(anModel.isKeyword).length);
-          setNoOfComment(anl.filter(anModel.isComment).length);
-        });
-      },
-      error => { showAlertError(alertId, error); }
-    );
+    const mbFilters = mkFilters();
+    if (!mbFilters) {
+      setAnRecords([]);
+    } else {
+      if (props.setLoaderFlagFn) { props.setLoaderFlagFn(true); }
+      api.getAnnotationsJSON(props.context, mbFilters).then(
+        anl => {
+          if (props.setLoaderFlagFn) { props.setLoaderFlagFn(false); }
+          setAnRecords(anl);
+          const targetsPms = anl.map(a => api.getTargets(anModel.getLabel(a)));
+          Promise.all(targetsPms).then(targets => {
+            props.setAnItemsFn(anl.map((an, i) => ({
+              anRecord: an,
+              targets: targets[i],
+              showFilesFlag: false
+            })));
+            // Prepared for target resolving:
+            // https://esciencedatalab.atlassian.net/browse/B2NT-137
+            // anl.map((an, ani) => {
+            //   const targetsItem = targets[ani];
+            //   const filenamePms = targetsItem.map(t => api.resolveSourceFilename(t.id));
+            //   Promise.all(filenamePms).then(filenames => 
+            //     props.setAnItems(anl.map(an2 => ({
+            //       anRecord: an2,
+            //       resTargets: targetsItem.map((t, ti) => ({ target: t, filename: filenames[ti] })),
+            //       showFilesFlag: false
+            //     })))
+            //   );
+            // });
+            setNoOfMine(anl.filter(a => a.creator.id === (props.context.user?.id || "")).length);
+            setNoOfOthers(anl.filter(a => a.creator.id !== (props.context.user?.id || "")).length);
+            setNoOfSemantic(anl.filter(anModel.isSemantic).length);
+            setNoOfKeyword(anl.filter(anModel.isKeyword).length);
+            setNoOfComment(anl.filter(anModel.isComment).length);
+          });
+        },
+        error => { showAlertError(alertId, error); }
+      );
+    }
   }
 
   React.useImperativeHandle(ref, () => ({
@@ -108,7 +119,7 @@ export const LoaderFilter = React.forwardRef((props: LoaderProps, ref: React.Ref
   
   React.useEffect(() => {
     loadAnnotations();
-  }, [allFilesFilter, mineFilter, othersFilter, semanticFilter, keywordFilter, commentFilter]);
+  }, allFilters);
 
   function renderLabel(): React.ReactElement {
     return (
