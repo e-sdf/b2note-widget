@@ -187,34 +187,30 @@ export function Annotations(props: Props): React.FunctionComponentElement<Props>
             <div className="row justify-content-center">
               <div className="col-sm font-italic">Really delete the annotation?</div>
             </div>
-            <div className="row justify-content-center">
-              <div className="col-sm">
-                <button type="button" 
-                  className="btn btn-sm btn-danger"
-                  style={{marginLeft: "5px", marginRight: "5px"}}
-                  onClick={() => {
-                    if (pendingDeleteId) {
-                      api.deleteAnnotation(pendingDeleteId, props.context).then(
-                        () => {
-                          if (loaderRef.current) { loaderRef.current.loadAnnotations(); }
-                        },
-                        (err) => {
-                          showAlertError(alertId, err);
-                        }
-                      );
-                    }
-                  }}>
-                  Yes
-                </button>
-              </div>
-              <div className="col-sm">
-                <button type="button"
-                  className="btn btn-sm btn-success"
-                  style={{marginLeft: "5px"}}
-                  onClick={() => setPendingDeleteId(null)}>
-                  No
-                </button>
-              </div>
+            <div className="row justify-content-center mt-2">
+              <button type="button" 
+                className="btn btn-sm btn-danger mr-3"
+                style={{marginLeft: "5px", marginRight: "5px"}}
+                onClick={() => {
+                  if (pendingDeleteId) {
+                    api.deleteAnnotation(pendingDeleteId, props.context).then(
+                      () => {
+                        if (loaderRef.current) { loaderRef.current.loadAnnotations(); }
+                      },
+                      (err) => {
+                        showAlertError(alertId, err);
+                      }
+                    );
+                  }
+                }}>
+                Yes
+              </button>
+              <button type="button"
+                className="btn btn-sm btn-success ml-3"
+                style={{marginLeft: "5px"}}
+                onClick={() => setPendingDeleteId(null)}>
+                No
+              </button>
             </div>
           </div>
         </td>
