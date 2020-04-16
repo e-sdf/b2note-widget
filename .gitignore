@@ -61,5 +61,5 @@ typings/
 .next
 
 server/public/widget/js/app.js
-
+chrome-extension/widget/
 b2note-core/

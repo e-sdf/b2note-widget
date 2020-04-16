@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<!--This index.html is just for webpack development server-->
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>B2Note widget</title>
+
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/bootstrap-grid.min.css">
+    <link rel="stylesheet" href="css/Typeahead-bs4.min.css">
+    <link rel="stylesheet" href="css/bundle.css">
+  </head>
+  <body>
+    <!-- Hidden inputs for the widget -->
+    <input type="hidden" id="pid-input" value="http://hdl.handle.net/11304/3720bb44-831c-48f3-9847-6988a41236e2">
+    <input type="hidden" id="source-input" value="https://b2share.eudat.eu/records/b1092be3cd4844e0bffd7b669521ba4c">
+    <!-- This is the DOM element where the B2NOTE widget will be rendered -->
+    <div id="b2note-widget" style="border: 1px solid gray"></div>
+  </body>
+  <script src="js/jquery.min.js"></script>
+  <script src="js/bootstrap.bundle.min.js"></script>
+  <script src="js/app.js"></script>
+</html>
