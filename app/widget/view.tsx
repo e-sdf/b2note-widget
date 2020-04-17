@@ -56,7 +56,11 @@ export function renderWidget(context: Context): void {
   const container = document.getElementById("b2note-widget");
   if (container) {
     ReactDOM.render(<Widget context={context}/>, container);
-    console.log(`Annotating pid="${context.target.pid}" source="${context.target.source}"`);
+    if (context.mbTarget) {
+      console.log(`Annotating pid="${context.mbTarget.pid}" source="${context.mbTarget.source}"`);
+    } else {
+      console.log("No target, will be in the view more");
+    }
   } else {
     console.error("widget DOM element missing");
   }

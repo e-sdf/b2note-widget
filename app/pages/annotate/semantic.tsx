@@ -16,6 +16,8 @@ export function Semantic(props: SemanticProps): React.FunctionComponentElement<S
   const [isNew, setIsNew] = React.useState(false);
   const [ref, setRef] = React.useState(null as any);
   const [loading, setLoading] = React.useState(false);
+  const target = props.context.mbTarget;
+  const user = props.context.mbUser;
 
   function gotSuggestion(suggestions: Array<ac.Suggestion>): void {
     if (suggestions.length > 0) {
@@ -35,21 +37,25 @@ export function Semantic(props: SemanticProps): React.FunctionComponentElement<S
   }
 
   function annotate(): void {
-    setLoading(true);
-    api.postAnnotationSemantic(uris, label, props.context).then(
-      () => { setLoading(false); showAlertSuccess(props.alertId, "Semantic annotation created"); },
-      (err) => { setLoading(false); showAlertError(props.alertId, err); }
-    );
+    if (target && user) {
+      setLoading(true);
+      api.postAnnotationSemantic(target, user, uris, label).then(
+        () => { setLoading(false); showAlertSuccess(props.alertId, "Semantic annotation created"); },
+        (err) => { setLoading(false); showAlertError(props.alertId, err); }
+      );
+    }
   }
 
   function postAnnotationAsKeyword(): void {
-    api.postAnnotationKeyword(label, props.context).then(
-      () => {
-        showAlertSuccess(props.alertId, "Keyword annotation created");
-        setLabel("");
-      },
-      (err) => showAlertError(props.alertId, err)
-    );
+    if (target && user) {
+      api.postAnnotationKeyword(target, user, label).then(
+        () => {
+          showAlertSuccess(props.alertId, "Keyword annotation created");
+          setLabel("");
+        },
+        (err) => showAlertError(props.alertId, err)
+      );
+    }
   }
 
   function renderKeywordDialog(): React.ReactElement {
@@ -93,8 +99,8 @@ export function Semantic(props: SemanticProps): React.FunctionComponentElement<S
           onChange={gotSuggestion}
         />
         <button type="button" className="btn btn-primary"
-          data-toggle="tooltip" data-placement="bottom" title={props.context.user ? "" : "Not logged in"}
-          disabled={label.length === 0 || !props.context.user || loading}
+          data-toggle="tooltip" data-placement="bottom" title={props.context.mbUser ? "" : "Not logged in"}
+          disabled={label.length === 0 || !props.context.mbUser || loading}
           onClick={() => {
             annotate();
             if (ref) { ref.clear(); }

@@ -33,6 +33,7 @@ function TagEditor(props: TagEditorProps): React.FunctionComponentElement<TagEdi
   const [uris, setUris] = React.useState([] as Array<string>);
   const [label, setLabel] = React.useState(anModel.getLabel(props.anRecord));
   const [ref, setRef] = React.useState(null as any);
+  const user = props.context.mbUser;
 
   function gotSuggestion(suggestions: Array<ac.Suggestion>): void {
     setUris((suggestions[0].items || []).map(i => i.uris));
@@ -40,21 +41,23 @@ function TagEditor(props: TagEditorProps): React.FunctionComponentElement<TagEdi
   }
 
   function update(): void {
-   const body = 
-     anModel.isSemantic(props.anRecord) ?
-       anModel.mkSemanticAnBody(uris, label)
-     : anModel.isKeyword(props.anRecord) ?
-       anModel.mkKeywordAnBody(label)
-     : anModel.mkCommentAnBody(label);
-    api.patchAnnotationBody(props.anRecord.id, body, props.context).then(
-      () => {
-        showAlertSuccess(alertId, "Annotation updated");
-        props.doneHandler();
-      },
-      (err) => {
-        showAlertError(alertId, err);
-      }
-    );
+    if (user) {
+     const body = 
+       anModel.isSemantic(props.anRecord) ?
+         anModel.mkSemanticAnBody(uris, label)
+       : anModel.isKeyword(props.anRecord) ?
+         anModel.mkKeywordAnBody(label)
+       : anModel.mkCommentAnBody(label);
+      api.patchAnnotationBody(user, props.anRecord.id, body).then(
+        () => {
+          showAlertSuccess(alertId, "Annotation updated");
+          props.doneHandler();
+        },
+        (err) => {
+          showAlertError(alertId, err);
+        }
+      );
+    }
   }
 
   React.useEffect(() => {
@@ -107,6 +110,7 @@ export function Annotations(props: Props): React.FunctionComponentElement<Props>
   const [editedRecordId, setEditedRecordId] = React.useState(null as string|null);
   const [pendingDeleteId, setPendingDeleteId] = React.useState(null as string|null);
   const [showOntologyInfos, setShowOntologyInfos] = React.useState(null as Array<oreg.OntologyInfo>|null);
+  const user = props.context.mbUser;
 
   //React.useEffect(() => console.log(annotations), [annotations]);
 
@@ -124,6 +128,10 @@ export function Annotations(props: Props): React.FunctionComponentElement<Props>
 
   function closeOntologiesInfo(): void {
     setShowOntologyInfos(null);
+  }
+
+  function pageChanged(p: number) {
+    console.log(p);
   }
 
   function renderAnItem(anItem: AnItem): React.ReactElement {
@@ -175,14 +183,14 @@ export function Annotations(props: Props): React.FunctionComponentElement<Props>
       return (
         <table className="table mb-0">
           {anItem.targets.map(t =>
-            <TargetTr key={t.source} context={props.context} target={t}/>)}
+            <TargetTr key={t.source} mbContextTarget={props.context.mbTarget} target={t}/>)}
         </table>
       );
     }
 
     function renderDeleteConfirmation(): React.ReactElement {
       return (
-        <td colSpan={3} className="alert alert-danger" style={{borderTop: "none", borderRight: "none"}}>
+        <td colSpan={3} className="alert alert-danger condensed">
           <div className="container-fluid">
             <div className="row justify-content-center">
               <div className="col-sm font-italic">Really delete the annotation?</div>
@@ -192,8 +200,8 @@ export function Annotations(props: Props): React.FunctionComponentElement<Props>
                 className="btn btn-sm btn-danger mr-3"
                 style={{marginLeft: "5px", marginRight: "5px"}}
                 onClick={() => {
-                  if (pendingDeleteId) {
-                    api.deleteAnnotation(pendingDeleteId, props.context).then(
+                  if (pendingDeleteId && user) {
+                    api.deleteAnnotation(user, pendingDeleteId).then(
                       () => {
                         if (loaderRef.current) { loaderRef.current.loadAnnotations(); }
                       },
@@ -223,7 +231,7 @@ export function Annotations(props: Props): React.FunctionComponentElement<Props>
           <tr onMouseOver={() => setActiveItem(label)} onMouseLeave={() => setActiveItem(null)}>
             <td style={{verticalAlign: "middle", whiteSpace: "nowrap"}}>
               <AnnotationTag 
-                context={props.context}
+                mbUser={props.context.mbUser}
                 anRecord={anRecord}
                 maxLen={17}
                 onClick={() => loadOntologiesInfo(anRecord)}/>
@@ -232,7 +240,7 @@ export function Annotations(props: Props): React.FunctionComponentElement<Props>
               {renderFilesBadge()}
             </td>
             <td style={{whiteSpace: "nowrap", paddingLeft: 0, paddingRight: 0, visibility}}>
-              {anRecord.creator.id === (props.context.user?.id || "") ? renderActionButtons() : ""}
+              {anRecord.creator.id === (props.context.mbUser?.id || "") ? renderActionButtons() : ""}
             </td>
           </tr>
           {pendingDeleteId === anRecord.id ? 
@@ -241,7 +249,7 @@ export function Annotations(props: Props): React.FunctionComponentElement<Props>
             </tr> : ""}
           {anItem.showFilesFlag ? 
             <tr>
-              <td colSpan={3} style={{borderTop: "none", paddingTop: 0}}>
+              <td colSpan={3} className="condensed">
                 {renderTargets()}
               </td>
             </tr> : ""}
@@ -283,11 +291,13 @@ export function Annotations(props: Props): React.FunctionComponentElement<Props>
         <div className="row">
           {annotations !== null ?
             annotations.length > 0 ? 
-              <table className="table anl-table">
-                <tbody>
-                  {annotations.map(anItem=> renderAnItem(anItem))}
-                </tbody>
-              </table>
+              <>
+                <table className="table anl-table">
+                  <tbody>
+                    {annotations.map(anItem=> renderAnItem(anItem))}
+                  </tbody>
+                </table>
+              </>
             : <div className="col-sm" style={{fontStyle: "italic"}}>No annotations matching the filters</div>
           : ""}
         </div>

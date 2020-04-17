@@ -32,3 +32,5 @@ export const OKIcon = icons.FaCheck;
 export const CancelIcon = icons.FaTimes;
 export const ErrorIcon = icons.FaExclamation;
 
+export const LeftIcon = icons.FaCaretLeft; 
+export const RightIcon = icons.FaCaretRight; 

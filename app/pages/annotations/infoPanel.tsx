@@ -1,10 +1,8 @@
 import * as _ from "lodash";
 import * as React from "react";
-import * as icons from "react-icons/fa";
+import * as icons from "../../components/icons";
+import { Paginator } from "../../components/paginator";
 import type { OntologyInfo } from "../../core/ontologyRegister";
-
-const LeftIcon = icons.FaCaretLeft; 
-const RightIcon = icons.FaCaretRight; 
 
 interface Props {
   label: string;
@@ -14,56 +12,6 @@ interface Props {
 
 export function InfoPanel(props: Props): React.FunctionComponentElement<Props> {
   const [activePage, setActivePage] = React.useState(1);
-
-  function renderPaginator(): React.ReactElement {
-
-    function renderGoLeft(): React.ReactElement {
-      return (
-        <li className="page-item">
-          <a className="page-link" href="#" aria-label="Previous"
-            onClick={() => setActivePage(Math.max(1, activePage - 1))}
-          ><span aria-hidden="true"><LeftIcon/></span>
-          </a>
-        </li>
-      );
-    }
-
-    function renderGoRight(): React.ReactElement {
-      return (
-        <li className="page-item">
-          <a className="page-link" href="#" aria-label="Next"
-            onClick={() => setActivePage(Math.min(props.ontologyInfos.length, activePage + 1))}
-          ><span aria-hidden="true"><RightIcon/></span>
-          </a>
-        </li>
-      );
-    }
-
-    function renderPage(n: number): React.ReactElement {
-      const index = n + 1;
-      const active = index === activePage ? " active" : "";
-      return (
-        <li key={index} className={"page-item" + active}>
-          <a className="page-link" href="#"
-            onClick={() => setActivePage(index)}
-          >{index}</a>
-        </li>
-      );
-    }
-
-    return (
-      <nav 
-        style={{backgroundColor: "white"}} aria-label="Ontologies navigation">
-        <ul 
-          className="pagination pagination-sm justify-content-center flex-wrap"
-          style={{margin: 0}}>
-          {renderGoLeft()}
-          {props.ontologyInfos.map((_, n) => renderPage(n))}
-          {renderGoRight()}
-        </ul>
-      </nav>
-    );
-  }
 
   function renderTable(info: OntologyInfo): React.ReactElement {
     return (
@@ -127,10 +75,8 @@ export function InfoPanel(props: Props): React.FunctionComponentElement<Props> {
             {renderTable(props.ontologyInfos[activePage - 1])}
           </div>
         </div>
-        <div className="row">
-          <div className="col-sm">
-            {renderPaginator()}
-          </div>
+        <div className="row d-flex flex-row justify-content-center">
+          <Paginator maxPage={props.ontologyInfos.length} pageChangedFn={setActivePage}/>
         </div>
       </div>
     </>

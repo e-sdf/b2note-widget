@@ -12,17 +12,21 @@ export interface CommentProps {
 export function Comment(props: CommentProps): React.FunctionComponentElement<CommentProps> {
   const [comment, setComment] = React.useState("");
   const [loading, setLoading] = React.useState(false);
+  const target = props.context.mbTarget;
+  const user = props.context.mbUser;
 
   function annotate(): void {
-    setLoading(true);
-    api.postAnnotationComment(comment, props.context).then(
-      () => {
-        setLoading(false);
-        showAlertSuccess(props.alertId, "Comment created");
-        setComment("");
-      },
-      (err) => { setLoading(false); showAlertError(props.alertId, err); }
-    );
+    if (target && user) {
+      setLoading(true);
+      api.postAnnotationComment(target, user, comment).then(
+        () => {
+          setLoading(false);
+          showAlertSuccess(props.alertId, "Comment created");
+          setComment("");
+        },
+        (err) => { setLoading(false); showAlertError(props.alertId, err); }
+      );
+    }
   }
 
   return (
@@ -33,8 +37,8 @@ export function Comment(props: CommentProps): React.FunctionComponentElement<Com
         onChange={ev => setComment(ev.target?.value || "")} 
       />
       <button type="button" className="btn btn-primary"
-        data-toggle="tooltip" data-placement="bottom" title={props.context.user ? "" : "Not logged in"}
-        disabled={comment.length === 0 || !props.context.user || loading}
+        data-toggle="tooltip" data-placement="bottom" title={props.context.mbUser ? "" : "Not logged in"}
+        disabled={comment.length === 0 || !props.context.mbUser || loading}
         onClick={annotate}
       ><CreateIcon/></button>
       <div className="d-flex flex-row justify-content-center">

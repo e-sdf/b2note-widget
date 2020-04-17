@@ -60,6 +60,8 @@ typings/
 # next.js build output
 .next
 
-server/public/widget/js/app.js
-chrome-extension/widget/
+server/public/widget/js
+server/public/widget/css
+chrome-extension/css/bundle.css
+chrome-extension/js/app.js
 b2note-core/

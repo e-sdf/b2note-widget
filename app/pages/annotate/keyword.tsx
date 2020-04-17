@@ -18,37 +18,45 @@ export function Keyword(props: KeywordProps): React.FunctionComponentElement<Key
   const [semanticFound, setSemanticFound] = React.useState(false);
   const [tooLong, setTooLong] = React.useState(false);
   const lengthLimit = 60;
+  const target = props.context.mbTarget;
+  const user = props.context.mbUser;
 
   React.useEffect(() => setTooLong(label.length > lengthLimit), [label]);
 
   function postAnnotation(): void {
-    api.postAnnotationKeyword(label, props.context).then(
-      () => {
-        showAlertSuccess(props.alertId, "Keyword annotation created");
-        setLabel("");
-      },
-      (err) => showAlertError(props.alertId, err)
-    );
+    if (target && user) {
+      api.postAnnotationKeyword(target, user, label).then(
+        () => {
+          showAlertSuccess(props.alertId, "Keyword annotation created");
+          setLabel("");
+        },
+        (err) => showAlertError(props.alertId, err)
+      );
+    }
   }
 
   function postAnnotationAsSemantic(): void {
-    api.postAnnotationSemantic(uris, label, props.context).then(
-      () => {
-        showAlertSuccess(props.alertId, "Semantic annotation created");
-        setLabel("");
-      },
-      (err) => showAlertError(props.alertId, err)
-    );
+    if (target && user) {
+      api.postAnnotationSemantic(target, user, uris, label).then(
+        () => {
+          showAlertSuccess(props.alertId, "Semantic annotation created");
+          setLabel("");
+        },
+        (err) => showAlertError(props.alertId, err)
+      );
+    }
   }
 
   function postAnnotationAsComment(): void {
-    api.postAnnotationComment(label, props.context).then(
-      () => {
-        showAlertSuccess(props.alertId, "Comment annotation created");
-        setLabel("");
-      },
-      (err) => showAlertError(props.alertId, err)
-    );
+    if (target && user) {
+      api.postAnnotationComment(target, user, label).then(
+        () => {
+          showAlertSuccess(props.alertId, "Comment annotation created");
+          setLabel("");
+        },
+        (err) => showAlertError(props.alertId, err)
+      );
+    }
   }
 
   function annotate(): void {
@@ -132,8 +140,8 @@ export function Keyword(props: KeywordProps): React.FunctionComponentElement<Key
         {tooLong ? 
           <></>
         : <button type="button" className="btn btn-primary"
-            data-toggle="tooltip" data-placement="bottom" title={props.context.user ? "" : "Not logged in"}
-            disabled={label.length === 0 || !props.context.user || loading}
+            data-toggle="tooltip" data-placement="bottom" title={props.context.mbUser ? "" : "Not logged in"}
+            disabled={label.length === 0 || !props.context.mbUser || loading}
             onClick={annotate}>
             <CreateIcon/>
           </button>

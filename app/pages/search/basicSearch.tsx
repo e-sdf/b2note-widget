@@ -45,7 +45,7 @@ function TermComp(props: TermCompProps): TermComp {
             props.updateValueHandle("");
           }
         }}>
-        <option value={SearchType.REGEX}>Any (regular expression)</option>
+        <option value={SearchType.REGEX}>All types (regular expression)</option>
         <option value={SearchType.SEMANTIC}>Semantic tag</option>
         <option value={SearchType.KEYWORD}>Free-text keyword</option>
         <option value={SearchType.COMMENT}>Comment</option>

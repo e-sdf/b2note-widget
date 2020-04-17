@@ -1,13 +1,13 @@
 import { matchSwitch } from "@babakness/exhaustive-type-checking";
 import * as React from "react";
 import * as anModel from "../core/annotationsModel";
+import { User } from "../core/user";
 import { shorten } from "../components/utils";
 import { SemanticIcon, KeywordIcon, CommentIcon } from "./icons";
-import type { Context } from "../context";
 
 interface AnnotationProps {
   anRecord: anModel.AnRecord;
-  context: Context;
+  mbUser: User|null;
   maxLen?: number;
   onClick?: () => void;
 }
@@ -21,7 +21,7 @@ export default function AnnotationTag(props: AnnotationProps): React.FunctionCom
     [anModel.AnRecordType.KEYWORD]: () => <KeywordIcon className="text-secondary" />,
     [anModel.AnRecordType.COMMENT]: () => <CommentIcon className="text-secondary" />,
   });
-  const itemStyle = anRecord.creator.id === (props.context.user?.id || "") ? {} : { fontStyle: "italic" };
+  const itemStyle = anRecord.creator.id === (props.mbUser?.id || "") ? {} : { fontStyle: "italic" };
 
   function renderSemanticLabel(): React.ReactElement {
     const shortened = props.maxLen ? shorten(label, props.maxLen - 4) : label;
@@ -57,12 +57,12 @@ export default function AnnotationTag(props: AnnotationProps): React.FunctionCom
   }
 
   return (
-    <React.Fragment>
+    <div>
       {icon}
       <span> </span>
       {anModel.isSemantic(anRecord)
         ? renderSemanticLabel()
         : renderOtherLabel()}
-    </React.Fragment>
+    </div>
   );
 }

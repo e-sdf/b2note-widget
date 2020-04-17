@@ -34,28 +34,22 @@ interface Props {
 }
 
 export function Navbar(props: Props): React.FunctionComponentElement<Context> {
-  const [page, setPage] = React.useState(Page.ANNOTATE);
+  const [page, setPage] = React.useState(props.context.mbTarget ? Page.ANNOTATE : Page.ANNOTATIONS);
   const [helpPage, setHelpPage] = React.useState(Page.ANNOTATE);
   const [context, setContext] = React.useState(props.context);
 
   function ensureLoginPm(): Promise<[User, UserProfile]> {
     return new Promise((resolve, reject) => {
-      if (!context.user) {
+      if (!context.mbUser) {
         auth.retrieveUserPm().then(
           ([user, userProfile]) => {
-            //console.log("retrieved user");
-            //console.log(user);
-            //console.log(userProfile);
-            setContext({ ...context, user, userProfile });
+            setContext({ ...context, mbUser: user, mbUserProfile: userProfile });
             resolve([user, userProfile]);
           },
           () => {
             auth.loginPm().then(
               ([user, userProfile]) => {
-                //console.log("user from login");
-                //console.log(user);
-                //console.log(userProfile);
-                setContext({ ...context, user, userProfile });
+                setContext({ ...context, mbUser: user, mbUserProfile: userProfile });
                 resolve([user, userProfile]);
               },
               err => {
@@ -66,8 +60,8 @@ export function Navbar(props: Props): React.FunctionComponentElement<Context> {
           }
         );
       } else {
-        if (context.userProfile) {
-          resolve([context.user, context.userProfile]);
+        if (context.mbUserProfile) {
+          resolve([context.mbUser, context.mbUserProfile]);
         } else {
           reject("User profile not present for current user!");
         }
@@ -76,33 +70,34 @@ export function Navbar(props: Props): React.FunctionComponentElement<Context> {
   }
 
   React.useEffect(() => { 
-    ensureLoginPm().then(([user, userProfile]) => setContext({ ...context, user, userProfile }));
+    if (context.mbTarget) {
+      ensureLoginPm().then(([user, userProfile]) => setContext({ ...context, mbUser: user, mbUserProfile: userProfile }));
+    }
   }, []);
 
   const activeFlag = (p: Page): string => p === page ? " active" : "";
 
   function logout(): void {
-    if (context.user) {
+    if (context.mbUser) {
       auth.logoutPm().then(
         () => {
-          setContext({ ...context, user: null, userProfile: null });
-          gotoPage(Page.ANNOTATE);
+          setContext({ ...context, mbUser: null, mbUserProfile: null });
         }
       );
     }
   }
 
   function updateUserProfile(): void {
-    if (context.user) {
-      profile.getUserProfilePm(context.user).then(userProfile => setContext({ ...context, userProfile }));
+    if (context.mbUser) {
+      profile.getUserProfilePm(context.mbUser).then(userProfile => setContext({ ...context, mbUserProfile: userProfile }));
     } else {
-      throw new Error("context.user is null");
+      throw new Error("context.mbUser is null");
     }
   }
 
   function profileLoggedRenderPm(): Promise<RenderFn> {
     return new Promise((resolve, reject) => {
-      const p = context.userProfile;
+      const p = context.mbUserProfile;
       if (p) {
         resolve(() => profileRender(p, () => { updateUserProfile(); gotoPage(Page.ANNOTATE); }));
       } else {
@@ -117,7 +112,7 @@ export function Navbar(props: Props): React.FunctionComponentElement<Context> {
 
   function renderPage(p: Page): void {
     return matchSwitch(p, {
-      [Page.ANNOTATE]: () => annotateRender(context),
+      [Page.ANNOTATE]: () =>  annotateRender(context),
       [Page.ANNOTATIONS]: () => annotationsRender(context),
       [Page.SEARCH]: () => searchRender(context),
       [Page.HELP]: () => helpRender(pageToHelp(helpPage)),
@@ -140,12 +135,20 @@ export function Navbar(props: Props): React.FunctionComponentElement<Context> {
   }
 
   function endSession(): void {
-    if (context.user) {
+    if (context.mbUser) {
       logout();
     }
   }
 
   React.useEffect(() => switchPage(page), []);
+
+  React.useEffect(() => {
+    if (context.mbUser === null && page === Page.PROFILE) { 
+      gotoPage(Page.ANNOTATE);
+    } else {
+      gotoPage(page);
+    }
+  }, [context]);
 
   return (
     <nav className="navbar navbar-expand navbar-dark pr-0">
@@ -183,15 +186,15 @@ export function Navbar(props: Props): React.FunctionComponentElement<Context> {
         <li className="nav-item ml-auto">
           <a
             className={"nav-link" + activeFlag(Page.PROFILE)} href="#" 
-            data-toggle="tooltip" data-placement="bottom" title={context.user ? "Profile" : "Login"}
+            data-toggle="tooltip" data-placement="bottom" title={context.mbUser ? "Profile" : "Login"}
             onClick={() => gotoPage(Page.PROFILE)}>
-            {context.userProfile ? 
-              <span><icons.UserIcon/> {shorten(context.userProfile.name, 15)}</span>
+            {context.mbUserProfile ? 
+              <span><icons.UserIcon/> {shorten(context.mbUserProfile.name, 15)}</span>
               : <icons.LoginIcon/>
             }
           </a>
         </li>
-        {context.user ? 
+        {context.mbUser ? 
           <li className="nav-item">
             <a className="nav-link" style={{paddingLeft: 0}}
               href="#"data-toggle="tooltip" 

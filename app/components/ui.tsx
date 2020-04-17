@@ -223,7 +223,7 @@ export class Confirm extends React.Component<ConfirmProps> {
               {this.props.body}
             </div>
           </div>
-          <div className="row form-grouop">
+          <div className="row form-group">
             <div className="col my-auto">
               <button type="button" className="btn btn-danger" onClick={this.confirm}>
                 Confirm {this.props.subject}

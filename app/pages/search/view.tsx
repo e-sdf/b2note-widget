@@ -52,7 +52,7 @@ export function SearchPage(props: SearchProps): React.FunctionComponentElement<S
         {anl.map((an, i) => 
           <tr key={i}>
             <td colSpan={2} style={{border: "none", padding: "0 0 0 0.5em"}}>
-              <AnnotationTag anRecord={an} context={props.context} maxLen={35}/>
+              <AnnotationTag anRecord={an} mbUser={props.context.mbUser} maxLen={35}/>
             </td>
           </tr>
         )}
@@ -69,7 +69,7 @@ export function SearchPage(props: SearchProps): React.FunctionComponentElement<S
           {Object.keys(resultsDict).map(source => 
             <li key={source} className="list-group-item pt-2 pl-0 pr-0 pb-2">
               <table className="table mb-2">
-                {<TargetTr key={source} context={props.context} target={resultsDict[source][0].target}/>}
+                {<TargetTr key={source} mbContextTarget={props.context.mbTarget} target={resultsDict[source][0].target}/>}
                 {renderAnTags(resultsDict[source])}
               </table>
             </li>

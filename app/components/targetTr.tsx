@@ -3,19 +3,19 @@ import type { Context } from "../context";
 import { shorten } from "../components/utils";
 import * as icons from "react-icons/fa";
 import { DownloadIcon } from "./icons";
-import type { AnTarget } from "../core/annotationsModel";
+import type { Target, AnTarget } from "../core/annotationsModel";
 // import { ResolvedTarget } from "../pages/annotations/loader";
 
 const LookIcon = icons.FaEye;
 
 interface TargetTrProps {
-  context: Context;
+  mbContextTarget: Target|null;
   // resTarget: ResolvedTarget;
   target: AnTarget;
 }
 
 export default function TargetTr(props: TargetTrProps): React.FunctionComponentElement<TargetTrProps> { 
-  const thisFile = props.target.source === props.context.target.source;
+  const thisFile = props.target.source === props.mbContextTarget?.source;
   return (
     <tr>
       <td style={{border: "none", padding: 0}}>

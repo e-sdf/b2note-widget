@@ -1,6 +1,6 @@
 import axios from "axios";
 import { endpointUrl } from "../config";
-import type { Context } from "../context";
+import type { User } from "../core/user";
 import { version } from "../config";
 import * as anModel from "../core/annotationsModel";
 import * as sModel from "../core/searchModel";
@@ -41,37 +41,39 @@ function mkTypeFilter(f: Filters): Query {
   };
 }
 
-function mkCreatorFilter(context: Context, f: Filters): Query {
-  return !f.creator.others ? { creator: context.user?.id || "" } : {};
+function mkCreatorFilter(user: User, f: Filters): Query {
+  return !f.creator.others ? { creator: user.id } : {};
 }
 
-function mkTargetSourceFilter(context: Context, f: Filters): Query {
-  return !f.allFiles ? { "target-source": context.target.source } : {};
+function mkTargetSourceFilter(target: anModel.Target, f: Filters): Query {
+  return !f.allFiles ? { "target-source": target.source } : {};
 }
 
 function mkValueFilter(f: Filters): Query {
   return f.value ? { value: f.value } : {};
 }
 
-function mkQuery(context: Context, f: Filters, format: anModel.Format, download: boolean): Query {
+function mkQuery(f: Filters, mbUser: User|null, mbTarget: anModel.Target|null, format: anModel.Format, download: boolean): Query {
+  const creatorFilter = mbUser ? mkCreatorFilter(mbUser, f) : {};
+  const targetSourceFilter = mbTarget ? mkTargetSourceFilter(mbTarget, f) : {};
   return {
     ...mkTypeFilter(f),
-    ...mkCreatorFilter(context, f),
-    ...mkTargetSourceFilter(context, f),
+    ...creatorFilter,
+    ...targetSourceFilter,
     ...mkValueFilter(f),
     format,
     download
   };
 }
 
-export function getAnnotationsJSON(context: Context, f: Filters, download = false): Promise<Array<anModel.AnRecord>> {
-  const params = mkQuery(context, f, anModel.Format.JSONLD, download);
+export function getAnnotationsJSON(f: Filters, mbUser: User|null = null, mbTarget: anModel.Target|null = null, download = false): Promise<Array<anModel.AnRecord>> {
+  const params = mkQuery(f, mbUser, mbTarget, anModel.Format.JSONLD, download);
   return new Promise((resolve, reject) => {
     axios.get(annotationsUrl, { params })
     .then(resp => {
       if(resp.data) {
         const cleaned = !f.creator.mine ? 
-          resp.data.filter((r: anModel.AnRecord) => r.creator.id !== (context.user?.id || ""))
+          resp.data.filter((r: anModel.AnRecord) => r.creator.id !== mbUser?.id)
         : resp.data;
         resolve(cleaned);
       } else {
@@ -82,8 +84,8 @@ export function getAnnotationsJSON(context: Context, f: Filters, download = fals
   });
 }
 
-export function getAnnotationsRDF(context: Context, f: Filters): Promise<string> {
-  const params = mkQuery(context, f, anModel.Format.RDF, true);
+export function getAnnotationsRDF(f: Filters, mbUser: User|null = null, mbTarget: anModel.Target|null = null): Promise<string> {
+  const params = mkQuery(f, mbUser, mbTarget, anModel.Format.RDF, true);
   return new Promise((resolve, reject) => {
     axios.get(annotationsUrl, { params })
     .then(resp => {
@@ -99,87 +101,58 @@ export function getAnnotationsRDF(context: Context, f: Filters): Promise<string>
 
 // Creating annotations
 
-function mkTarget(target: anModel.Target): anModel.AnTarget {
-  return anModel.mkTarget({
-      id: target.pid, 
-      source: target.source
-  });
-}
-
-function mkCreator(context: Context): anModel.AnCreator {
-  const mbUser = context.user;
-  if (mbUser) {
-    return anModel.mkCreator(mbUser.id);
-  } else {
-    throw new Error("User not logged");
-  }
-}
-
-async function postAnnotation(anRecord: anModel.AnRecord, context: Context): Promise<any> {
+async function postAnnotation(anRecord: anModel.AnRecord, user: User): Promise<any> {
   return new Promise((resolve, reject) => {
-    const mbUser = context.user;
-    if (mbUser) {
-      axios.post(annotationsUrl, anRecord, authHeader(mbUser.accessToken))
-      .then(resp => resolve(resp.data))
-      .catch(error => reject(axiosErrToMsg(error)));
-    } else {
-      reject("User not logged");
-    }
+    axios.post(annotationsUrl, anRecord, authHeader(user.accessToken))
+    .then(resp => resolve(resp.data))
+    .catch(error => reject(axiosErrToMsg(error)));
   });
 }
 
-export async function postAnnotationSemantic(uris: string[], label: string, context: Context): Promise<any> {
+export async function postAnnotationSemantic(target: anModel.Target, user: User, uris: string[], label: string): Promise<any> {
   const body = anModel.mkSemanticAnBody(uris, label);
-  const target = mkTarget(context.target);
+  const anTarget = anModel.mkTarget(target);
   const generator = anModel.mkGenerator(version);
-  const creator = mkCreator(context);
-  const req = anModel.mkAnRecord(body, target, creator, generator, anModel.PurposeType.TAGGING);
-  return postAnnotation(req, context);
+  const creator = anModel.mkCreator(user.id);
+  const req = anModel.mkAnRecord(body, anTarget, creator, generator, anModel.PurposeType.TAGGING);
+  return postAnnotation(req, user);
 }
 
-export async function postAnnotationKeyword(label: string, context: Context): Promise<any> {
+export async function postAnnotationKeyword(target: anModel.Target, user: User, label: string): Promise<any> {
   const body = anModel.mkKeywordAnBody(label);
-  const target = mkTarget(context.target);
-  const creator = mkCreator(context);
+  const anTarget = anModel.mkTarget(target);
+  const creator = anModel.mkCreator(user.id);
   const generator = anModel.mkGenerator(version);
-  const req = anModel.mkAnRecord(body, target, creator, generator, anModel.PurposeType.TAGGING);
-  return postAnnotation(req, context);
+  const req = anModel.mkAnRecord(body, anTarget, creator, generator, anModel.PurposeType.TAGGING);
+  return postAnnotation(req, user);
 }
 
-export async function postAnnotationComment(comment: string, context: Context): Promise<any> {
+export async function postAnnotationComment(target: anModel.Target, user: User, comment: string): Promise<any> {
   const body = anModel.mkCommentAnBody(comment);
-  const target = mkTarget(context.target);
-  const creator = mkCreator(context);
+  const anTarget = anModel.mkTarget(target);
+  const creator = anModel.mkCreator(user.id);
   const generator = anModel.mkGenerator(version);
-  const req = anModel.mkAnRecord(body, target, creator, generator, anModel.PurposeType.COMMENTING);
-  return postAnnotation(req, context);
+  const req = anModel.mkAnRecord(body, anTarget, creator, generator, anModel.PurposeType.COMMENTING);
+  return postAnnotation(req, user);
 }
 
 // Changing annotatations
 
-export function patchAnnotationBody(anIdUrl: string, body: anModel.AnBody, context: Context): Promise<any> {
+export function patchAnnotationBody(user: User, anIdUrl: string, body: anModel.AnBody): Promise<any> {
   return new Promise((resolve, reject) => {
-    if (context.user) {
-      axios.patch(anIdUrl, { body }, authHeader(context.user.accessToken))
-      .then(resp => resolve(resp))
-      .catch(error => reject(axiosErrToMsg(error)));
-    } else {
-      reject("Token not present");
-    }
+    axios.patch(anIdUrl, { body }, authHeader(user.accessToken))
+    .then(resp => resolve(resp))
+    .catch(error => reject(axiosErrToMsg(error)));
   });
 }
 
 // Deleting annotations
 
-export function deleteAnnotation(anIdUrl: string, context: Context): Promise<any> {
+export function deleteAnnotation(user: User, anIdUrl: string): Promise<any> {
   return new Promise((resolve, reject) => {
-    if (context.user) {
-      axios.delete(anIdUrl, authHeader(context.user.accessToken))
-        .then(resp => resolve(resp))
-        .catch(error => reject(axiosErrToMsg(error)));
-    } else {
-      reject("Token not present");
-    }
+    axios.delete(anIdUrl, authHeader(user.accessToken))
+      .then(resp => resolve(resp))
+      .catch(error => reject(axiosErrToMsg(error)));
   });
 }
 
