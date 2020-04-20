@@ -16,4 +16,4 @@ export const endpointUrl = serverUrl + apiUrl;
 export const pageSize = 10;
 
 export const version = "v3.0";
-export const subversion = "BETA6";
+export const subversion = "BETA7";

@@ -1,6 +1,6 @@
 import axios from "axios";
 import { endpointUrl } from "../config";
-import type { User } from "../core/user";
+import type { User, UserProfile } from "../core/user";
 import { version } from "../config";
 import * as anModel from "../core/annotationsModel";
 import * as sModel from "../core/searchModel";
@@ -109,28 +109,28 @@ async function postAnnotation(anRecord: anModel.AnRecord, user: User): Promise<a
   });
 }
 
-export async function postAnnotationSemantic(target: anModel.Target, user: User, uris: string[], label: string): Promise<any> {
+export async function postAnnotationSemantic(target: anModel.Target, user: User, profile: UserProfile, uris: string[], label: string): Promise<any> {
   const body = anModel.mkSemanticAnBody(uris, label);
   const anTarget = anModel.mkTarget(target);
   const generator = anModel.mkGenerator(version);
-  const creator = anModel.mkCreator(user.id);
+  const creator = anModel.mkCreator({id: user.id, name: profile.name, orcid: profile.orcid});
   const req = anModel.mkAnRecord(body, anTarget, creator, generator, anModel.PurposeType.TAGGING);
   return postAnnotation(req, user);
 }
 
-export async function postAnnotationKeyword(target: anModel.Target, user: User, label: string): Promise<any> {
+export async function postAnnotationKeyword(target: anModel.Target, user: User, profile: UserProfile, label: string): Promise<any> {
   const body = anModel.mkKeywordAnBody(label);
   const anTarget = anModel.mkTarget(target);
-  const creator = anModel.mkCreator(user.id);
+  const creator = anModel.mkCreator({id: user.id, name: profile.name, orcid: profile.orcid});
   const generator = anModel.mkGenerator(version);
   const req = anModel.mkAnRecord(body, anTarget, creator, generator, anModel.PurposeType.TAGGING);
   return postAnnotation(req, user);
 }
 
-export async function postAnnotationComment(target: anModel.Target, user: User, comment: string): Promise<any> {
+export async function postAnnotationComment(target: anModel.Target, user: User, profile: UserProfile, comment: string): Promise<any> {
   const body = anModel.mkCommentAnBody(comment);
   const anTarget = anModel.mkTarget(target);
-  const creator = anModel.mkCreator(user.id);
+  const creator = anModel.mkCreator({id: user.id, name: profile.name, orcid: profile.orcid});
   const generator = anModel.mkGenerator(version);
   const req = anModel.mkAnRecord(body, anTarget, creator, generator, anModel.PurposeType.COMMENTING);
   return postAnnotation(req, user);

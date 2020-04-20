@@ -97,13 +97,14 @@ export function Navbar(props: Props): React.FunctionComponentElement<Context> {
 
   function profileLoggedRenderPm(): Promise<RenderFn> {
     return new Promise((resolve, reject) => {
+      const u = context.mbUser;
       const p = context.mbUserProfile;
-      if (p) {
-        resolve(() => profileRender(p, () => { updateUserProfile(); gotoPage(Page.ANNOTATE); }));
+      if (u && p) {
+        resolve(() => profileRender(u, p, () => { updateUserProfile(); gotoPage(Page.ANNOTATE); }));
       } else {
         ensureLoginPm().then(
           ([user, userProfile]) => {
-            resolve(() => profileRender(userProfile, () => { updateUserProfile(); gotoPage(Page.ANNOTATE); }));
+            resolve(() => profileRender(user, userProfile, () => { updateUserProfile(); gotoPage(Page.ANNOTATE); }));
           }
         );
       }

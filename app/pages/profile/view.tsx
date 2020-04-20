@@ -2,7 +2,7 @@ import * as React from "react";
 import * as ReactDOM from "react-dom";
 import { $enum } from "ts-enum-util";
 import { Typeahead } from "react-bootstrap-typeahead";
-import type { UserProfile } from "../../core/user";
+import type { User, UserProfile } from "../../core/user";
 import { countries, Experience } from "../../core/user";
 import * as api from "../../api/profile";
 import { showAlertSuccess, showAlertError } from "../../components/ui"; 
@@ -10,6 +10,7 @@ import { showAlertSuccess, showAlertError } from "../../components/ui";
 const alertId = "profileAlert";
 
 interface ProfileProps {
+  user: User;
   profile: UserProfile;
   updateProfileFn(profile: UserProfile): void;
 }
@@ -38,20 +39,15 @@ export function ProfilePage(props: ProfileProps): React.FunctionComponentElement
     const country2 = country.length > 0 ? { country } : {};
     const experience2 = experience.length > 0 ? { experience } : {};
     const changes = { ...orcid2, ...organisation2, ...jobTitle2, ...country2, ...experience2 };
-    const mbUser = props.profile;
-    if (mbUser) {
-      api.patchUserProfilePm(changes, mbUser).then(
-        updatedProfile => {
-          props.updateProfileFn(updatedProfile);
-          showAlertSuccess(alertId, "Profile updated");
-        },
-        () => {
-          showAlertError(alertId, "Failed");
-        }
-      );
-    } else {
-      showAlertError(alertId, "User not logged");
-    }
+    api.patchUserProfilePm(changes, props.user).then(
+      updatedProfile => {
+        props.updateProfileFn(updatedProfile);
+        showAlertSuccess(alertId, "Profile updated");
+      },
+      () => {
+        showAlertError(alertId, "Failed");
+      }
+    );
   }
 
   function renderCountryInput(): React.ReactElement {
@@ -145,10 +141,10 @@ export function ProfilePage(props: ProfileProps): React.FunctionComponentElement
   );
 }
 
-export function render(profile: UserProfile, updateProfileFn: (profile: UserProfile) => void): void {
+export function render(user: User, profile: UserProfile, updateProfileFn: (profile: UserProfile) => void): void {
   const container = document.getElementById("page");
   if (container) {
-    ReactDOM.render(<ProfilePage profile={profile} updateProfileFn={updateProfileFn}/>, container);
+    ReactDOM.render(<ProfilePage user={user} profile={profile} updateProfileFn={updateProfileFn}/>, container);
   } else {
     console.error("#page element missing");
   }
