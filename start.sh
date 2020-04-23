@@ -9,4 +9,4 @@ echo -n "window.b2note = { serverUrl: '"$JS_SERVER_URL"', solrUrl: '"$JS_SOLR_UR
 echo "$C created"
 echo "Starting the server..."
 
-cd server; npm run start
+cd server; node server
