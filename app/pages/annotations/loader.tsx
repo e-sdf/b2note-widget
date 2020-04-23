@@ -62,7 +62,7 @@ export const LoaderFilter = React.forwardRef((props: LoaderProps, ref: React.Ref
 
   function mkFilters(): api.Filters|null {
     return (
-      _.some(allFilters) ?
+      (mineFilter || othersFilter) && (semanticFilter || keywordFilter || commentFilter) ?
         {
           allFiles: allFilesFilter, 
           creator: {
@@ -83,6 +83,7 @@ export const LoaderFilter = React.forwardRef((props: LoaderProps, ref: React.Ref
     const mbFilters = mkFilters();
     if (!mbFilters) {
       setAnRecords([]);
+      props.setAnItemsFn([]);
     } else {
       if (props.setLoaderFlagFn) { props.setLoaderFlagFn(true); }
       api.getAnnotationsJSON(mbFilters, props.context.mbUser, props.context.mbTarget).then(
