@@ -1,13 +1,11 @@
 import { apiUrl } from "./core/server";
 
 interface ConfRec {
-  chromeExtension?: boolean;
   serverUrl?: string;
   solrUrl?: string;
 }
 
 const confRec = (window as any).b2note as ConfRec|undefined;
-export const chromeExtension = confRec?.chromeExtension ? true : false;
 export const serverUrl = confRec?.serverUrl ? confRec.serverUrl : "http://localhost:3060";
 export const solrUrl = confRec?.solrUrl ? confRec.solrUrl : "https://b2note.eudat.eu/solr/b2note_index/select";
 

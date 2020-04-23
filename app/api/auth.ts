@@ -10,55 +10,33 @@ const storageKey = "user";
 
 function storeUserPm(user: User): Promise<void> {
   return new Promise((resolve, reject) => {
-    if (config.chromeExtension) {
-      chrome.storage.local.set({ [storageKey]: user }, () => resolve());
-    } else {
-      if (typeof(Storage) !== "undefined") {
-        window.localStorage.setItem(storageKey, JSON.stringify(user));
-        resolve();
-      }
+    if (typeof(Storage) !== "undefined") {
+      window.localStorage.setItem(storageKey, JSON.stringify(user));
+      resolve();
     }
   });
 }
 
 function deleteUserPm(): Promise<void> {
   return new Promise((resolve, reject) => {
-    if (config.chromeExtension) {
-      chrome.storage.local.remove([storageKey], () => resolve());
-    } else {
-      window.localStorage.removeItem(storageKey);
-      resolve();
-    }
+    window.localStorage.removeItem(storageKey);
+    resolve();
   });
 }
 
 export function retrieveUserPm(): Promise<[User, UserProfile]> {
   return new Promise((resolve, reject) => {
-    if (config.chromeExtension) {
-      chrome.storage.local.get(storageKey, result => {
-        const mbUser: User|null = result[storageKey];
-        if (!mbUser) {
-          reject();
-        } else {
-          getUserProfilePm(mbUser).then(
-            profile => resolve([mbUser, profile]),
-              err => reject(err)
-          );
-        }
-      });
+    const userStr = window.localStorage.getItem(storageKey);
+    if (!userStr) {
+      return reject();
     } else {
-      const userStr = window.localStorage.getItem(storageKey);
-      if (!userStr) {
-        return reject();
-      } else {
-        try {
-          const user: User = JSON.parse(userStr);
-          getUserProfilePm(user).then(
-            profile => resolve([user, profile]),
-              err => reject(err)
-          );
-        } catch(err) { reject("Error parsing user object: " + err); }
-      }
+      try {
+        const user: User = JSON.parse(userStr);
+        getUserProfilePm(user).then(
+          profile => resolve([user, profile]),
+            err => reject(err)
+        );
+      } catch(err) { reject("Error parsing user object: " + err); }
     }
   });
 }
@@ -88,15 +66,8 @@ export function loginPm(): Promise<[User, UserProfile]> {
     retrieveUserPm().then(
       res => resolve(res),
       () => {
-        //if (config.chromeExtension) {
-          //chrome.windows.create(
-            //{ url: serverUrl + "/api/b2access/login", type: "popup", focused: false, width: 800, setSelfAsOpener: true} as any,
-            //w => window.addEventListener("message", receiveMessage, false)
-          //);
-        //} else {
-          popup = window.open(serverUrl + "/api/b2access/login", "B2ACCESS", "width=800");
-          window.addEventListener("message", receiveMessage, false);
-        //}
+        popup = window.open(serverUrl + "/api/b2access/login", "B2ACCESS", "width=800");
+        window.addEventListener("message", receiveMessage, false);
       }
     );
   });

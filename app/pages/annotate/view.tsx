@@ -44,9 +44,7 @@ function AnnotatePage(props: PageProps): React.FunctionComponentElement<PageProp
                 data-toggle="tooltip" data-placement="bottom" title={props.context.mbTarget?.source || ""}
                 value={props.context.mbTarget?.source || ""}></input>
             </>
-          : config.chromeExtension ?
-              <h3 className="text-danger">Use link context menu in the browser to select the annotation target</h3>
-            : <h3 className="text-danger">No annotation target</h3>
+          : <h3 className="text-danger">No annotation target</h3>
           }
         </div>
       </div>

@@ -1,1 +1,0 @@
-window.b2note = { chromeExtension: true, serverUrl: 'https://b2note.bsc.es', solrUrl: 'https://b2note.eudat.eu/solr/b2note_index/select' };

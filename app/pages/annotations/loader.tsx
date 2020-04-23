@@ -49,7 +49,7 @@ export const LoaderFilter = React.forwardRef((props: LoaderProps, ref: React.Ref
   const [anRecords, setAnRecords] = React.useState([] as anModel.AnRecord[]);
   const [noOfMine, setNoOfMine] = React.useState(null as number|null);
   const [noOfOthers, setNoOfOthers] = React.useState(null as number|null);
-  const [noOfSematic, setNoOfSemantic] = React.useState(null as number|null);
+  const [noOfSemantic, setNoOfSemantic] = React.useState(null as number|null);
   const [noOfKeyword, setNoOfKeyword] = React.useState(null as number|null);
   const [noOfComment, setNoOfComment] = React.useState(null as number|null);
 
@@ -177,7 +177,7 @@ export const LoaderFilter = React.forwardRef((props: LoaderProps, ref: React.Ref
         <button type="button"
           className={`btn btn-sm ${btnState(othersFilter)}`}
           disabled={!logged}
-          data-toggle="tooltip" data-placement="bottom" title={logged ? "Other's annotations /displayed in italic/" + (noOfOthers ? ` (${noOfOthers})` : "") : notLoggedMsg}
+          data-toggle="tooltip" data-placement="bottom" title={logged ? "Other's annotations (displayed in italic)" + (noOfOthers ? ` (${noOfOthers})` : "") : notLoggedMsg}
           onClick={() => setOthersFilter(!othersFilter)}
         ><icons.OthersIcon/></button>
       </div>
@@ -189,7 +189,7 @@ export const LoaderFilter = React.forwardRef((props: LoaderProps, ref: React.Ref
       <div className="btn-group ml-2" role="group" aria-label="Type Filter">
         <button type="button"
           className={`btn btn-sm ${btnState(semanticFilter)}`}
-          data-toggle="tooltip" data-placement="bottom" title={"Sematic tags" + (noOfSematic ? ` (${noOfSematic})` : "")}
+          data-toggle="tooltip" data-placement="bottom" title={"Semantic tags" + (noOfSemantic ? ` (${noOfSemantic})` : "")}
           onClick={() => setSemanticFilter(!semanticFilter)}
         ><icons.SemanticIcon/></button>
         <button type="button"
