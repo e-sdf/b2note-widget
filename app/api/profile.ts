@@ -1,23 +1,24 @@
 import axios from "axios";
 import { endpointUrl } from "../config";
-import type { User, UserProfile } from "../core/user";
+import type { Token } from "./auth";
+import { mkAuthHeader } from "./auth";
+import type { UserProfile } from "../core/user";
 import { profileUrl } from "../core/user";
-import { authHeader } from "./utils";
 import { axiosErrToMsg } from "../core/utils";
 
 const url = endpointUrl + profileUrl;
 
-export function getUserProfilePm(user: User): Promise<UserProfile> {
+export function getUserProfilePm(token: Token): Promise<UserProfile> {
   return new Promise((resolve, reject) => {
-    axios.get(url, authHeader(user.accessToken))
+    axios.get(url, mkAuthHeader(token))
     .then(resp => resolve(resp.data as UserProfile))
     .catch(error => reject(axiosErrToMsg(error)));
   });
 }
 
-export function patchUserProfilePm(changes: Record<string, any>, user: User): Promise<UserProfile> {
+export function patchUserProfilePm(changes: Record<string, any>, token: Token): Promise<UserProfile> {
   return new Promise((resolve, reject) => {
-    axios.patch(url, { ...changes }, authHeader(user.accessToken))
+    axios.patch(url, { ...changes }, mkAuthHeader(token))
     .then(resp => resolve(resp.data as UserProfile))
     .catch(error => reject(axiosErrToMsg(error)));
   });

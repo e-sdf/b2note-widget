@@ -6,7 +6,7 @@ import * as anModel from "../../core/annotationsModel";
 import * as api from "../../api/annotations";
 import type { Context } from "../../context";
 import { showAlertError } from "../../components/ui"; 
-import { downloadJSON, downloadRDF } from "../../components/download";
+import { downloadJSON, downloadRDF, downloadTurtle } from "../../components/download";
 
 const alertId = "anlAlert";
 
@@ -110,8 +110,8 @@ export const LoaderFilter = React.forwardRef((props: LoaderProps, ref: React.Ref
             //     })))
             //   );
             // });
-            setNoOfMine(anl.filter(a => a.creator.id === (props.context.mbUser?.id || "")).length);
-            setNoOfOthers(anl.filter(a => a.creator.id !== (props.context.mbUser?.id || "")).length);
+            setNoOfMine(anl.filter(a => a.creator.id === (props.context.mbUser?.profile.id || "")).length);
+            setNoOfOthers(anl.filter(a => a.creator.id !== (props.context.mbUser?.profile.id || "")).length);
             setNoOfSemantic(anl.filter(anModel.isSemantic).length);
             setNoOfKeyword(anl.filter(anModel.isKeyword).length);
             setNoOfComment(anl.filter(anModel.isComment).length);
@@ -217,6 +217,10 @@ export const LoaderFilter = React.forwardRef((props: LoaderProps, ref: React.Ref
             className="dropdown-item"
             onClick={() => downloadJSON(anRecords)}
           >Download JSON-LD</button>
+          <button type="button"
+            className="dropdown-item"
+            onClick={() => downloadTurtle(anRecords)}
+          >Download RDF/Turtle</button>
           <button type="button"
             className="dropdown-item"
             onClick={() => downloadRDF(anRecords)}

@@ -2,7 +2,6 @@ import { matchSwitch } from '@babakness/exhaustive-type-checking';
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 import * as icons from "../components/icons";
-import type { User, UserProfile } from "../core/user";
 import { Page } from "../pages/pages";
 import { render as annotateRender } from "../pages/annotate/view";
 import { render as annotationsRender } from "../pages/annotations/view";
@@ -11,6 +10,7 @@ import { render as helpRender } from "../pages/help/view";
 import { render as profileRender } from "../pages/profile/view";
 import { HelpSection } from "../pages/help/defs";
 import type { Context } from "../context";
+import type { AuthUser } from "../api/auth";
 import * as auth from "../api/auth";
 import * as profile from "../api/profile";
 import { shorten } from "../components/utils";
@@ -33,45 +33,39 @@ interface Props {
   context: Context;
 }
 
+enum LoginState { NOT_LOGGED, LOGGING, LOGGED, ERROR };
+
 export function Navbar(props: Props): React.FunctionComponentElement<Context> {
   const [page, setPage] = React.useState(props.context.mbTarget ? Page.ANNOTATE : Page.ANNOTATIONS);
   const [helpPage, setHelpPage] = React.useState(Page.ANNOTATE);
   const [context, setContext] = React.useState(props.context);
+  const [loginState, setLoginState] = React.useState(LoginState.NOT_LOGGED);
 
-  function ensureLoginPm(): Promise<[User, UserProfile]> {
+  function ensureLoginPm(): Promise<AuthUser> {
     return new Promise((resolve, reject) => {
+      setLoginState(LoginState.LOGGING);
       if (!context.mbUser) {
-        auth.retrieveUserPm().then(
-          ([user, userProfile]) => {
-            setContext({ ...context, mbUser: user, mbUserProfile: userProfile });
-            resolve([user, userProfile]);
+        auth.loginPm().then(
+          user => {
+            setLoginState(LoginState.LOGGED);
+            setContext({ ...context, mbUser: user });
+            resolve(user);
           },
-          () => {
-            auth.loginPm().then(
-              ([user, userProfile]) => {
-                setContext({ ...context, mbUser: user, mbUserProfile: userProfile });
-                resolve([user, userProfile]);
-              },
-              err => {
-                console.error(err);
-                reject();
-              }
-            );
+          err => {
+            setLoginState(LoginState.ERROR);
+            console.error(err);
+            reject();
           }
         );
       } else {
-        if (context.mbUserProfile) {
-          resolve([context.mbUser, context.mbUserProfile]);
-        } else {
-          reject("User profile not present for current user!");
-        }
+        resolve(context.mbUser);
       }
     });
   }
 
   React.useEffect(() => { 
     if (context.mbTarget) {
-      ensureLoginPm().then(([user, userProfile]) => setContext({ ...context, mbUser: user, mbUserProfile: userProfile }));
+      ensureLoginPm().then();
     }
   }, []);
 
@@ -81,15 +75,21 @@ export function Navbar(props: Props): React.FunctionComponentElement<Context> {
     if (context.mbUser) {
       auth.logoutPm().then(
         () => {
-          setContext({ ...context, mbUser: null, mbUserProfile: null });
+          setContext({ ...context, mbUser: null });
         }
       );
     }
   }
 
   function updateUserProfile(): void {
-    if (context.mbUser) {
-      profile.getUserProfilePm(context.mbUser).then(userProfile => setContext({ ...context, mbUserProfile: userProfile }));
+    const u = context.mbUser;
+    if (u) {
+      profile.getUserProfilePm(u.token).then(
+        profile => setContext({
+          ...context,
+          mbUser: { token: u.token, profile }
+        })
+      );
     } else {
       throw new Error("context.mbUser is null");
     }
@@ -98,13 +98,12 @@ export function Navbar(props: Props): React.FunctionComponentElement<Context> {
   function profileLoggedRenderPm(): Promise<RenderFn> {
     return new Promise((resolve, reject) => {
       const u = context.mbUser;
-      const p = context.mbUserProfile;
-      if (u && p) {
-        resolve(() => profileRender(u, p, () => { updateUserProfile(); gotoPage(Page.ANNOTATE); }));
+      if (u) {
+        resolve(() => profileRender(u, () => { updateUserProfile(); gotoPage(Page.ANNOTATE); }));
       } else {
         ensureLoginPm().then(
-          ([user, userProfile]) => {
-            resolve(() => profileRender(user, userProfile, () => { updateUserProfile(); gotoPage(Page.ANNOTATE); }));
+          user => {
+            resolve(() => profileRender(user, () => { updateUserProfile(); gotoPage(Page.ANNOTATE); }));
           }
         );
       }
@@ -138,6 +137,7 @@ export function Navbar(props: Props): React.FunctionComponentElement<Context> {
   function endSession(): void {
     if (context.mbUser) {
       logout();
+      setLoginState(LoginState.NOT_LOGGED);
     }
   }
 
@@ -188,14 +188,16 @@ export function Navbar(props: Props): React.FunctionComponentElement<Context> {
           <a
             className={"nav-link" + activeFlag(Page.PROFILE)} href="#" 
             data-toggle="tooltip" data-placement="bottom" title={context.mbUser ? "Profile" : "Login"}
-            onClick={() => gotoPage(Page.PROFILE)}>
-            {context.mbUserProfile ? 
-              <span><icons.UserIcon/> {shorten(context.mbUserProfile.name, 15)}</span>
-              : <icons.LoginIcon/>
-            }
+            onClick={() => { if (loginState !== LoginState.LOGGING) { gotoPage(Page.PROFILE); }}}>
+            {matchSwitch(loginState, {
+              [LoginState.NOT_LOGGED]: () => <icons.LoginIcon/>,
+              [LoginState.LOGGING]: () => <span>Logging in...</span>,
+              [LoginState.LOGGED]: () => <span><icons.UserIcon/> {shorten(context.mbUser?.profile.name || "", 15)}</span>,
+              [LoginState.ERROR]: () => <span>Login error <icons.LoginIcon/></span>
+            })}
           </a>
         </li>
-        {context.mbUser ? 
+        {loginState === LoginState.LOGGED ? 
           <li className="nav-item">
             <a className="nav-link" style={{paddingLeft: 0}}
               href="#"data-toggle="tooltip" 

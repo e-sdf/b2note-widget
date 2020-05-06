@@ -1,47 +1,50 @@
 import axios from "axios";
-import * as config from "../config";
 import { endpointUrl, serverUrl } from "../config";
-import { authHeader } from "./utils";
-import type { User, UserProfile } from "../core/user";
+import type { UserProfile } from "../core/user";
 import { axiosErrToMsg } from "../core/utils";
 import { getUserProfilePm } from "./profile";
 
-const storageKey = "user";
+export type Token = string;
 
-function storeUserPm(user: User): Promise<void> {
+export interface AuthUser {
+  token: Token;
+  profile: UserProfile;
+}
+
+const storageKey = "token";
+
+export function mkAuthHeader(token: string): Record<string, any> { 
+  return { headers: { Authorization: "Bearer " + token } };
+}
+
+function storeTokenPm(token: Token): Promise<void> {
   return new Promise((resolve, reject) => {
     if (typeof(Storage) !== "undefined") {
-      window.localStorage.setItem(storageKey, JSON.stringify(user));
+      window.localStorage.setItem(storageKey, token);
       resolve();
     }
   });
 }
 
-function deleteUserPm(): Promise<void> {
+function deleteTokenPm(): Promise<void> {
   return new Promise((resolve, reject) => {
     window.localStorage.removeItem(storageKey);
     resolve();
   });
 }
 
-export function retrieveUserPm(): Promise<[User, UserProfile]> {
+export function retrieveTokenPm(): Promise<Token> {
   return new Promise((resolve, reject) => {
-    const userStr = window.localStorage.getItem(storageKey);
-    if (!userStr) {
-      return reject();
+    const token = window.localStorage.getItem(storageKey);
+    if (!token) {
+      reject();
     } else {
-      try {
-        const user: User = JSON.parse(userStr);
-        getUserProfilePm(user).then(
-          profile => resolve([user, profile]),
-            err => reject(err)
-        );
-      } catch(err) { reject("Error parsing user object: " + err); }
+      resolve(token); 
     }
   });
 }
 
-export function loginPm(): Promise<[User, UserProfile]> {
+export function loginPm(): Promise<AuthUser> {
   return new Promise((resolve, reject) => {
     let popup: Window|null = null;
 
@@ -50,12 +53,12 @@ export function loginPm(): Promise<[User, UserProfile]> {
         popup?.close();
         window.removeEventListener("message", receiveMessage);
         try {
-          const user = JSON.parse(event.data) as User;
-          //console.log("Logged user:");
-          //console.log(user);
-          storeUserPm(user).then(
-            () => getUserProfilePm(user).then(
-              profile => resolve([user, profile]),
+          const token = event.data as Token;
+          //console.log("token:");
+          //console.log(token);
+          storeTokenPm(token).then(
+            () => getUserProfilePm(token).then(
+              profile => resolve({ token, profile }),
               err => reject(err)
             )
           );
@@ -63,26 +66,29 @@ export function loginPm(): Promise<[User, UserProfile]> {
       }
     }
 
-    retrieveUserPm().then(
-      res => resolve(res),
-      () => {
-        popup = window.open(serverUrl + "/api/b2access/login", "B2ACCESS", "width=800");
-        window.addEventListener("message", receiveMessage, false);
-      }
+    function makeLogin(): void {
+      popup = window.open(serverUrl + "/api/b2access/login", "B2ACCESS", "width=800");
+      window.addEventListener("message", receiveMessage, false);
+    }
+
+    retrieveTokenPm().then(
+      token => getUserProfilePm(token).then(
+        profile => resolve({ token, profile }),
+        () => makeLogin()
+      ),
+      () => makeLogin()
     );
   });
 }
 
 export function logoutPm(): Promise<any> {
   return new Promise((resolve, reject) => {
-    retrieveUserPm().then(
-      ([user, userProfile]) => {
-        deleteUserPm().then(
-          () => axios.get(endpointUrl + "/logout", authHeader(user.accessToken))
-            .then((resp) => resolve(resp))
-            .catch(error => reject(axiosErrToMsg(error)))
-        )
-      },
+    retrieveTokenPm().then(
+      token => deleteTokenPm().then(
+        () => axios.get(endpointUrl + "/logout", mkAuthHeader(token))
+          .then((resp) => resolve(resp))
+          .catch(error => reject(axiosErrToMsg(error)))
+      ),
       () => reject("Not logged in")
     );
   });

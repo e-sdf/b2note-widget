@@ -1,9 +1,8 @@
-import type { User, UserProfile } from "./core/user";
+import type { AuthUser } from "./api/auth";
 import type { Target } from "./core/annotationsModel";
 
 export interface Context {
-  mbUser: User|null;
-  mbUserProfile: UserProfile|null;
+  mbUser: AuthUser|null;
   mbTarget: Target|null;
 }
 

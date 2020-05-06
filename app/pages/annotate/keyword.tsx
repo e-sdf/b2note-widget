@@ -20,13 +20,12 @@ export function Keyword(props: KeywordProps): React.FunctionComponentElement<Key
   const lengthLimit = 60;
   const target = props.context.mbTarget;
   const user = props.context.mbUser;
-  const profile = props.context.mbUserProfile;
 
   React.useEffect(() => setTooLong(label.length > lengthLimit), [label]);
 
   function postAnnotation(): void {
-    if (target && user && profile) {
-      api.postAnnotationKeyword(target, user, profile, label).then(
+    if (target && user) {
+      api.postAnnotationKeyword(target, user, label).then(
         () => {
           showAlertSuccess(props.alertId, "Keyword annotation created");
           setLabel("");
@@ -37,8 +36,8 @@ export function Keyword(props: KeywordProps): React.FunctionComponentElement<Key
   }
 
   function postAnnotationAsSemantic(): void {
-    if (target && user && profile) {
-      api.postAnnotationSemantic(target, user, profile, uris, label).then(
+    if (target && user) {
+      api.postAnnotationSemantic(target, user, uris, label).then(
         () => {
           showAlertSuccess(props.alertId, "Semantic annotation created");
           setLabel("");
@@ -49,8 +48,8 @@ export function Keyword(props: KeywordProps): React.FunctionComponentElement<Key
   }
 
   function postAnnotationAsComment(): void {
-    if (target && user && profile) {
-      api.postAnnotationComment(target, user, profile, label).then(
+    if (target && user) {
+      api.postAnnotationComment(target, user, label).then(
         () => {
           showAlertSuccess(props.alertId, "Comment annotation created");
           setLabel("");

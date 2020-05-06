@@ -18,7 +18,6 @@ export function Semantic(props: SemanticProps): React.FunctionComponentElement<S
   const [loading, setLoading] = React.useState(false);
   const target = props.context.mbTarget;
   const user = props.context.mbUser;
-  const profile = props.context.mbUserProfile;
 
   function gotSuggestion(suggestions: Array<ac.Suggestion>): void {
     if (suggestions.length > 0) {
@@ -38,9 +37,9 @@ export function Semantic(props: SemanticProps): React.FunctionComponentElement<S
   }
 
   function annotate(): void {
-    if (target && user && profile) {
+    if (target && user) {
       setLoading(true);
-      api.postAnnotationSemantic(target, user, profile, uris, label).then(
+      api.postAnnotationSemantic(target, user, uris, label).then(
         () => { setLoading(false); showAlertSuccess(props.alertId, "Semantic annotation created"); },
         (err) => { setLoading(false); showAlertError(props.alertId, err); }
       );
@@ -48,8 +47,8 @@ export function Semantic(props: SemanticProps): React.FunctionComponentElement<S
   }
 
   function postAnnotationAsKeyword(): void {
-    if (target && user && profile) {
-      api.postAnnotationKeyword(target, user, profile, label).then(
+    if (target && user) {
+      api.postAnnotationKeyword(target, user, label).then(
         () => {
           showAlertSuccess(props.alertId, "Keyword annotation created");
           setLabel("");

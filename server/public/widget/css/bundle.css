@@ -28,14 +28,15 @@
   height: 435px;
   overflow: auto;
 }
+.btn-filter-off:hover {
+  background-color: #5f96d1;
+}
 .btn-filter-on,
 .btn-filter-on:focus {
-  /*background-color: #ddd;*/
-  /*color: #6c757d;*/
+  background-color: #0062cc;
 }
 .btn-filter-on:hover {
-  /*background-color: #6c757d;*/
-  /*color: #ffffff;*/
+  background-color: #004c9e;
 }
 nav {
   background-color: #1c418f;

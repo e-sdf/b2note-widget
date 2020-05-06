@@ -14,12 +14,11 @@ export function Comment(props: CommentProps): React.FunctionComponentElement<Com
   const [loading, setLoading] = React.useState(false);
   const target = props.context.mbTarget;
   const user = props.context.mbUser;
-  const profile = props.context.mbUserProfile;
 
   function annotate(): void {
-    if (target && user && profile) {
+    if (target && user) {
       setLoading(true);
-      api.postAnnotationComment(target, user, profile, comment).then(
+      api.postAnnotationComment(target, user, comment).then(
         () => {
           setLoading(false);
           showAlertSuccess(props.alertId, "Comment created");
