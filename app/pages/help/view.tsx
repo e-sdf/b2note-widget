@@ -2,7 +2,6 @@ import _ from "lodash";
 import { matchSwitch } from "@babakness/exhaustive-type-checking";
 import { $enum } from "ts-enum-util";
 import * as React from "react";
-import * as ReactDOM from "react-dom";
 import { HelpSection } from "./defs";
 import { AboutSection } from "./about";
 import { MenuSection } from "./menu";
@@ -96,13 +95,3 @@ export function HelpPage(props: HelpPageProps): React.FunctionComponentElement<H
     </div>
   );
 }
-
-export function render(section: HelpSection): void {
-  const container = document.getElementById("page");
-  if (container) {
-    ReactDOM.render(<HelpPage section={section}/>, container);
-  } else {
-    console.error("#page element missing");
-  }
-}
-

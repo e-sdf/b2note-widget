@@ -3,7 +3,6 @@
 import _ from "lodash";
 import allSettled from "promise.allsettled";
 import * as React from "react";
-import * as ReactDOM from "react-dom";
 import * as icons from "../../components/icons";
 import * as anModel from "../../core/annotationsModel";
 import * as api from "../../api/annotations";
@@ -102,7 +101,7 @@ function TagEditor(props: TagEditorProps): React.FunctionComponentElement<TagEdi
   );
 }
 
-export function Annotations(props: Props): React.FunctionComponentElement<Props> {
+export function AnnotationsPage(props: Props): React.FunctionComponentElement<Props> {
   const loaderRef = React.useRef(null as any);
   const [annotations, setAnnotations] = React.useState(null as Array<AnItem>|null);
   const [loading, setLoading] = React.useState(false);
@@ -315,13 +314,3 @@ export function Annotations(props: Props): React.FunctionComponentElement<Props>
     : renderAnnotationsTable()
   );
 }
-
-export function render(context: Context): void {
-  const container = document.getElementById("page");
-  if (container) {
-    ReactDOM.render(<Annotations context={context}/>, container);
-  } else {
-    console.error("#page element missing");
-  }
-}
-

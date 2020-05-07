@@ -1,5 +1,4 @@
 import * as React from "react";
-import * as ReactDOM from "react-dom";
 import { $enum } from "ts-enum-util";
 import { Typeahead } from "react-bootstrap-typeahead";
 import { AuthUser } from "../../api/auth";
@@ -149,13 +148,3 @@ export function ProfilePage(props: ProfileProps): React.FunctionComponentElement
     </div>
   );
 }
-
-export function render(user: AuthUser, updateProfileFn: (profile: UserProfile) => void): void {
-  const container = document.getElementById("page");
-  if (container) {
-    ReactDOM.render(<ProfilePage user={user} updateProfileFn={updateProfileFn}/>, container);
-  } else {
-    console.error("#page element missing");
-  }
-}
-

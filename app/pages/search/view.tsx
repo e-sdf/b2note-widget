@@ -1,6 +1,5 @@
 import _ from "lodash";
 import * as React from "react";
-import * as ReactDOM from "react-dom";
 import type { Context } from "../../context";
 import { Tabs, Tab } from "../../components/ui";
 import * as anModel from "../../core/annotationsModel";
@@ -112,13 +111,3 @@ export function SearchPage(props: SearchProps): React.FunctionComponentElement<S
     </>
   );
 }
-
-export function render(context: Context): void {
-  const container = document.getElementById("page");
-  if (container) {
-    ReactDOM.render(<SearchPage context={context}/>, container);
-  } else {
-    console.error("#page element missing");
-  }
-}
-

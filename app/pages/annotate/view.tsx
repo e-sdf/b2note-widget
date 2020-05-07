@@ -1,6 +1,4 @@
 import * as React from "react";
-import * as ReactDOM from "react-dom";
-import * as config from "../../config";
 import { Tabs, Tab } from "../../components/ui";
 import type { Context } from "../../context";
 import { Semantic } from "./semantic";
@@ -16,7 +14,7 @@ interface PageProps {
   context: Context;
 }
 
-function AnnotatePage(props: PageProps): React.FunctionComponentElement<PageProps> {
+export function AnnotatePage(props: PageProps): React.FunctionComponentElement<PageProps> {
   const [activeTab, setActiveTab] = React.useState(TabType.SEMANTIC);
 
   function renderTargetInfo(): React.ReactElement {
@@ -77,13 +75,3 @@ function AnnotatePage(props: PageProps): React.FunctionComponentElement<PageProp
     </>
   );
 }
-
-export function render(context: Context): void {
-  const container = document.getElementById("page");
-  if (container) {
-    ReactDOM.render(<AnnotatePage context={context}/>, container);
-  } else {
-    console.error("#page element missing");
-  }
-}
-
