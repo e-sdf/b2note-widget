@@ -1,6 +1,6 @@
 import * as React from "react";
 import { Tabs, Tab } from "../../components/ui";
-import type { Context } from "../../context";
+import type { PageProps } from "../pages";
 import { Semantic } from "./semantic";
 import { Keyword } from "./keyword";
 import { Comment } from "./comment";
@@ -9,10 +9,6 @@ import * as icons from "../../components/icons";
 const alertId = "anAlert";
 
 enum TabType { SEMANTIC = "semantic", KEYWORD = "keyword", COMMENT = "comment" }
-
-interface PageProps {
-  context: Context;
-}
 
 export function AnnotatePage(props: PageProps): React.FunctionComponentElement<PageProps> {
   const [activeTab, setActiveTab] = React.useState(TabType.SEMANTIC);
@@ -56,13 +52,13 @@ export function AnnotatePage(props: PageProps): React.FunctionComponentElement<P
         <div style={{marginTop: "10px"}}>
           <Tabs key={activeTab} id="annotateTabs" activeTab={activeTab} activeHandle={setActiveTab}> 
             <Tab tabId={TabType.SEMANTIC} title={<span>Semantic<br/>tag</span>}>
-              <Semantic context={props.context} alertId={alertId}/>
+              <Semantic context={props.context} alertId={alertId} authErrAction={props.authErrAction}/>
             </Tab>
             <Tab tabId={TabType.KEYWORD} title={<span>Free-text<br/>keyword</span>}>
-              <Keyword context={props.context} alertId={alertId}/>
+              <Keyword context={props.context} alertId={alertId} authErrAction={props.authErrAction}/>
             </Tab>
             <Tab tabId={TabType.COMMENT} title={<span>Comment<br/>&nbsp;</span>}>
-              <Comment context={props.context} alertId={alertId}/>
+              <Comment context={props.context} alertId={alertId} authErrAction={props.authErrAction}/>
             </Tab>
           </Tabs>
           <div id={alertId}></div>

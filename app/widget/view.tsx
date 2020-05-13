@@ -2,6 +2,7 @@ import { matchSwitch } from '@babakness/exhaustive-type-checking';
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 import * as config from "../config";
+import type { Token } from "../api/http";
 import * as auth from "../api/auth";
 import * as profileApi from "../api/profile";
 import { Context } from "../context";
@@ -48,87 +49,50 @@ function Widget(props: Props): React.FunctionComponentElement<Context> {
   const [context, setContext] = React.useState(props.context);
   const [loginState, setLoginState] = React.useState(LoginState.NOT_LOGGED);
 
-  //React.useEffect(() => { 
-    //if (context.mbTarget) {
-      //ensureLoginPm().then();
-    //}
-  //}, []);
-
-  //function ensureLoginPm(): Promise<AuthUser> {
-    //return new Promise((resolve, reject) => {
-      //setLoginState(LoginState.LOGGING);
-      //if (!context.mbUser) {
-        //auth.loginPm().then(
-          //user => {
-            //setLoginState(LoginState.LOGGED);
-            //setContext({ ...context, mbUser: user });
-            //resolve(user);
-          //},
-          //err => {
-            //setLoginState(LoginState.ERROR);
-            //console.error(err);
-            //reject();
-          //}
-        //);
-      //} else {
-        //resolve(context.mbUser);
-      //}
-    //});
-  //}
-
-
-  React.useEffect(() => setHelpPage(page === PagesEnum.HELP ? helpPage : page), [page]);
-
-  function updateUserProfile(): void {
-    const u = context.mbUser;
-    if (u) {
-      profileApi.getUserProfilePm(u.token).then(
-        profile => setContext({
-          ...context,
-          mbUser: { token: u.token, profile }
-        })
+  function loginPm(relogin = false): Promise<Token> {
+    return new Promise((resolve, reject) => {
+      setLoginState(LoginState.LOGGING);
+      auth.loginPm(relogin).then(
+        token => profileApi.getUserProfilePm(token, () => auth.loginPm(true)).then(
+          profile => {
+            setLoginState(LoginState.LOGGED);
+            setContext({ ...context, mbUser: { token, profile }});
+            resolve(token);
+          }
+        ),
+        err => {
+          setLoginState(LoginState.ERROR);
+          console.error(err);
+          reject();
+        }
       );
-    } else {
-      throw new Error("context.mbUser is null");
-    }
-  }
-
-  function login(): void {
-    setLoginState(LoginState.LOGGING);
-    auth.loginPm().then(
-      user => {
-        setLoginState(LoginState.LOGGED);
-        setContext({ ...context, mbUser: user });
-      },
-      err => {
-        setLoginState(LoginState.ERROR);
-        console.error(err);
-      }
-    );
+    });
   }
 
   function logout(): void {
-    if (context.mbUser) {
-      auth.logoutPm().then(
-        () => {
-          setContext({ ...context, mbUser: null });
-          setLoginState(LoginState.NOT_LOGGED);
-        }
-      );
-    }
+    setContext({ ...context, mbUser: null });
+    setLoginState(LoginState.NOT_LOGGED);
   }
 
   function pageComp(): React.ReactElement {
     return matchSwitch(page, {
-      [PagesEnum.ANNOTATE]: () => <AnnotatePage context={context}/>,
-      [PagesEnum.ANNOTATIONS]: () => <AnnotationsPage context={context}/>,
+      [PagesEnum.ANNOTATE]: () => <AnnotatePage context={context} authErrAction={() => loginPm(true)}/>,
+      [PagesEnum.ANNOTATIONS]: () => <AnnotationsPage context={context} authErrAction={() => loginPm(true)}/>,
       [PagesEnum.SEARCH]: () => <SearchPage context={context}/>,
       [PagesEnum.PROFILE]: () => context.mbUser ? 
-        <ProfilePage user={context.mbUser} updateProfileFn={updateUserProfile}/>
+        <ProfilePage user={context.mbUser} updateProfileFn={() => loginPm()} authErrAction={() => loginPm(true)}/>
           : <></>,
       [PagesEnum.HELP]: () => <HelpPage section={pageToHelp(helpPage)}/>
     });  
   }
+
+  React.useEffect(() => { 
+    if (context.mbTarget) {
+      loginPm();
+    }
+  }, []);
+
+  React.useEffect(() => setHelpPage(page === PagesEnum.HELP ? helpPage : page), [page]);
 
   function renderNavbar(): React.ReactElement {
     const activeFlag = (p: PagesEnum): string => p === page ? " active" : "";
@@ -172,16 +136,16 @@ function Widget(props: Props): React.FunctionComponentElement<Context> {
               data-toggle="tooltip" data-placement="bottom" title={context.mbUser ? "Profile" : "Login"}
               onClick={() =>
                 matchSwitch(loginState, {
-                  [LoginState.NOT_LOGGED]: () => login(),
+                  [LoginState.NOT_LOGGED]: () => { loginPm(); },
                   [LoginState.LOGGING]: () => void(null),
                   [LoginState.LOGGED]: () => setPage(PagesEnum.PROFILE),
-                  [LoginState.ERROR]: () => login()
+                  [LoginState.ERROR]: () => { loginPm(true); }
                 })}>
               {matchSwitch(loginState, {
                 [LoginState.NOT_LOGGED]: () => <icons.LoginIcon/>,
                 [LoginState.LOGGING]: () => <span>Logging in...</span>,
                 [LoginState.LOGGED]: () => <span><icons.UserIcon/> {shorten(context.mbUser?.profile.name || "", 15)}</span>,
-                [LoginState.ERROR]: () => <span>Login error <icons.LoginIcon/></span>
+                [LoginState.ERROR]: () => <span>Login error, try again <icons.LoginIcon/></span>
               })}
             </a>
           </li>

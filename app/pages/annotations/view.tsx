@@ -6,7 +6,8 @@ import * as React from "react";
 import * as icons from "../../components/icons";
 import * as anModel from "../../core/annotationsModel";
 import * as api from "../../api/annotations";
-import type { Context } from "../../context";
+import type { AuthErrAction } from "../../api/http";
+import type { PageProps } from "../pages";
 import { showAlertSuccess, showAlertError, SpinningWheel } from "../../components/ui"; 
 import { LoaderFilter, AnItem } from "./loader";
 import AnnotationTag from "../../components/annotationTag";
@@ -18,12 +19,7 @@ import { InfoPanel } from "./infoPanel";
 
 const alertId = "anlAlert";
 
-interface Props {
-  context: Context;
-}
-
-interface TagEditorProps {
-  context: Context;
+interface TagEditorProps extends PageProps {
   anRecord: anModel.AnRecord;
   doneHandler(): void;
 }
@@ -47,7 +43,7 @@ function TagEditor(props: TagEditorProps): React.FunctionComponentElement<TagEdi
        : anModel.isKeyword(props.anRecord) ?
          anModel.mkKeywordAnBody(label)
        : anModel.mkCommentAnBody(label);
-      api.patchAnnotationBody(user, props.anRecord.id, body).then(
+      api.patchAnnotationBody(user, props.anRecord.id, body, props.authErrAction).then(
         () => {
           showAlertSuccess(alertId, "Annotation updated");
           props.doneHandler();
@@ -101,7 +97,7 @@ function TagEditor(props: TagEditorProps): React.FunctionComponentElement<TagEdi
   );
 }
 
-export function AnnotationsPage(props: Props): React.FunctionComponentElement<Props> {
+export function AnnotationsPage(props: PageProps): React.FunctionComponentElement<PageProps> {
   const loaderRef = React.useRef(null as any);
   const [annotations, setAnnotations] = React.useState(null as Array<AnItem>|null);
   const [loading, setLoading] = React.useState(false);
@@ -127,10 +123,6 @@ export function AnnotationsPage(props: Props): React.FunctionComponentElement<Pr
 
   function closeOntologiesInfo(): void {
     setShowOntologyInfos(null);
-  }
-
-  function pageChanged(p: number) {
-    console.log(p);
   }
 
   function renderAnItem(anItem: AnItem): React.ReactElement {
@@ -200,7 +192,7 @@ export function AnnotationsPage(props: Props): React.FunctionComponentElement<Pr
                 style={{marginLeft: "5px", marginRight: "5px"}}
                 onClick={() => {
                   if (pendingDeleteId && user) {
-                    api.deleteAnnotation(user, pendingDeleteId).then(
+                    api.deleteAnnotation(user, pendingDeleteId, props.authErrAction).then(
                       () => {
                         if (loaderRef.current) { loaderRef.current.loadAnnotations(); }
                       },
@@ -264,7 +256,7 @@ export function AnnotationsPage(props: Props): React.FunctionComponentElement<Pr
     return (
       <React.Fragment key={anRecord.id}>
         {anRecord.id === editedRecordId ?
-          <TagEditor context={props.context} anRecord={anRecord} doneHandler={reload}/>
+          <TagEditor context={props.context} anRecord={anRecord} doneHandler={reload} authErrAction={props.authErrAction}/>
         : renderNormalRow()
         }
       </React.Fragment>

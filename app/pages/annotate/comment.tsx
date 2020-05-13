@@ -1,11 +1,10 @@
 import * as React from "react";
-import type { Context } from "../../context";
+import type { PageProps } from "../pages";
 import { showAlertSuccess, showAlertError, SpinningWheel } from "../../components/ui"; 
 import * as api from "../../api/annotations";
 import { CommentIcon, CreateIcon } from "../../components/icons";
 
-export interface CommentProps {
-  context: Context;
+export interface CommentProps extends PageProps {
   alertId: string;
 }
 
@@ -18,7 +17,7 @@ export function Comment(props: CommentProps): React.FunctionComponentElement<Com
   function annotate(): void {
     if (target && user) {
       setLoading(true);
-      api.postAnnotationComment(target, user, comment).then(
+      api.postAnnotationComment(target, user, comment, props.authErrAction).then(
         () => {
           setLoading(false);
           showAlertSuccess(props.alertId, "Comment created");

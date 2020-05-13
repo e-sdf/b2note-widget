@@ -1,5 +1,11 @@
-import type { AuthUser } from "./api/auth";
+import type { Token } from "./api/http";
+import type { UserProfile } from "./core/user";
 import type { Target } from "./core/annotationsModel";
+
+export interface AuthUser {
+  token: Token;
+  profile: UserProfile;
+}
 
 export interface Context {
   mbUser: AuthUser|null;

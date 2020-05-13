@@ -1,7 +1,8 @@
 import * as React from "react";
 import { $enum } from "ts-enum-util";
 import { Typeahead } from "react-bootstrap-typeahead";
-import { AuthUser } from "../../api/auth";
+import type { AuthUser } from "../../context";
+import type { AuthErrAction } from "../../api/http";
 import type { UserProfile } from "../../core/user";
 import { countries, Experience } from "../../core/user";
 import * as api from "../../api/profile";
@@ -12,6 +13,7 @@ const alertId = "profileAlert";
 interface ProfileProps {
   user: AuthUser;
   updateProfileFn(profile: UserProfile): void;
+  authErrAction: AuthErrAction;
 }
 
 export function ProfilePage(props: ProfileProps): React.FunctionComponentElement<ProfileProps> {
@@ -40,7 +42,7 @@ export function ProfilePage(props: ProfileProps): React.FunctionComponentElement
     const country2 = country.length > 0 ? { country } : {};
     const experience2 = experience.length > 0 ? { experience } : {};
     const changes = { ...name2, ...orcid2, ...organisation2, ...jobTitle2, ...country2, ...experience2 };
-    api.patchUserProfilePm(changes, props.user.token).then(
+    api.patchUserProfilePm(changes, props.user.token, props.authErrAction).then(
       updatedProfile => {
         props.updateProfileFn(updatedProfile);
         showAlertSuccess(alertId, "Profile updated");

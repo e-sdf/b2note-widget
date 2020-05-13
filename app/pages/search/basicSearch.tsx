@@ -213,7 +213,7 @@ export function BasicSearch(props: BasicSearchProps): React.FunctionComponentEle
   function submitQuery(): void {
     const operator = mode === SearchMode.ANY ? BiOperatorType.OR : BiOperatorType.AND;
     const query: SearchQuery = 
-      nonEmptyTerms.length > 1 ? { expression: mkExpression(operator, nonEmptyTerms) } : { expression: mkValue(nonEmptyTerms[0]) };
+      nonEmptyTerms.length > 1 ? mkExpression(operator, nonEmptyTerms) : mkValue(nonEmptyTerms[0]);
     setSearching(true);
     api.searchAnnotations(query).then(
       (anl: Array<AnRecord>) => {

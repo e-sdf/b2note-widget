@@ -1,7 +1,7 @@
 {
   "name": "b2note-widget",
   "version": "3.0.0",
-  "build": "beta9",
+  "build": "beta10",
   "description": "B2Note widget app",
   "private": "true",
   "scripts": {

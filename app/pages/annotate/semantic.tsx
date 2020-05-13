@@ -1,12 +1,11 @@
 import * as React from "react";
-import type { Context } from "../../context";
+import type { PageProps } from "../pages";
 import { showAlertSuccess, showAlertError, SpinningWheel } from "../../components/ui"; 
 import * as ac from "../../components/autocomplete/view";
 import * as api from "../../api/annotations";
 import { SemanticIcon, CreateIcon } from "../../components/icons";
 
-export interface SemanticProps {
-  context: Context;
+export interface SemanticProps extends PageProps {
   alertId: string;
 }
 
@@ -39,7 +38,7 @@ export function Semantic(props: SemanticProps): React.FunctionComponentElement<S
   function annotate(): void {
     if (target && user) {
       setLoading(true);
-      api.postAnnotationSemantic(target, user, uris, label).then(
+      api.postAnnotationSemantic(target, user, uris, label, props.authErrAction).then(
         () => { setLoading(false); showAlertSuccess(props.alertId, "Semantic annotation created"); },
         (err) => { setLoading(false); showAlertError(props.alertId, err); }
       );
@@ -48,7 +47,7 @@ export function Semantic(props: SemanticProps): React.FunctionComponentElement<S
 
   function postAnnotationAsKeyword(): void {
     if (target && user) {
-      api.postAnnotationKeyword(target, user, label).then(
+      api.postAnnotationKeyword(target, user, label, props.authErrAction).then(
         () => {
           showAlertSuccess(props.alertId, "Keyword annotation created");
           setLabel("");

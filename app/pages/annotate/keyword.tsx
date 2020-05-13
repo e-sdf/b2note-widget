@@ -1,13 +1,12 @@
 import * as React from "react";
-import type { Context } from "../../context";
+import type { PageProps } from "../pages";
 import { showAlertSuccess, showAlertError, SpinningWheel } from "../../components/ui"; 
 import * as oreg from "../../core/ontologyRegister";
 import { solrUrl } from "../../config";
 import * as api from "../../api/annotations";
 import { KeywordIcon, CreateIcon } from "../../components/icons";
 
-export interface KeywordProps {
-  context: Context;
+export interface KeywordProps extends PageProps {
   alertId: string;
 }
 
@@ -25,7 +24,7 @@ export function Keyword(props: KeywordProps): React.FunctionComponentElement<Key
 
   function postAnnotation(): void {
     if (target && user) {
-      api.postAnnotationKeyword(target, user, label).then(
+      api.postAnnotationKeyword(target, user, label, props.authErrAction).then(
         () => {
           showAlertSuccess(props.alertId, "Keyword annotation created");
           setLabel("");
@@ -37,7 +36,7 @@ export function Keyword(props: KeywordProps): React.FunctionComponentElement<Key
 
   function postAnnotationAsSemantic(): void {
     if (target && user) {
-      api.postAnnotationSemantic(target, user, uris, label).then(
+      api.postAnnotationSemantic(target, user, uris, label, props.authErrAction).then(
         () => {
           showAlertSuccess(props.alertId, "Semantic annotation created");
           setLabel("");
@@ -49,7 +48,7 @@ export function Keyword(props: KeywordProps): React.FunctionComponentElement<Key
 
   function postAnnotationAsComment(): void {
     if (target && user) {
-      api.postAnnotationComment(target, user, label).then(
+      api.postAnnotationComment(target, user, label, props.authErrAction).then(
         () => {
           showAlertSuccess(props.alertId, "Comment annotation created");
           setLabel("");
