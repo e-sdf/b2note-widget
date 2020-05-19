@@ -1,17 +1,34 @@
 import * as _ from "lodash";
 import * as React from "react";
-import * as icons from "../../components/icons";
-import { Paginator } from "../../components/paginator";
-import type { OntologyInfo } from "../../core/ontologyRegister";
+import type { AnRecord } from "../core/annotationsModel";
+import * as anModel from "../core/annotationsModel";
+import type { OntologyInfo } from "../core/ontologyRegister";
+import * as oApi from "../api/ontologies";
+import Paginator from "./paginator";
+import SpinningWheel from "./spinningWheel";
 
 interface Props {
-  label: string;
-  ontologyInfos: Array<OntologyInfo>;
+  anRecord: AnRecord;
   closeFn(): void;
 }
 
-export function InfoPanel(props: Props): React.FunctionComponentElement<Props> {
+export default function InfoPanel(props: Props): React.FunctionComponentElement<Props> {
+  const [loading, setLoading] = React.useState(false);
+  const [ontologyInfos, setOntologyInfos] = React.useState([] as Array<OntologyInfo>);
   const [activePage, setActivePage] = React.useState(1);
+
+  React.useEffect(
+    () => { 
+      setLoading(true);
+      oApi.loadOntologiesInfo(props.anRecord).then(
+        res => { 
+          setOntologyInfos(res); 
+          setLoading(false);
+        }
+      );
+    },
+    [props.anRecord]
+  );
 
   function renderTable(info: OntologyInfo): React.ReactElement {
     return (
@@ -54,29 +71,36 @@ export function InfoPanel(props: Props): React.FunctionComponentElement<Props> {
 
   return (
     <>
-      <div className="container-fluid">
-        <div className="row">
-          <button type="button" className="ml-auto mr-3 close"
-            onClick={() => props.closeFn()}
-          ><span>&times;</span>
-          </button>
-        </div>
+      <div className="container-fluid mt-2">
       </div>
       <div className="container-fluid anl-ontology-pane">
         <div className="row">
           <div className="col-sm">
             <strong className="mr-auto" style={{fontSize: "125%"}}>
-              {props.label}
+              {anModel.getLabel(props.anRecord)}
             </strong>
           </div>
+          <button type="button" className="ml-auto mr-1 close"
+            onClick={() => props.closeFn()}
+          ><span>&times;</span>
+          </button>
+        </div>
+        <div className="row mt-2 justify-content-center">
+            <SpinningWheel show={loading}/>
         </div>
         <div className="row">
           <div className="col-sm">
-            {renderTable(props.ontologyInfos[activePage - 1])}
+            {!loading ?
+              ontologyInfos.length > 0 ? 
+                renderTable(ontologyInfos[activePage - 1])
+              : "No ontologies found"
+            : <></>}
           </div>
         </div>
         <div className="row d-flex flex-row justify-content-center">
-          <Paginator maxPage={props.ontologyInfos.length} pageChangedFn={setActivePage}/>
+          {ontologyInfos.length > 0 ? 
+            <Paginator maxPage={ontologyInfos.length} pageChangedFn={setActivePage}/>
+            : <></>}
         </div>
       </div>
     </>

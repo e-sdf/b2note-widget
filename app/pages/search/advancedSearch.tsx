@@ -7,7 +7,8 @@ import type { AnRecord } from "../../core/annotationsModel";
 import { SearchType } from "../../core/searchModel";
 import * as queryParser from "../../core/searchQueryParser";
 import * as api from "../../api/annotations";
-import { showAlertError, SpinningWheel } from "../../components/ui"; 
+import { showAlertError } from "../../components/ui"; 
+import SpinningWheel from "../../components/spinningWheel";
 import { TermComp } from "./termComp";
 
 const alertId = "basic-search-alert";

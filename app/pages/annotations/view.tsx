@@ -1,21 +1,16 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/explicit-function-return-type */
 import _ from "lodash";
-import allSettled from "promise.allsettled";
 import * as React from "react";
 import * as icons from "../../components/icons";
 import * as anModel from "../../core/annotationsModel";
-import * as api from "../../api/annotations";
-import type { AuthErrAction } from "../../api/http";
+import * as anApi from "../../api/annotations";
 import type { PageProps } from "../pages";
-import { showAlertSuccess, showAlertError, SpinningWheel } from "../../components/ui"; 
+import { showAlertSuccess, showAlertError } from "../../components/ui"; 
+import SpinningWheel from "../../components/spinningWheel";
 import { LoaderFilter, AnItem } from "./loader";
 import AnnotationTag from "../../components/annotationTag";
 import TargetTr from "../../components/targetTr";
+import InfoPanel from "../../components/infoPanel";
 import * as ac from "../../components/autocomplete/view";
-import * as oreg from "../../core/ontologyRegister";
-import { solrUrl } from "../../config";
-import { InfoPanel } from "./infoPanel";
 
 const alertId = "anlAlert";
 
@@ -43,7 +38,7 @@ function TagEditor(props: TagEditorProps): React.FunctionComponentElement<TagEdi
        : anModel.isKeyword(props.anRecord) ?
          anModel.mkKeywordAnBody(label)
        : anModel.mkCommentAnBody(label);
-      api.patchAnnotationBody(user, props.anRecord.id, body, props.authErrAction).then(
+      anApi.patchAnnotationBody(user, props.anRecord.id, body, props.authErrAction).then(
         () => {
           showAlertSuccess(alertId, "Annotation updated");
           props.doneHandler();
@@ -102,27 +97,15 @@ export function AnnotationsPage(props: PageProps): React.FunctionComponentElemen
   const [annotations, setAnnotations] = React.useState(null as Array<AnItem>|null);
   const [loading, setLoading] = React.useState(false);
   const [activeItem, setActiveItem] = React.useState(null as string|null);
+  const [ontologyInfoRequest, setOntologyInfoRequest] = React.useState(null as anModel.AnRecord|null);
   const [editedRecordId, setEditedRecordId] = React.useState(null as string|null);
   const [pendingDeleteId, setPendingDeleteId] = React.useState(null as string|null);
-  const [showOntologyInfos, setShowOntologyInfos] = React.useState(null as Array<oreg.OntologyInfo>|null);
   const user = props.context.mbUser;
 
   //React.useEffect(() => console.log(annotations), [annotations]);
 
-  function loadOntologiesInfo(anRecord: anModel.AnRecord): void {
-    const iris = anModel.getSources(anRecord);
-    const infoPms = iris.map((iri: string) => oreg.getInfo(solrUrl, iri));
-    allSettled<oreg.OntologyInfo>(infoPms).then(
-      (results) => {
-        const settled = results.filter(r => r.status === "fulfilled") as Array<allSettled.PromiseResolution<oreg.OntologyInfo>>;
-        const infos = settled.map(s  => s.value);
-        setShowOntologyInfos(infos);
-      }
-    );
-  }
-
   function closeOntologiesInfo(): void {
-    setShowOntologyInfos(null);
+    setOntologyInfoRequest(null);
   }
 
   function renderAnItem(anItem: AnItem): React.ReactElement {
@@ -192,7 +175,7 @@ export function AnnotationsPage(props: PageProps): React.FunctionComponentElemen
                 style={{marginLeft: "5px", marginRight: "5px"}}
                 onClick={() => {
                   if (pendingDeleteId && user) {
-                    api.deleteAnnotation(user, pendingDeleteId, props.authErrAction).then(
+                    anApi.deleteAnnotation(user, pendingDeleteId, props.authErrAction).then(
                       () => {
                         if (loaderRef.current) { loaderRef.current.loadAnnotations(); }
                       },
@@ -225,7 +208,7 @@ export function AnnotationsPage(props: PageProps): React.FunctionComponentElemen
                 mbUser={props.context.mbUser}
                 anRecord={anRecord}
                 maxLen={17}
-                onClick={() => loadOntologiesInfo(anRecord)}/>
+                onClick={() => setOntologyInfoRequest(anRecord)}/>
             </td>
             <td style={{paddingLeft: 0, paddingRight: 0}}>
               {renderFilesBadge()}
@@ -297,10 +280,9 @@ export function AnnotationsPage(props: PageProps): React.FunctionComponentElemen
   }
 
   return (
-    showOntologyInfos ?
+    ontologyInfoRequest ?
       <InfoPanel 
-        label={activeItem ? activeItem : ""}
-        ontologyInfos={showOntologyInfos}
+        anRecord={ontologyInfoRequest}
         closeFn={closeOntologiesInfo}
       />
     : renderAnnotationsTable()

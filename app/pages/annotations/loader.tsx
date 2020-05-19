@@ -1,6 +1,5 @@
 import _ from "lodash";
 import * as React from "react";
-import type { StandardProperties } from "csstype";
 import * as icons from "../../components/icons";
 import * as anModel from "../../core/annotationsModel";
 import * as api from "../../api/annotations";
@@ -231,7 +230,7 @@ export const LoaderFilter = React.forwardRef((props: LoaderProps, ref: React.Ref
   }
 
   return (
-    <React.Fragment>
+    <>
       {renderLabel()}
       <div className="row mt-2">
         <div className="col-sm">
@@ -243,6 +242,6 @@ export const LoaderFilter = React.forwardRef((props: LoaderProps, ref: React.Ref
           </div>
         </div>
       </div>
-    </React.Fragment>
+    </>
   );
 });

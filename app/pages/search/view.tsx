@@ -7,6 +7,7 @@ import { BasicSearch } from "./basicSearch";
 import { AdvancedSearch } from "./advancedSearch";
 import AnnotationTag from "../../components/annotationTag";
 import TargetTr from "../../components/targetTr";
+import InfoPanel from "../../components/infoPanel";
 import { DownloadIcon } from "../../components/icons";
 import { downloadJSON, downloadRDF } from "../../components/download";
 
@@ -19,7 +20,16 @@ interface SearchProps {
 export function SearchPage(props: SearchProps): React.FunctionComponentElement<SearchProps> {
   const [resultsBasic, setResultsBasic] = React.useState(null as Array<anModel.AnRecord>|null);
   const [resultsAdv, setResultsAdv] = React.useState(null as Array<anModel.AnRecord>|null);
+  const [ontologyInfoRequest, setOntologyInfoRequest] = React.useState(null as anModel.AnRecord|null);
 
+  function clearResults(): void {
+    setResultsBasic(null);
+    setResultsAdv(null);
+  }
+
+  function closeOntologiesInfo(): void {
+    setOntologyInfoRequest(null);
+  }
 
   function renderDownloadButton(results: anModel.AnRecord[]): React.ReactElement {
     return (
@@ -48,10 +58,14 @@ export function SearchPage(props: SearchProps): React.FunctionComponentElement<S
   function renderAnTags(anl: anModel.AnRecord[]): React.ReactElement {
     return (
       <>
-        {anl.map((an, i) => 
+        {anl.map((anRecord, i) => 
           <tr key={i}>
             <td colSpan={2} style={{border: "none", padding: "0 0 0 0.5em"}}>
-              <AnnotationTag anRecord={an} mbUser={props.context.mbUser} maxLen={35}/>
+              <AnnotationTag 
+                anRecord={anRecord}
+                mbUser={props.context.mbUser}
+                maxLen={35}
+                onClick={() => setOntologyInfoRequest(anRecord)}/>
             </td>
           </tr>
         )}
@@ -82,6 +96,10 @@ export function SearchPage(props: SearchProps): React.FunctionComponentElement<S
         <div className="card mt-2">
           <div className="card-header" style={{padding: "5px 10px"}}>
             {results.length === 0 ? "No results" : "Targets found:"}
+            <button type="button" className="ml-auto mr-3 close"
+              onClick={clearResults}
+            ><span>&times;</span>
+          </button>
           </div>
           { results.length > 0 ?
             <ul className="list-group list-group-flush" style={{padding: "10px", maxHeight: "372px", overflow: "auto"}}>
@@ -94,20 +112,29 @@ export function SearchPage(props: SearchProps): React.FunctionComponentElement<S
     );
   }
 
+  function renderSearchInput(): React.ReactElement {
+    return (
+      <Tabs id="searchTabs" activeTab={"basic" as TabType}>
+        <Tab tabId={"basic" as TabType} title="Basic Search">
+          <BasicSearch resultsHandle={setResultsBasic}/>
+        </Tab>
+        <Tab tabId={"advanced" as TabType} title="Advanced Search">
+          <AdvancedSearch resultsHandle={setResultsAdv}/>
+        </Tab>
+      </Tabs>
+    );
+  }
+
   return (
     <>
-      { resultsBasic ? renderResults(resultsBasic) : "" }
-      { resultsAdv ? renderResults(resultsAdv) : "" }
-      { !resultsBasic && !resultsAdv ?
-        <Tabs id="searchTabs" activeTab={"basic" as TabType}>
-          <Tab tabId={"basic" as TabType} title="Basic Search">
-            <BasicSearch resultsHandle={setResultsBasic}/>
-          </Tab>
-          <Tab tabId={"advanced" as TabType} title="Advanced Search">
-            <AdvancedSearch resultsHandle={setResultsAdv}/>
-          </Tab>
-        </Tabs>
-      : ""}
+      {ontologyInfoRequest ?
+        <InfoPanel 
+          anRecord={ontologyInfoRequest}
+          closeFn={closeOntologiesInfo}
+        />
+      : resultsBasic ? renderResults(resultsBasic) 
+      : resultsAdv ? renderResults(resultsAdv)
+      : renderSearchInput()}
     </>
   );
 }

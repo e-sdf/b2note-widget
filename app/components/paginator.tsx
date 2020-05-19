@@ -6,7 +6,7 @@ export interface PaginatorProps {
   pageChangedFn(p: number): void;
 }
 
-export function Paginator(props: PaginatorProps): React.FunctionComponentElement<PaginatorProps> {
+export default function Paginator(props: PaginatorProps): React.FunctionComponentElement<PaginatorProps> {
   const [page, setPage] = React.useState(1);
 
   React.useEffect(() => props.pageChangedFn(page), [page]);

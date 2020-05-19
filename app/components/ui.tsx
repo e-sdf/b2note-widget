@@ -249,17 +249,3 @@ export class Confirm extends React.Component<ConfirmProps> {
     //}
   //});
 //}
-
-export interface SpinningWheelProps {
-  show: boolean;
-}
-
-export function SpinningWheel(props: SpinningWheelProps): React.FunctionComponentElement<SpinningWheelProps> {
-  return (
-    props.show ?
-      <div className="spinner-border text-primary" role="status">
-        <span className="sr-only">Loading...</span>
-      </div>
-    : <></>
-  );
-}

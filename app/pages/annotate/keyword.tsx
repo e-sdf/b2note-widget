@@ -1,6 +1,7 @@
 import * as React from "react";
 import type { PageProps } from "../pages";
-import { showAlertSuccess, showAlertError, SpinningWheel } from "../../components/ui"; 
+import { showAlertSuccess, showAlertError } from "../../components/ui"; 
+import SpinningWheel from "../../components/spinningWheel";
 import * as oreg from "../../core/ontologyRegister";
 import { solrUrl } from "../../config";
 import * as api from "../../api/annotations";
