@@ -6,3 +6,4 @@ V=`./scripts/utils/getVersion.sh`
 B=`./scripts/utils/getBuild.sh`
 
 docker tag "$P/$N" "$P/$N:$V-$B"
+git tag "v$V-$B"
