@@ -1,13 +1,12 @@
 import type { Token } from "./http";
-import { get } from "./http";
-import { endpointUrl, serverUrl } from "../config";
+import { serverUrl } from "../config";
 
 export type AuthPm = Promise<void>;
 
 const storageKey = "token";
 
 function storeTokenPm(token: Token): Promise<void> {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     if (typeof(Storage) !== "undefined") {
       window.localStorage.setItem(storageKey, token);
       resolve();
@@ -16,7 +15,7 @@ function storeTokenPm(token: Token): Promise<void> {
 }
 
 function deleteTokenPm(): Promise<void> {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     window.localStorage.removeItem(storageKey);
     resolve();
   });
