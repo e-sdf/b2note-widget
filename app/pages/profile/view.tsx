@@ -17,6 +17,8 @@ interface ProfileProps {
 }
 
 export default function ProfilePage(props: ProfileProps): React.FunctionComponentElement<ProfileProps> {
+  const [givenName, setGivenName] = React.useState(props.user.profile.givenName);
+  const [familyName, setFamilyName] = React.useState(props.user.profile.familyName);
   const [name, setName] = React.useState(props.user.profile.name);
   const [orcid, setOrcid] = React.useState(props.user.profile.orcid);
   const [organisation, setOrganisation] = React.useState(props.user.profile.organisation);
@@ -35,13 +37,15 @@ export default function ProfilePage(props: ProfileProps): React.FunctionComponen
       const panelDOM = (panelRef.current as unknown) as Element;
       panelDOM.scrollTop = 0;
     }
+    const givenName2 = givenName.length > 0 ? { givenName } : {};
+    const familyName2 = familyName.length > 0 ? { familyName } : {};
     const name2 = name.length > 0 ? { name } : {};
     const orcid2 = orcid.length > 0 ? { orcid } : {};
     const organisation2 = organisation.length > 0 ? { organisation } : {};
     const jobTitle2 = jobTitle.length > 0 ? { jobTitle } : {};
     const country2 = country.length > 0 ? { country } : {};
     const experience2 = experience.length > 0 ? { experience } : {};
-    const changes = { ...name2, ...orcid2, ...organisation2, ...jobTitle2, ...country2, ...experience2 };
+    const changes = { ...givenName2, ...familyName2, ...name2, ...orcid2, ...organisation2, ...jobTitle2, ...country2, ...experience2 };
     api.patchUserProfilePm(changes, props.user.token, props.authErrAction).then(
       updatedProfile => {
         props.updateProfileFn(updatedProfile);
@@ -108,7 +112,7 @@ export default function ProfilePage(props: ProfileProps): React.FunctionComponen
       </div>
       <form>
         <div className="form-group">
-          <label>B2NOTE PID</label>
+          <label>B2NOTE ID</label>
           <input type="text" className="form-control" readOnly
             data-toggle="tooltip" data-placement="bottom" title="B2NOTE user persistent identifier; read-only, value provided by B2NOTE"
             value={props.user.profile?.id || ""} />
@@ -118,6 +122,18 @@ export default function ProfilePage(props: ProfileProps): React.FunctionComponen
           <input type="email" className="form-control" readOnly
             data-toggle="tooltip" data-placement="bottom" title="Read-only, value provided by B2ACCESS"
             value={props.user.profile?.email || ""} />
+        </div>
+        <div className="form-group">
+          <label>Given Name</label>
+          <input type="text" className="form-control"
+            value={givenName}
+            onChange={ev => setGivenName(ev.target.value)} />
+        </div>
+        <div className="form-group">
+          <label>Family Name</label>
+          <input type="text" className="form-control"
+            value={familyName}
+            onChange={ev => setFamilyName(ev.target.value)} />
         </div>
         <div className="form-group">
           <label>Name</label>

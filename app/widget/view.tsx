@@ -107,6 +107,7 @@ function Widget(props: Props): React.FunctionComponentElement<Context> {
       setContext({ ...context, mbUser: null });
       setLoginState(LoginStateEnum.NOT_LOGGED);
       setAuthProvider(null);
+      setChosenAuthProvider(null);
       }
     );
   }
