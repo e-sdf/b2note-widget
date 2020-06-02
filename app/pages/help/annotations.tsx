@@ -1,12 +1,12 @@
 import * as React from "react";
 import type { SectionProps } from "./defs";
-import { imgUrl } from "./utils";
+import { imgHelpPath } from "./utils";
 import * as icons from "../../components/icons";
 import { renderFilterItemTr } from "./utils";
 
 const btnCol = "#6c757d";
 
-export function AnnotationsSection(props: SectionProps): React.FunctionComponentElement<SectionProps> {
+export default function AnnotationsSection(props: SectionProps): React.FunctionComponentElement<SectionProps> {
   return (
     <>
       <h2>{props.header}</h2>
@@ -61,7 +61,7 @@ export function AnnotationsSection(props: SectionProps): React.FunctionComponent
       </ul>
 
       <h3>Annotation details</h3>
-      <img src={imgUrl + "annotation.png"}/>
+      <img src={imgHelpPath + "annotation.png"}/>
       <p>
         Annotations in the list follow the structure depicted in the figure. Initially, just the heaer line items (1)-(5) are displayed. When the line is made active on mouse-over, in case you are the author of the annotation, action buttons (6), (7) are displayed. On clicking the chevron (5), the detial line (8)-(10) is displayed. The individual pieces are:
       </p>

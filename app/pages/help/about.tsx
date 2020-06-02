@@ -1,7 +1,7 @@
 import * as React from "react";
 import type { SectionProps } from "./defs";
 
-export function AboutSection(props: SectionProps): React.FunctionComponentElement<SectionProps> {
+export default function AboutSection(props: SectionProps): React.FunctionComponentElement<SectionProps> {
   return (
     <>
       <h2>{props.header}</h2>

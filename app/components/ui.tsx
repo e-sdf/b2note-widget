@@ -152,7 +152,7 @@ export function Tabs<T>(props: TabsProps<T>): React.ReactElement {
   return (
     <div>
       <ul className="nav nav-tabs" id={props.id} role="tablist">
-        {!props.children ? "" : props.children.map((tab: React.ReactElement) =>
+        {!props.children ? <></> : props.children.map((tab: React.ReactElement) =>
           <li key={tab.props.tabId} className="nav-item">
             <a className={"nav-link" + activeCls(tab)} id={`${tab.props.tabId}-tab`} href="#"
               onClick={() => {
@@ -165,7 +165,7 @@ export function Tabs<T>(props: TabsProps<T>): React.ReactElement {
         )}
       </ul>
       <div className="tab-content">
-      {!props.children ? "" : props.children.map((tab: React.ReactElement) =>
+        {!props.children ? <></> : props.children.map((tab: React.ReactElement) =>
         <div
           key={tab.props.tabId}
           id={tab.props.tabId}

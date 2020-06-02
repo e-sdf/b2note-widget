@@ -3,7 +3,7 @@ import type { SectionProps } from "./defs";
 import * as icons from "../../components/icons";
 import { renderMenuItemTr } from "./utils";
 
-export function MenuSection(props: SectionProps): React.FunctionComponentElement<SectionProps> {
+export default function MenuSection(props: SectionProps): React.FunctionComponentElement<SectionProps> {
   return (
     <>
       <h2>{props.header}</h2>

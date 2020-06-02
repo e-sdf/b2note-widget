@@ -21,7 +21,10 @@ export default function AnnotationTag(props: AnnotationProps): React.FunctionCom
     [anModel.AnRecordType.KEYWORD]: () => <KeywordIcon className="text-secondary" />,
     [anModel.AnRecordType.COMMENT]: () => <CommentIcon className="text-secondary" />,
   });
-  const itemStyle = anRecord.creator.id === (props.mbUser?.profile.id || "") ? {} : { fontStyle: "italic" };
+  const itemStyle = 
+    props.mbUser ? 
+      props.mbUser.profile.id === anModel.getCreatorId(anRecord) ? {} : { fontStyle: "italic" }
+    : { fontStyle: "italic" }; 
 
   function renderSemanticLabel(): React.ReactElement {
     const shortened = props.maxLen ? shorten(label, props.maxLen - 4) : label;
@@ -35,7 +38,7 @@ export default function AnnotationTag(props: AnnotationProps): React.FunctionCom
         title={`${label} (present in ${ontologiesNo} ${
           ontologiesNo > 1 ? "ontologies" : "ontology"
         })`}
-        onClick={props.onClick ? props.onClick : () => "nop"}
+        onClick={props.onClick ? props.onClick : () => void(0)}
       >
         {`${shortened} (${ontologiesNo})`}
       </a>

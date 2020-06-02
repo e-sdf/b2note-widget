@@ -16,7 +16,7 @@ interface ProfileProps {
   authErrAction: AuthErrAction;
 }
 
-export function ProfilePage(props: ProfileProps): React.FunctionComponentElement<ProfileProps> {
+export default function ProfilePage(props: ProfileProps): React.FunctionComponentElement<ProfileProps> {
   const [name, setName] = React.useState(props.user.profile.name);
   const [orcid, setOrcid] = React.useState(props.user.profile.orcid);
   const [organisation, setOrganisation] = React.useState(props.user.profile.organisation);

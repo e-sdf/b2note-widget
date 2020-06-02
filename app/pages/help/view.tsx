@@ -3,33 +3,35 @@ import { matchSwitch } from "@babakness/exhaustive-type-checking";
 import { $enum } from "ts-enum-util";
 import * as React from "react";
 import { HelpSection } from "./defs";
-import { AboutSection } from "./about";
-import { MenuSection } from "./menu";
-import { AnnotateSection } from "./annotate";
-import { AnnotationsSection } from "./annotations";
-import { SearchSection } from "./search";
-import { ProfileSection } from "./profile";
-import { SupportSection } from "./support";
+import AboutSection from "./about";
+import MenuSection from "./menu";
+import AnnotateSection from "./annotate";
+import AnnotationsSection from "./annotations";
+import SearchSection from "./search";
+import LoginSection from "./login";
+import ProfileSection from "./profile";
+import SupportSection from "./support";
 
 interface ToCProps {
   sectionHandle(section: HelpSection): void;
   header: string;
 }
 
-export function header(section: HelpSection): string {
+function header(section: HelpSection): string {
   return matchSwitch(section, {
     [HelpSection.ABOUT]: () => "About B2NOTE",
     [HelpSection.MENU]: () => "The Main Menu",
     [HelpSection.ANNOTATE]: () => "Annotating",
     [HelpSection.ANNOTATIONS]: () => "List of Annotations",
     [HelpSection.SEARCH]: () => "Searching Annotations",
+    [HelpSection.LOGIN]: () => "Login",
     [HelpSection.PROFILE]: () => "User Profile",
     [HelpSection.SUPPORT]: () => "Support",
     [HelpSection.TOC]: () => "Table of Contents"
   });
 }
 
-export function ToC(props: ToCProps): React.FunctionComponentElement<ToCProps> {
+function ToC(props: ToCProps): React.FunctionComponentElement<ToCProps> {
 
   function butLast<T>(arr: T[]): T[] {
     return arr.filter(i => i !== _.last(arr));
@@ -53,7 +55,7 @@ interface HelpPageProps {
   section: HelpSection;
 }
 
-export function HelpPage(props: HelpPageProps): React.FunctionComponentElement<HelpPageProps> {
+export default function HelpPage(props: HelpPageProps): React.FunctionComponentElement<HelpPageProps> {
   const [section, setSection] = React.useState(props.section);
   const sectionRef = React.useRef(null);
 
@@ -68,6 +70,7 @@ export function HelpPage(props: HelpPageProps): React.FunctionComponentElement<H
       [HelpSection.ANNOTATE]: () => <AnnotateSection header={header(HelpSection.ANNOTATE)} redirectFn={setSection}/>,
       [HelpSection.ANNOTATIONS]: () => <AnnotationsSection header={header(HelpSection.ANNOTATIONS)} redirectFn={setSection}/>,
       [HelpSection.SEARCH]: () => <SearchSection header={header(HelpSection.SEARCH)} redirectFn={setSection}/>,
+      [HelpSection.LOGIN]: () => <LoginSection header={header(HelpSection.LOGIN)} redirectFn={setSection}/>,
       [HelpSection.PROFILE]: () => <ProfileSection header={header(HelpSection.PROFILE)} redirectFn={setSection}/>,
       [HelpSection.SUPPORT]: () => <SupportSection header={header(HelpSection.SUPPORT)} redirectFn={setSection}/>,
       [HelpSection.TOC]: () => <ToC sectionHandle={setSection} header={header(HelpSection.TOC)}/>

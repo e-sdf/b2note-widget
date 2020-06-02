@@ -17,7 +17,7 @@ interface SearchProps {
   context: Context;
 }
 
-export function SearchPage(props: SearchProps): React.FunctionComponentElement<SearchProps> {
+export default function SearchPage(props: SearchProps): React.FunctionComponentElement<SearchProps> {
   const [resultsBasic, setResultsBasic] = React.useState(null as Array<anModel.AnRecord>|null);
   const [resultsAdv, setResultsAdv] = React.useState(null as Array<anModel.AnRecord>|null);
   const [ontologyInfoRequest, setOntologyInfoRequest] = React.useState(null as anModel.AnRecord|null);
@@ -82,8 +82,10 @@ export function SearchPage(props: SearchProps): React.FunctionComponentElement<S
           {Object.keys(resultsDict).map(source => 
             <li key={source} className="list-group-item pt-2 pl-0 pr-0 pb-2">
               <table className="table mb-2">
-                {<TargetTr key={source} mbContextTarget={props.context.mbTarget} target={resultsDict[source][0].target}/>}
-                {renderAnTags(resultsDict[source])}
+                <tbody>
+                  {<TargetTr key={source} mbContextTarget={props.context.mbTarget} target={resultsDict[source][0].target}/>}
+                  {renderAnTags(resultsDict[source])}
+                </tbody>
               </table>
             </li>
           )}
@@ -93,10 +95,10 @@ export function SearchPage(props: SearchProps): React.FunctionComponentElement<S
 
     return (
       <>
-        <div className="card mt-2">
-          <div className="card-header" style={{padding: "5px 10px"}}>
+        <div className="card">
+          <div className="card-header" style={{padding: "5px 5px 5px 10px"}}>
             {results.length === 0 ? "No results" : "Targets found:"}
-            <button type="button" className="ml-auto mr-3 close"
+            <button type="button" className="ml-auto close"
               onClick={clearResults}
             ><span>&times;</span>
           </button>
@@ -105,7 +107,7 @@ export function SearchPage(props: SearchProps): React.FunctionComponentElement<S
             <ul className="list-group list-group-flush" style={{padding: "10px", maxHeight: "372px", overflow: "auto"}}>
               {renderItems()}
             </ul>
-          : ""}
+            : <></>}
         </div>
         {renderDownloadButton(results)}
       </>

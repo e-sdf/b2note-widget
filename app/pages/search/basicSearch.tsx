@@ -82,7 +82,7 @@ function TermComp(props: TermCompProps): TermComp {
             props.updateValueHandle(val);
           }}/>
       }
-      {props.isFirst ? "" :
+      {props.isFirst ? <></> :
         <button type="button" className="btn btn-sm btn-danger"
           onClick={() => { if (props.deleteHandle) { props.deleteHandle(); } }}>
           <icons.DeleteIcon/>
@@ -250,7 +250,7 @@ export function BasicSearch(props: BasicSearchProps): React.FunctionComponentEle
   return (
     <div className="container-fluid mt-2">
       {terms.map((term: TermItem) => term.termComp)}
-      {terms.length > 1 ? renderModeSelection() : ""}
+      {terms.length > 1 ? renderModeSelection() : <></>}
       <div className="form-group">
         <button type="button" className="btn btn-secondary"
           data-toggle="tooltip" data-placement="bottom" title="Add another expression"

@@ -10,7 +10,7 @@ const alertId = "anAlert";
 
 enum TabType { SEMANTIC = "semantic", KEYWORD = "keyword", COMMENT = "comment" }
 
-export function AnnotatePage(props: PageProps): React.FunctionComponentElement<PageProps> {
+export default function AnnotatePage(props: PageProps): React.FunctionComponentElement<PageProps> {
   const [activeTab, setActiveTab] = React.useState(TabType.SEMANTIC);
 
   function renderTargetInfo(): React.ReactElement {
@@ -64,7 +64,7 @@ export function AnnotatePage(props: PageProps): React.FunctionComponentElement<P
           <div id={alertId}></div>
         </div>
         : 
-        props.context.mbUser ? "" : 
+          props.context.mbUser ? <></> : 
           <div className="container-fluid">
             <h3 className="text-danger">You need to log in to make annotations</h3>
           </div>}

@@ -3,7 +3,7 @@ import type { PageProps } from "../pages";
 import { showAlertSuccess, showAlertError } from "../../components/ui"; 
 import SpinningWheel from "../../components/spinningWheel";
 import * as oreg from "../../core/ontologyRegister";
-import { solrUrl } from "../../config";
+import config from "../../config";
 import * as api from "../../api/annotations";
 import { KeywordIcon, CreateIcon } from "../../components/icons";
 
@@ -62,7 +62,7 @@ export function Keyword(props: KeywordProps): React.FunctionComponentElement<Key
   function annotate(): void {
     // Check the existence of a semantic tag
     setLoading(true);
-    oreg.getOntologies(solrUrl, label).then(oDict => {
+    oreg.getOntologies(config.solrUrl, label).then(oDict => {
       setLoading(false);
       if (oDict[label]) {
         setUris(oDict[label].map(i => i.uris));

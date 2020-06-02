@@ -135,7 +135,7 @@ export function AdvancedSearch(props: SearchProps): React.FunctionComponentEleme
                   <icons.ErrorIcon className="text-danger" /> 
                   : <icons.OKIcon className="text-success" />}
               </div>
-              : ""}
+              : <></>}
           </div>
         </div>
       </div>

@@ -1,5 +1,6 @@
 import * as anModel from "../core/annotationsModel";
 import fileDownload from "js-file-download"; 
+import config from "../config";
 import { mkRDF } from "../core/export/rdf";
 import { anRecords2ttl } from "../core/export/turtle";
 
@@ -12,11 +13,11 @@ export function downloadJSON(anRecords: anModel.AnRecord[]): void {
 }
 
 export function downloadRDF(anRecords: anModel.AnRecord[]): void {
-  const rdf = mkRDF(anRecords);
+  const rdf = mkRDF(anRecords, config.apiServerUrl + config.apiPath);
   fileDownload(rdf, mkFilename(anModel.Format.RDF));
 }
 
 export function downloadTurtle(anRecords: anModel.AnRecord[]): void {
-  const ttl = anRecords2ttl(anRecords);
+  const ttl = anRecords2ttl(anRecords, config.apiServerUrl + config.apiPath);
   fileDownload(ttl, mkFilename(anModel.Format.TTL));
 }

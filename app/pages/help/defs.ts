@@ -4,6 +4,7 @@ export enum HelpSection {
   ANNOTATE = "annotate",
   ANNOTATIONS = "annotations",
   SEARCH = "search",
+  LOGIN = "login",
   PROFILE = "profile",
   SUPPORT = "support",
   TOC = "toc"

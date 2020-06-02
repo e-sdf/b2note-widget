@@ -55,7 +55,7 @@ export default function InfoPanel(props: Props): React.FunctionComponentElement<
             <td>{info.synonyms.map(s => 
               <>
                 {s}
-                {s === _.last(info.synonyms) ? "" : <br/>}
+                {s === _.last(info.synonyms) ? <></> : <br/>}
               </>
               )}
             </td>
@@ -89,13 +89,11 @@ export default function InfoPanel(props: Props): React.FunctionComponentElement<
             <SpinningWheel show={loading}/>
         </div>
         <div className="row">
-          <div className="col-sm">
-            {!loading ?
-              ontologyInfos.length > 0 ? 
-                renderTable(ontologyInfos[activePage - 1])
-              : "No ontologies found"
+          {!loading ?
+            ontologyInfos.length > 0 ? 
+            renderTable(ontologyInfos[activePage - 1])
+            : "No ontologies found"
             : <></>}
-          </div>
         </div>
         <div className="row d-flex flex-row justify-content-center">
           {ontologyInfos.length > 0 ? 

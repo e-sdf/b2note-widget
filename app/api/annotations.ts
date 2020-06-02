@@ -1,11 +1,12 @@
-import { endpointUrl } from "../config";
+import config from "../config";
 import type { AuthUser } from "../context";
 import type { AuthErrAction } from "./http";
 import { get, post, patch, del } from "./http";
-import { version } from "../config";
 import * as anModel from "../core/annotationsModel";
 import * as sModel from "../core/searchModel";
 import * as searchQueryParser from "../core/searchQueryParser";
+
+const endpointUrl = config.apiServerUrl + config.apiPath;
 
 const annotationsUrl = endpointUrl + anModel.annotationsUrl;
 const targetsUrl = endpointUrl + anModel.targetsUrl;
@@ -71,7 +72,7 @@ export function getAnnotationsJSON(f: Filters, mbUser: AuthUser|null = null, mbT
     get<Array<anModel.AnRecord>>(annotationsUrl, params).then(
       data => {
         const cleaned = !f.creator.mine ? 
-          data.filter((r: anModel.AnRecord) => r.creator.id !== mbUser?.profile.id)
+          data.filter((r: anModel.AnRecord) => anModel.getCreatorId(r) !== mbUser?.profile.id)
         : data;
         resolve(cleaned);
       },
@@ -94,7 +95,7 @@ function postAnnotation(anRecord: anModel.AnRecord, user: AuthUser, authErrActio
 export async function postAnnotationSemantic(target: anModel.Target, user: AuthUser, uris: string[], label: string, authErrAction: AuthErrAction): Promise<any> {
   const body = anModel.mkSemanticAnBody(uris, label);
   const anTarget = anModel.mkTarget(target);
-  const generator = anModel.mkGenerator(version);
+  const generator = anModel.mkGenerator(config.version);
   const creator = anModel.mkCreator({id: user.profile.id});
   const req = anModel.mkAnRecord(body, anTarget, creator, generator, anModel.PurposeType.TAGGING);
   return postAnnotation(req, user, authErrAction);
@@ -104,7 +105,7 @@ export async function postAnnotationKeyword(target: anModel.Target, user: AuthUs
   const body = anModel.mkKeywordAnBody(label);
   const anTarget = anModel.mkTarget(target);
   const creator = anModel.mkCreator({id: user.profile.id});
-  const generator = anModel.mkGenerator(version);
+  const generator = anModel.mkGenerator(config.version);
   const req = anModel.mkAnRecord(body, anTarget, creator, generator, anModel.PurposeType.TAGGING);
   return postAnnotation(req, user, authErrAction);
 }
@@ -114,7 +115,7 @@ export async function postAnnotationComment(target: anModel.Target, user: AuthUs
   const anTarget = anModel.mkTarget(target);
   //TODO: privacy choices handling
   const creator = anModel.mkCreator({id: user.profile.id});
-  const generator = anModel.mkGenerator(version);
+  const generator = anModel.mkGenerator(config.version);
   const req = anModel.mkAnRecord(body, anTarget, creator, generator, anModel.PurposeType.COMMENTING);
   return postAnnotation(req, user, authErrAction);
 }

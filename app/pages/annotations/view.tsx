@@ -92,7 +92,7 @@ function TagEditor(props: TagEditorProps): React.FunctionComponentElement<TagEdi
   );
 }
 
-export function AnnotationsPage(props: PageProps): React.FunctionComponentElement<PageProps> {
+export default function AnnotationsPage(props: PageProps): React.FunctionComponentElement<PageProps> {
   const loaderRef = React.useRef(null as any);
   const [annotations, setAnnotations] = React.useState(null as Array<AnItem>|null);
   const [loading, setLoading] = React.useState(false);
@@ -156,8 +156,10 @@ export function AnnotationsPage(props: PageProps): React.FunctionComponentElemen
     function renderTargets(): React.ReactElement {
       return (
         <table className="table mb-0">
-          {anItem.targets.map(t =>
-            <TargetTr key={t.source} mbContextTarget={props.context.mbTarget} target={t}/>)}
+          <tbody>
+            {anItem.targets.map(t =>
+              <TargetTr key={t.source} mbContextTarget={props.context.mbTarget} target={t}/>)}
+          </tbody>
         </table>
       );
     }
@@ -214,19 +216,19 @@ export function AnnotationsPage(props: PageProps): React.FunctionComponentElemen
               {renderFilesBadge()}
             </td>
             <td style={{whiteSpace: "nowrap", paddingLeft: 0, paddingRight: 0, visibility}}>
-              {anRecord.creator.id === (props.context.mbUser?.profile.id || "") ? renderActionButtons() : ""}
+              {anModel.getCreatorId(anRecord) === (props.context.mbUser?.profile.id || "") ? renderActionButtons() : <></>}
             </td>
           </tr>
           {pendingDeleteId === anRecord.id ? 
             <tr>
               {renderDeleteConfirmation()}
-            </tr> : ""}
+            </tr> : <></>}
           {anItem.showFilesFlag ? 
             <tr>
               <td colSpan={3} className="condensed">
                 {renderTargets()}
               </td>
-            </tr> : ""}
+            </tr> : <></>}
         </>
       );
     }
@@ -273,7 +275,7 @@ export function AnnotationsPage(props: PageProps): React.FunctionComponentElemen
                 </table>
               </>
             : <div className="col-sm" style={{fontStyle: "italic"}}>No annotations matching the filters</div>
-          : ""}
+          : <></>}
         </div>
       </div>
     );

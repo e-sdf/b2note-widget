@@ -1,6 +1,7 @@
 import type { AxiosRequestConfig, AxiosResponse } from "axios";
 import axios from "axios";
 import { axiosErrToMsg } from "../core/utils";
+import type { StoredAuth } from "./auth";
 
 export type Token = string;
 
@@ -33,7 +34,7 @@ function authWrapper<T>(pm: Promise<AxiosResponse<T>>, authErrAction?: AuthErrAc
       err => {
         if (authErrAction && err.response.status === 401) {
           authErrAction().then(
-            newToken => resolve(newToken),
+            newAuth => resolve(newAuth),
             err => reject(err)
           );
         } else {
@@ -46,7 +47,7 @@ function authWrapper<T>(pm: Promise<AxiosResponse<T>>, authErrAction?: AuthErrAc
 
 export function http<T>(config: AxiosRequestConfig, authInfo?: AuthInfo): Promise<T> {
 
-  function isToken(resp: AxiosResponse<any>|Token): boolean {
+  function isAuth(resp: AxiosResponse<any>|Token): boolean {
     return typeof resp === "string";
   }
   
@@ -59,11 +60,11 @@ export function http<T>(config: AxiosRequestConfig, authInfo?: AuthInfo): Promis
       const pm1 = axios(conf1);
       authWrapper(pm1, authInfo.authErrAction).then(
         resp => {
-          if (isToken(resp)) {
-            const newToken = resp as Token;
+          if (isAuth(resp)) {
+            const token = resp as Token;
             const conf2 = {
               ...conf1,
-              ...mkAuthHeader(newToken)
+              ...mkAuthHeader(token)
             };
             const pm2 = axios(conf2);
             resolve(errWrapper(pm2));

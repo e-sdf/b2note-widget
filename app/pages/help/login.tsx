@@ -2,7 +2,7 @@ import * as React from "react";
 import type { SectionProps } from "./defs";
 import { HelpSection } from "./defs";
 
-export default function ProfileSection(props: SectionProps): React.FunctionComponentElement<SectionProps> {
+export default function LoginSection(props: SectionProps): React.FunctionComponentElement<SectionProps> {
   return (
     <>
       <h2>{props.header}</h2>

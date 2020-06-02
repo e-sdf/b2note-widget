@@ -2,7 +2,7 @@ import * as React from "react";
 import type { SectionProps } from "./defs";
 import * as icons from "../../components/icons";
 
-export function SearchSection(props: SectionProps): React.FunctionComponentElement<SectionProps> {
+export default function SearchSection(props: SectionProps): React.FunctionComponentElement<SectionProps> {
   return (
     <>
       <h2>{props.header}</h2>

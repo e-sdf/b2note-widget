@@ -1,8 +1,8 @@
 import * as React from "react";
-import { serverUrl } from "../../config";
+import config from "../../config";
 import { b2noteBlue } from "../../components/defs";
 
-export const imgUrl = serverUrl + "/img/help/";
+export const imgHelpPath = config.imgPath;
 
 function renderButtonItemTr(icon: React.ReactElement, border: string, bgCol: string, text: string): React.ReactElement {
   return (

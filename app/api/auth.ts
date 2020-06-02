@@ -1,14 +1,26 @@
 import type { Token } from "./http";
-import { serverUrl } from "../config";
+import config from "../config";
+
+const endpointUrl = config.apiServerUrl + config.apiPath;
+
+export enum AuthProvidersEnum {
+  B2ACCESS = "b2access",
+  OPEN_AIRE = "openaire"
+};
 
 export type AuthPm = Promise<void>;
 
+export interface StoredAuth {
+  token: Token;
+  provider: AuthProvidersEnum;
+}
+
 const storageKey = "token";
 
-function storeTokenPm(token: Token): Promise<void> {
+function storeAuthPm(sAuth: StoredAuth): Promise<void> {
   return new Promise((resolve) => {
     if (typeof(Storage) !== "undefined") {
-      window.localStorage.setItem(storageKey, token);
+      window.localStorage.setItem(storageKey, JSON.stringify(sAuth));
       resolve();
     }
   });
@@ -21,13 +33,18 @@ function deleteTokenPm(): Promise<void> {
   });
 }
 
-export function retrieveTokenPm(): Promise<Token> {
+export function retrieveStoredAuthPm(): Promise<StoredAuth> {
   return new Promise((resolve, reject) => {
-    const token = window.localStorage.getItem(storageKey);
-    if (!token) {
-      reject();
+    const sAuthStr = window.localStorage.getItem(storageKey);
+    if (!sAuthStr) {
+      reject("Storage empty");
     } else {
-      resolve(token); 
+      try {
+        const sAuth: StoredAuth = JSON.parse(sAuthStr);
+        resolve(sAuth); 
+      } catch(err) {
+        reject("Stored auth parsing error" + JSON.stringify(err));
+      }
     }
   });
 }
@@ -36,7 +53,7 @@ export function invalidateLoginPm(): Promise<void> {
   return deleteTokenPm();
 }
 
-export function loginPm(relogin = false): Promise<Token> {
+export function loginPm(provider: AuthProvidersEnum): Promise<Token> {
   return new Promise((resolve, reject) => {
     let popup: Window|null = null;
 
@@ -44,25 +61,16 @@ export function loginPm(relogin = false): Promise<Token> {
       if (event.source === popup) {
         popup?.close();
         window.removeEventListener("message", receiveMessage);
-        try {
+        if (event.data) {
           const token = event.data as Token;
-          storeTokenPm(token).then(() => resolve(token));
-        } catch (err) { reject("Error parsing user object: " + err); }
+          storeAuthPm({ provider, token }).then(() => resolve(token));
+        } else {
+          reject();
+        }
       }
     }
 
-    function openLogin(): void {
-      popup = window.open(serverUrl + "/api/b2access/login", "B2ACCESS", "width=800");
-      window.addEventListener("message", receiveMessage, false);
-    }
-
-    if (relogin) {
-      openLogin();
-    } else {
-      retrieveTokenPm().then(
-        token => resolve(token),
-        () => openLogin()
-      );
-    }
+    popup = window.open(endpointUrl + `/${provider}/login`, "LOGIN", "width=800");
+    window.addEventListener("message", receiveMessage, false);
   });
 }

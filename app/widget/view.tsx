@@ -1,18 +1,19 @@
 import { matchSwitch } from '@babakness/exhaustive-type-checking';
 import * as React from "react";
 import * as ReactDOM from "react-dom";
-import * as config from "../config";
+import config from "../config";
 import type { Token } from "../api/http";
 import * as auth from "../api/auth";
 import * as profileApi from "../api/profile";
 import { Context } from "../context";
 import * as icons from "../components/icons";
 import { PagesEnum } from "../pages/pages";
-import { AnnotatePage } from "../pages/annotate/view";
-import { AnnotationsPage } from "../pages/annotations/view";
-import { SearchPage } from "../pages/search/view";
-import { HelpPage } from "../pages/help/view";
-import { ProfilePage } from "../pages/profile/view";
+import AnnotatePage from "../pages/annotate/view";
+import AnnotationsPage from "../pages/annotations/view";
+import SearchPage from "../pages/search/view";
+import AuthProviderSelectionPage from "../pages/login";
+import ProfilePage from "../pages/profile/view";
+import HelpPage from "../pages/help/view";
 import { HelpSection } from "../pages/help/defs";
 import { shorten } from "../components/utils";
 
@@ -27,17 +28,18 @@ function WidgetInfo(): React.ReactElement {
   );
 }
 
-enum LoginState { NOT_LOGGED, LOGGING, LOGGED, ERROR };
-
 function pageToHelp(page: PagesEnum): HelpSection {
   return matchSwitch(page, {
     [PagesEnum.ANNOTATE]: () => HelpSection.ANNOTATE,
     [PagesEnum.ANNOTATIONS]: () => HelpSection.ANNOTATIONS,
     [PagesEnum.SEARCH]: () => HelpSection.SEARCH,
+    [PagesEnum.LOGIN]: () => HelpSection.LOGIN,
     [PagesEnum.PROFILE]: () => HelpSection.PROFILE,
     [PagesEnum.HELP]: () => HelpSection.TOC // just for type exahaustivness, not used actually
   });  
 }
+
+enum LoginStateEnum { NOT_LOGGED, LOGGING, LOGGED, ERROR };
 
 interface Props {
   context: Context;
@@ -47,52 +49,100 @@ function Widget(props: Props): React.FunctionComponentElement<Context> {
   const [page, setPage] = React.useState(props.context.mbTarget ? PagesEnum.ANNOTATE : PagesEnum.ANNOTATIONS);
   const [helpPage, setHelpPage] = React.useState(PagesEnum.ANNOTATE);
   const [context, setContext] = React.useState(props.context);
-  const [loginState, setLoginState] = React.useState(LoginState.NOT_LOGGED);
+  const [authProvider, setAuthProvider] = React.useState(null as null|auth.AuthProvidersEnum);
+  const [chosenAuthProvider, setChosenAuthProvider] = React.useState(null as null | auth.AuthProvidersEnum);
+  const [loginState, setLoginState] = React.useState(LoginStateEnum.NOT_LOGGED);
 
-  function loginPm(relogin = false): Promise<Token> {
-    return new Promise((resolve, reject) => {
-      setLoginState(LoginState.LOGGING);
-      auth.loginPm(relogin).then(
-        token => profileApi.getUserProfilePm(token, () => auth.loginPm(true)).then(
-          profile => {
-            setLoginState(LoginState.LOGGED);
-            setContext({ ...context, mbUser: { token, profile }});
-            resolve(token);
-          }
-        ),
+  function retrieveProfile(provider: auth.AuthProvidersEnum|null, token: Token|null): void {
+    if (provider && token) {
+      profileApi.getUserProfilePm(token, () => auth.loginPm(provider)).then(
+        profile => {
+          setLoginState(LoginStateEnum.LOGGED);
+          setContext({ ...context, mbUser: { token, profile }});
+        },
         err => {
-          setLoginState(LoginState.ERROR);
+          setLoginState(LoginStateEnum.ERROR);
           console.error(err);
-          reject();
         }
       );
+    } 
+  }
+
+  function loginPm(): Promise<Token> {
+    return new Promise((resolve, reject) => {
+      setLoginState(LoginStateEnum.LOGGING);
+      if (chosenAuthProvider) {
+        auth.loginPm(chosenAuthProvider).then(
+          token => {
+            retrieveProfile(chosenAuthProvider, token);
+            resolve(token);
+          },
+          err => {
+            setLoginState(LoginStateEnum.ERROR);
+            console.error(err);
+            reject();
+          }
+        );
+      } else {
+        setPage(PagesEnum.LOGIN);
+        reject();
+      }
     });
   }
 
-  function logout(): void {
-    setContext({ ...context, mbUser: null });
-    setLoginState(LoginState.NOT_LOGGED);
+  function firstLogin(): void {
+    setLoginState(LoginStateEnum.LOGGING);
+    auth.retrieveStoredAuthPm().then(
+      sAuth => {
+        setAuthProvider(sAuth.provider);
+        retrieveProfile(sAuth.provider, sAuth.token);
+      },
+      () => setPage(PagesEnum.LOGIN)
+    );
   }
 
-  function pageComp(): React.ReactElement {
-    return matchSwitch(page, {
-      [PagesEnum.ANNOTATE]: () => <AnnotatePage context={context} authErrAction={() => loginPm(true)}/>,
-      [PagesEnum.ANNOTATIONS]: () => <AnnotationsPage context={context} authErrAction={() => loginPm(true)}/>,
-      [PagesEnum.SEARCH]: () => <SearchPage context={context}/>,
-      [PagesEnum.PROFILE]: () => context.mbUser ? 
-        <ProfilePage user={context.mbUser} updateProfileFn={() => loginPm()} authErrAction={() => loginPm(true)}/>
-          : <></>,
-      [PagesEnum.HELP]: () => <HelpPage section={pageToHelp(helpPage)}/>
-    });  
+  function logout(): void {
+    auth.invalidateLoginPm().then(
+      () => {
+      setContext({ ...context, mbUser: null });
+      setLoginState(LoginStateEnum.NOT_LOGGED);
+      setAuthProvider(null);
+      }
+    );
   }
 
   React.useEffect(() => { 
     if (context.mbTarget) {
-      loginPm();
+      firstLogin();
     }
   }, []);
 
+  React.useEffect(
+    () => { 
+      if (chosenAuthProvider !== null) {
+        setAuthProvider(chosenAuthProvider);
+        loginPm().then(() => setPage(PagesEnum.ANNOTATE));
+      }
+    },
+    [chosenAuthProvider]
+  );
+
   React.useEffect(() => setHelpPage(page === PagesEnum.HELP ? helpPage : page), [page]);
+
+  function pageComp(): React.ReactElement {
+    return matchSwitch(page, {
+      [PagesEnum.ANNOTATE]: () => <AnnotatePage context={context} authErrAction={() => loginPm()}/>,
+      [PagesEnum.ANNOTATIONS]: () => <AnnotationsPage context={context} authErrAction={() => loginPm()}/>,
+      [PagesEnum.SEARCH]: () => <SearchPage context={context}/>,
+      [PagesEnum.LOGIN]: () => <AuthProviderSelectionPage selectedHandler={(p) => setChosenAuthProvider(p)}/>,
+      [PagesEnum.PROFILE]: () => context.mbUser ? 
+        <ProfilePage 
+          user={context.mbUser}
+          updateProfileFn={() => retrieveProfile(authProvider, context.mbUser?.token ? context.mbUser.token : null)} authErrAction={() => loginPm()}/>
+      : <></>,
+      [PagesEnum.HELP]: () => <HelpPage section={pageToHelp(helpPage)}/>
+    });  
+  }
 
   function renderNavbar(): React.ReactElement {
     const activeFlag = (p: PagesEnum): string => p === page ? " active" : "";
@@ -136,20 +186,20 @@ function Widget(props: Props): React.FunctionComponentElement<Context> {
               data-toggle="tooltip" data-placement="bottom" title={context.mbUser ? "Profile" : "Login"}
               onClick={() =>
                 matchSwitch(loginState, {
-                  [LoginState.NOT_LOGGED]: () => { loginPm(); },
-                  [LoginState.LOGGING]: () => void(null),
-                  [LoginState.LOGGED]: () => setPage(PagesEnum.PROFILE),
-                  [LoginState.ERROR]: () => { loginPm(true); }
+                  [LoginStateEnum.NOT_LOGGED]: () => firstLogin(),
+                  [LoginStateEnum.LOGGING]: () => void(null),
+                  [LoginStateEnum.LOGGED]: () => setPage(PagesEnum.PROFILE),
+                  [LoginStateEnum.ERROR]: () => firstLogin()
                 })}>
               {matchSwitch(loginState, {
-                [LoginState.NOT_LOGGED]: () => <icons.LoginIcon/>,
-                [LoginState.LOGGING]: () => <span>Logging in...</span>,
-                [LoginState.LOGGED]: () => <span><icons.UserIcon/> {shorten(context.mbUser?.profile.name || "", 15)}</span>,
-                [LoginState.ERROR]: () => <span>Login error, try again <icons.LoginIcon/></span>
+                [LoginStateEnum.NOT_LOGGED]: () => <icons.LoginIcon/>,
+                [LoginStateEnum.LOGGING]: () => <span>Logging in...</span>,
+                [LoginStateEnum.LOGGED]: () => <span><icons.UserIcon/> {shorten(context.mbUser?.profile.name || "", 15)}</span>,
+                [LoginStateEnum.ERROR]: () => <span>Login error, try again <icons.LoginIcon/></span>
               })}
             </a>
           </li>
-          {loginState === LoginState.LOGGED ? 
+          {loginState === LoginStateEnum.LOGGED ? 
             <li className="nav-item">
               <a className="nav-link" style={{paddingLeft: 0}}
                 href="#"data-toggle="tooltip" 

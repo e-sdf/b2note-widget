@@ -1,16 +1,16 @@
 import * as React from "react";
 import type { SectionProps } from "./defs";
-import { imgUrl } from "./utils";
+import { imgHelpPath } from "./utils";
 import * as icons from "../../components/icons";
 
-export function AnnotateSection(props: SectionProps): React.FunctionComponentElement<SectionProps> {
+export default function AnnotateSection(props: SectionProps): React.FunctionComponentElement<SectionProps> {
   return (
     <>
       <h2>{props.header}</h2>
       <p>
         The main panel is divided into 3 tabs. Each tab contains a simple form for creating an annotation of one of the 3 types supported by B2NOTE:
       </p>
-      <img src={imgUrl + "annotateTypes.jpg"}/>
+      <img src={imgHelpPath + "annotateTypes.jpg"}/>
       <ol>
         <li>
           <strong><a href="#semantic">Semantic tag:</a></strong> Create an annotation that uses a term defined in a controlled vocabulary
@@ -31,7 +31,7 @@ export function AnnotateSection(props: SectionProps): React.FunctionComponentEle
       <p>
         Clicking the text-area then typing-in the first letters of the term you want triggers the autocomplete functionality, which provides a list of suggestions.
       </p>
-      <img src={imgUrl + "autocomplete.png"} style={{marginBottom: "1em"}}/>
+      <img src={imgHelpPath + "autocomplete.png"} style={{marginBottom: "1em"}}/>
       <p>
         From the list of suggestions, you can then select your term of interest amongst the extensive B2NOTE index.
       </p>
@@ -41,8 +41,8 @@ export function AnnotateSection(props: SectionProps): React.FunctionComponentEle
       <p>
         If case the requested term is not found in the index, a &quot;New selection:&quot; is indicated. When you select it, you are given an option to create a free-text keyword instead or select a different term.
       </p>
-      <img src={imgUrl + "semanticKeyword.png"}/>
-      <img src={imgUrl + "semanticKeyword2.png"}/>
+      <img src={imgHelpPath + "semanticKeyword.png"}/>
+      <img src={imgHelpPath + "semanticKeyword2.png"}/>
       
       <h3 id="keyword">Creating a free-text keyword annotation</h3>
       <p>
@@ -51,7 +51,7 @@ export function AnnotateSection(props: SectionProps): React.FunctionComponentEle
       <p>
         Annotations of this type contain plain text information as opposed to linked-data, thus not allowing the full range of benefits provided by the <a href="#semantic">&quot;Semantic tag&quot; type</a>.
       </p>
-      <img src={imgUrl + "keyword.png"}/>
+      <img src={imgHelpPath + "keyword.png"}/>
       <p>
         After typing the text for your custom keyword in the input, click <span className="btn btn-sm btn-primary"><icons.CreateIcon/></span>&nbsp;to create the annotation.
       </p>
@@ -63,7 +63,7 @@ export function AnnotateSection(props: SectionProps): React.FunctionComponentEle
       <p>
         Similarly to &quot;free-text keyword&quot;, annotations of this type contain plain text information as opposed to linked-data, thus not allowing the full range of benefits provided by the <a href="#semantic">&quot;Semantic tag&quot; type</a>.
       </p>
-      <img src={imgUrl + "comment.png"}/>
+      <img src={imgHelpPath + "comment.png"}/>
       <p>
         After typing-in the text of the comment, click <span className="btn btn-sm btn-primary"><icons.CreateIcon/></span>&nbsp;to create the annotation.
       </p>
@@ -71,7 +71,7 @@ export function AnnotateSection(props: SectionProps): React.FunctionComponentEle
       <h3 id="special">Special situations</h3>
       <ol>
         <li>
-          <img src={imgUrl + "exists.png"}/>
+          <img src={imgHelpPath + "exists.png"}/>
           <p>
             <strong>Duplicate</strong>: it is not possible to create an annotation that would be a duplicate of an existing annotation. So a semantic tag or free-text tag annotation can not use <em>the same tag about the same file</em> as another annotation. When attempting to do so, an alert will be displayed informing you that this is the case.
           </p>
