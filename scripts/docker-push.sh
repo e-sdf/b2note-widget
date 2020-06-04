@@ -1,6 +1,6 @@
 #!/bin/bash
 
-P=`./scripts/utils/getPackage.sh`
+R=`./scripts/utils/getRepo.sh`
 N=`./scripts/utils/getName.sh`
 
-docker push "$P/$N"
+docker push "$R/$N"

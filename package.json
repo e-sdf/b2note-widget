@@ -6,6 +6,11 @@
   "private": "true",
   "scripts": {
     "dev-server": "webpack-dev-server --open --config webpack.dev.js",
+    "build": "scripts/build.sh",
+    "docker-build": "scripts/docker-build.sh",
+    "docker-tag": "scripts/docker-run.sh",
+    "docker-push": "scripts/git-tag.sh; scripts/docker-tag.sh",
+    "docker-deploy": "scripts/docker-deploy.sh",
     "clean": "npm cache clean --force"
   },
   "devDependencies": {

@@ -1,9 +1,9 @@
 #!/bin/bash
 
-P=`./scripts/utils/getPackage.sh`
+R=`./scripts/utils/getRepo.sh`
 N=`./scripts/utils/getName.sh`
 V=`./scripts/utils/getVersion.sh`
 B=`./scripts/utils/getBuild.sh`
 
-docker tag "$P/$N" "$P/$N:$V-$B"
-git tag "v$V-$B"
+docker tag "$R/$N" "$R/$N:$V-$B"
+git tag "v$V"
