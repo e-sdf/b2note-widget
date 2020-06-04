@@ -91,9 +91,9 @@ function Widget(props: Props): React.FunctionComponentElement<Context> {
   }
 
   function firstLogin(): void {
-    setLoginState(LoginStateEnum.LOGGING);
     auth.retrieveStoredAuthPm().then(
       sAuth => {
+        setLoginState(LoginStateEnum.LOGGING);
         setAuthProvider(sAuth.provider);
         retrieveProfile(sAuth.provider, sAuth.token);
       },
