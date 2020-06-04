@@ -220,8 +220,7 @@ function Widget(props: Props): React.FunctionComponentElement<Context> {
       <img src="img/logo.png" width="100%"/>
       <div id="widget-version">
         <a href="https://github.com/e-sdf/b2note-reactjs/releases" target="_blank" rel="noopener noreferrer">
-          {config.version}<br/>
-          {config.subversion}
+          {config.version}
         </a>
       </div>
       {renderNavbar()}
