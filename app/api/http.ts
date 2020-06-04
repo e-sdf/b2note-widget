@@ -1,7 +1,6 @@
 import type { AxiosRequestConfig, AxiosResponse } from "axios";
 import axios from "axios";
 import { axiosErrToMsg } from "../core/utils";
-import type { StoredAuth } from "./auth";
 
 export type Token = string;
 
