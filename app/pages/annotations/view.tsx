@@ -11,6 +11,7 @@ import AnnotationTag from "../../components/annotationTag";
 import TargetTr from "../../components/targetTr";
 import InfoPanel from "../../components/infoPanel";
 import * as ac from "../../components/autocomplete/view";
+import { NotificationTypeEnum, notify } from "../notify";
 
 const alertId = "anlAlert";
 
@@ -41,6 +42,11 @@ function TagEditor(props: TagEditorProps): React.FunctionComponentElement<TagEdi
       anApi.patchAnnotationBody(user, props.anRecord.id, body, props.authErrAction).then(
         () => {
           showAlertSuccess(alertId, "Annotation updated");
+          notify({
+            action: NotificationTypeEnum.EDIT,
+            annotationType: anModel.getAnType(props.anRecord),
+            annotationId: props.anRecord.id 
+          });
           props.doneHandler();
         },
         (err) => {
@@ -99,7 +105,7 @@ export default function AnnotationsPage(props: PageProps): React.FunctionCompone
   const [activeItem, setActiveItem] = React.useState(null as string|null);
   const [ontologyInfoRequest, setOntologyInfoRequest] = React.useState(null as anModel.AnRecord|null);
   const [editedRecordId, setEditedRecordId] = React.useState(null as string|null);
-  const [pendingDeleteId, setPendingDeleteId] = React.useState(null as string|null);
+  const [pendingDeleteAn, setPendingDeleteAn] = React.useState(null as anModel.AnRecord|null);
   const user = props.context.mbUser;
 
   //React.useEffect(() => console.log(annotations), [annotations]);
@@ -146,7 +152,7 @@ export default function AnnotationsPage(props: PageProps): React.FunctionCompone
           <button type="button"
             className="btn btn-sm btn-outline-primary list-action-button"
             data-toggle="tooltip" data-placement="bottom" title="Delete"
-            onClick={() => setPendingDeleteId(anRecord.id)}
+            onClick={() => setPendingDeleteAn(anRecord)}
           ><icons.DeleteIcon/>
           </button>
         </>
@@ -176,9 +182,14 @@ export default function AnnotationsPage(props: PageProps): React.FunctionCompone
                 className="btn btn-sm btn-danger mr-3"
                 style={{marginLeft: "5px", marginRight: "5px"}}
                 onClick={() => {
-                  if (pendingDeleteId && user) {
-                    anApi.deleteAnnotation(user, pendingDeleteId, props.authErrAction).then(
+                  if (pendingDeleteAn && user) {
+                    anApi.deleteAnnotation(user, pendingDeleteAn.id, props.authErrAction).then(
                       () => {
+                        notify({
+                          action: NotificationTypeEnum.DELETE,
+                          annotationType: anModel.getAnType(pendingDeleteAn),
+                          annotationId: pendingDeleteAn.id
+                        });
                         if (loaderRef.current) { loaderRef.current.loadAnnotations(); }
                       },
                       (err) => {
@@ -192,7 +203,7 @@ export default function AnnotationsPage(props: PageProps): React.FunctionCompone
               <button type="button"
                 className="btn btn-sm btn-success ml-3"
                 style={{marginLeft: "5px"}}
-                onClick={() => setPendingDeleteId(null)}>
+                onClick={() => setPendingDeleteAn(null)}>
                 No
               </button>
             </div>
@@ -219,7 +230,7 @@ export default function AnnotationsPage(props: PageProps): React.FunctionCompone
               {anModel.getCreatorId(anRecord) === (props.context.mbUser?.profile.id || "") ? renderActionButtons() : <></>}
             </td>
           </tr>
-          {pendingDeleteId === anRecord.id ? 
+          {pendingDeleteAn === anRecord ? 
             <tr>
               {renderDeleteConfirmation()}
             </tr> : <></>}

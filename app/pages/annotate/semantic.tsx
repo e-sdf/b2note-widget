@@ -5,6 +5,7 @@ import SpinningWheel from "../../components/spinningWheel";
 import * as ac from "../../components/autocomplete/view";
 import * as api from "../../api/annotations";
 import { SemanticIcon, CreateIcon } from "../../components/icons";
+import { AnRecordType, NotificationTypeEnum, notify } from "../notify";
 
 export interface SemanticProps extends PageProps {
   alertId: string;
@@ -36,11 +37,19 @@ export function Semantic(props: SemanticProps): React.FunctionComponentElement<S
     }
   }
 
-  function annotate(): void {
+  function postAnnotationAsSemantic(): void {
     if (target && user) {
       setLoading(true);
       api.postAnnotationSemantic(target, user, uris, label, props.authErrAction).then(
-        () => { setLoading(false); showAlertSuccess(props.alertId, "Semantic annotation created"); },
+        newAn => { 
+          setLoading(false);
+          showAlertSuccess(props.alertId, "Semantic annotation created");
+          notify({
+            action: NotificationTypeEnum.CREATE,
+            annotationType: AnRecordType.SEMANTIC,
+            annotationId: newAn.id
+          });
+        },
         (err) => { setLoading(false); showAlertError(props.alertId, err); }
       );
     }
@@ -49,9 +58,14 @@ export function Semantic(props: SemanticProps): React.FunctionComponentElement<S
   function postAnnotationAsKeyword(): void {
     if (target && user) {
       api.postAnnotationKeyword(target, user, label, props.authErrAction).then(
-        () => {
+        newAn => {
           showAlertSuccess(props.alertId, "Keyword annotation created");
           setLabel("");
+          notify({
+            action: NotificationTypeEnum.CREATE,
+            annotationType: AnRecordType.KEYWORD,
+            annotationId: newAn.id
+          });
         },
         (err) => showAlertError(props.alertId, err)
       );
@@ -102,7 +116,7 @@ export function Semantic(props: SemanticProps): React.FunctionComponentElement<S
           data-toggle="tooltip" data-placement="bottom" title={props.context.mbUser ? "" : "Not logged in"}
           disabled={label.length === 0 || !props.context.mbUser || loading}
           onClick={() => {
-            annotate();
+            postAnnotationAsSemantic();
             if (ref) { ref.clear(); }
           }}
         ><CreateIcon/></button>

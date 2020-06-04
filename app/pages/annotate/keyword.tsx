@@ -6,6 +6,7 @@ import * as oreg from "../../core/ontologyRegister";
 import config from "../../config";
 import * as api from "../../api/annotations";
 import { KeywordIcon, CreateIcon } from "../../components/icons";
+import { AnRecordType, NotificationTypeEnum, notify } from "../notify";
 
 export interface KeywordProps extends PageProps {
   alertId: string;
@@ -23,14 +24,19 @@ export function Keyword(props: KeywordProps): React.FunctionComponentElement<Key
 
   React.useEffect(() => setTooLong(label.length > lengthLimit), [label]);
 
-  function postAnnotation(): void {
+  function postAnnotationAsKeyword(): void {
     if (target && user) {
       api.postAnnotationKeyword(target, user, label, props.authErrAction).then(
-        () => {
+       newAn => {
           showAlertSuccess(props.alertId, "Keyword annotation created");
           setLabel("");
+          notify({
+            action: NotificationTypeEnum.CREATE,
+            annotationType: AnRecordType.KEYWORD,
+            annotationId: newAn.id
+          });
         },
-        (err) => showAlertError(props.alertId, err)
+        err => showAlertError(props.alertId, err)
       );
     }
   }
@@ -38,9 +44,14 @@ export function Keyword(props: KeywordProps): React.FunctionComponentElement<Key
   function postAnnotationAsSemantic(): void {
     if (target && user) {
       api.postAnnotationSemantic(target, user, uris, label, props.authErrAction).then(
-        () => {
+        newAn => {
           showAlertSuccess(props.alertId, "Semantic annotation created");
           setLabel("");
+          notify({
+            action: NotificationTypeEnum.CREATE,
+            annotationType: AnRecordType.SEMANTIC,
+            annotationId: newAn.id
+          });
         },
         (err) => showAlertError(props.alertId, err)
       );
@@ -50,9 +61,14 @@ export function Keyword(props: KeywordProps): React.FunctionComponentElement<Key
   function postAnnotationAsComment(): void {
     if (target && user) {
       api.postAnnotationComment(target, user, label, props.authErrAction).then(
-        () => {
+        newAn => {
           showAlertSuccess(props.alertId, "Comment annotation created");
           setLabel("");
+          notify({
+            action: NotificationTypeEnum.CREATE,
+            annotationType: AnRecordType.COMMENT,
+            annotationId: newAn.id
+          });
         },
         (err) => showAlertError(props.alertId, err)
       );
@@ -68,7 +84,7 @@ export function Keyword(props: KeywordProps): React.FunctionComponentElement<Key
         setUris(oDict[label].map(i => i.uris));
         setSemanticFound(true);
       } else {
-        postAnnotation();
+        postAnnotationAsKeyword();
       }
     });
   }
@@ -93,7 +109,7 @@ export function Keyword(props: KeywordProps): React.FunctionComponentElement<Key
           <button type="button" className="btn btn-secondary"
             onClick={() => {
               setSemanticFound(false);
-              postAnnotation();
+              postAnnotationAsKeyword();
             }}>
             Keyword
             </button>
@@ -121,7 +137,7 @@ export function Keyword(props: KeywordProps): React.FunctionComponentElement<Key
             Comment
           </button>
           <button type="button" className="btn btn-secondary"
-            onClick={() => postAnnotation()}>
+            onClick={() => postAnnotationAsKeyword()}>
             Keyword
           </button>
         </div>
