@@ -89,7 +89,7 @@ export function getAnnotationsRDF(f: Filters, mbUser: AuthUser|null = null, mbTa
 // Creating annotations
 
 function postAnnotation(anRecord: anModel.AnRecord, user: AuthUser, authErrAction: AuthErrAction): Promise<any> {
-  return post(annotationsUrl, anRecord, { token: user.token, authErrAction });
+  return post<anModel.AnRecord>(annotationsUrl, anRecord, { token: user.token, authErrAction });
 }
 
 export async function postAnnotationSemantic(target: anModel.Target, user: AuthUser, uris: string[], label: string, authErrAction: AuthErrAction): Promise<any> {
