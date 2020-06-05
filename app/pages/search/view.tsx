@@ -9,7 +9,7 @@ import AnnotationTag from "../../components/annotationTag";
 import TargetTr from "../../components/targetTr";
 import InfoPanel from "../../components/infoPanel";
 import { DownloadIcon } from "../../components/icons";
-import { downloadJSON, downloadRDF } from "../../components/download";
+import { downloadJSON, downloadTurtle, downloadRDF } from "../../components/download";
 
 type TabType = "basic" | "advanced";
 
@@ -45,6 +45,10 @@ export default function SearchPage(props: SearchProps): React.FunctionComponentE
               className="dropdown-item"
               onClick={() => downloadJSON(results)}
             >Download JSON-LD</button>
+            <button type="button"
+              className="dropdown-item"
+              onClick={() => downloadTurtle(results)}
+            >Download RDF/Turtle</button>
             <button type="button"
               className="dropdown-item"
               onClick={() => downloadRDF(results)}
