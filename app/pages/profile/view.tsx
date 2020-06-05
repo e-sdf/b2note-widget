@@ -1,3 +1,4 @@
+import _ from "lodash";
 import * as React from "react";
 import { $enum } from "ts-enum-util";
 import { Typeahead } from "react-bootstrap-typeahead";
@@ -19,36 +20,67 @@ interface ProfileProps {
 export default function ProfilePage(props: ProfileProps): React.FunctionComponentElement<ProfileProps> {
   const [givenName, setGivenName] = React.useState(props.user.profile.givenName);
   const [familyName, setFamilyName] = React.useState(props.user.profile.familyName);
-  const [name, setName] = React.useState(props.user.profile.name);
+  const [personName, setPersonName] = React.useState(props.user.profile.personName);
   const [orcid, setOrcid] = React.useState(props.user.profile.orcid);
   const [organisation, setOrganisation] = React.useState(props.user.profile.organisation);
   const [jobTitle, setJobTitle] = React.useState(props.user.profile.jobTitle);
   const [country, setCountry] = React.useState(props.user.profile.country);
   const [experience, setExperience] = React.useState(props.user.profile.experience);
+  const fields = [givenName, familyName, personName, orcid, organisation, jobTitle, country, experience];
+  const [changed, setChanged] = React.useState(false);
   const panelRef = React.useRef(null);
 
-  function changeMade(): boolean {
-    const orig = props.user.profile;
-    return orcid !== orig?.orcid || organisation !== orig?.organisation || jobTitle !== orig?.jobTitle || country !== orig?.country || experience !== orig?.experience;
+  function getFields(): Partial<UserProfile> {
+    const givenName2 = givenName.length > 0 ? { givenName } : {};
+    const familyName2 = familyName.length > 0 ? { familyName } : {};
+    const personName2 = personName.length > 0 ? { personName } : {};
+    const orcid2 = orcid.length > 0 ? { orcid } : {};
+    const organisation2 = organisation.length > 0 ? { organisation } : {};
+    const jobTitle2 = jobTitle.length > 0 ? { jobTitle } : {};
+    const country2 = country.length > 0 ? { country } : {};
+    const experience2 = experience.length > 0 ? { experience } : {};
+    const changes = { ...givenName2, ...familyName2, ...personName2, ...orcid2, ...organisation2, ...jobTitle2, ...country2, ...experience2 };
+    return changes;
   }
+
+  React.useEffect(
+    () => {
+      const p = props.user.profile;
+      const current: Partial<UserProfile> = {
+        givenName,
+        familyName,
+        personName,
+        orcid,
+        organisation,
+        jobTitle,
+        country,
+        experience
+      };
+      const orig: Partial<UserProfile> = {
+        givenName: p.givenName,
+        familyName: p.familyName,
+        personName: p.personName,
+        orcid: p.orcid,
+        organisation: p.organisation,
+        jobTitle: p.jobTitle,
+        country: p.country,
+        experience: p.experience
+      };
+      setChanged(!_.isEqual(current, orig));
+    },
+    fields
+  );
+
 
   function postProfile(): void {
     if (panelRef.current) {
       const panelDOM = (panelRef.current as unknown) as Element;
       panelDOM.scrollTop = 0;
     }
-    const givenName2 = givenName.length > 0 ? { givenName } : {};
-    const familyName2 = familyName.length > 0 ? { familyName } : {};
-    const name2 = name.length > 0 ? { name } : {};
-    const orcid2 = orcid.length > 0 ? { orcid } : {};
-    const organisation2 = organisation.length > 0 ? { organisation } : {};
-    const jobTitle2 = jobTitle.length > 0 ? { jobTitle } : {};
-    const country2 = country.length > 0 ? { country } : {};
-    const experience2 = experience.length > 0 ? { experience } : {};
-    const changes = { ...givenName2, ...familyName2, ...name2, ...orcid2, ...organisation2, ...jobTitle2, ...country2, ...experience2 };
-    api.patchUserProfilePm(changes, props.user.token, props.authErrAction).then(
+    api.patchUserProfilePm(getFields(), props.user.token, props.authErrAction).then(
       updatedProfile => {
         props.updateProfileFn(updatedProfile);
+        setChanged(false);
         showAlertSuccess(alertId, "Profile updated");
       },
       () => {
@@ -95,7 +127,7 @@ export default function ProfilePage(props: ProfileProps): React.FunctionComponen
     return (
       <div className="form-group d-flex flex-row justify-content-center">
         <button type="button" className="btn btn-primary"
-          disabled={!changeMade()}
+          disabled={!changed}
           onClick={() => postProfile()}>
           Save
       </button>
@@ -138,8 +170,8 @@ export default function ProfilePage(props: ProfileProps): React.FunctionComponen
         <div className="form-group">
           <label>Name</label>
           <input type="text" className="form-control"
-            value={name}
-            onChange={ev => setName(ev.target.value)} />
+            value={personName}
+            onChange={ev => setPersonName(ev.target.value)} />
         </div>
         <div className="form-group">
           <label>ORCID ID</label>

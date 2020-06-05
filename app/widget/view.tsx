@@ -195,7 +195,7 @@ function Widget(props: Props): React.FunctionComponentElement<Context> {
               {matchSwitch(loginState, {
                 [LoginStateEnum.NOT_LOGGED]: () => <icons.LoginIcon/>,
                 [LoginStateEnum.LOGGING]: () => <span>Logging in...</span>,
-                [LoginStateEnum.LOGGED]: () => <span><icons.UserIcon/> {shorten(context.mbUser?.profile.name || "", 15)}</span>,
+                [LoginStateEnum.LOGGED]: () => <span><icons.UserIcon/> {shorten(context.mbUser?.profile.personName || "", 15)}</span>,
                 [LoginStateEnum.ERROR]: () => <span>Login error, try again <icons.LoginIcon/></span>
               })}
             </a>
