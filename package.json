@@ -1,11 +1,12 @@
 {
   "name": "b2note-widget",
   "version": "3.1.0",
-  "build": "1",
+  "build": "2",
   "description": "B2Note widget app",
   "private": "true",
   "scripts": {
     "dev-server": "webpack-dev-server --open --config webpack.dev.js",
+    "start-dev": "cd server; node -r dotenv/config server",
     "build": "scripts/build.sh",
     "docker-deploy": "scripts/git-tag.sh; scripts/docker-build.sh; scripts/docker-tag.sh; scripts/docker-push.sh",
     "clean": "npm cache clean --force"
