@@ -6,7 +6,7 @@ import * as oreg from "../../core/ontologyRegister";
 import config from "../../config";
 import * as api from "../../api/annotations";
 import { KeywordIcon, CreateIcon } from "../../components/icons";
-import { AnRecordType, NotificationTypeEnum, notify } from "../notify";
+import { ActionEnum, notify } from "../notify";
 
 export interface KeywordProps extends PageProps {
   alertId: string;
@@ -30,11 +30,7 @@ export function Keyword(props: KeywordProps): React.FunctionComponentElement<Key
        newAn => {
           showAlertSuccess(props.alertId, "Keyword annotation created");
           setLabel("");
-          notify({
-            action: NotificationTypeEnum.CREATE,
-            annotationType: AnRecordType.KEYWORD,
-            annotationId: newAn.id
-          });
+          notify(ActionEnum.CREATE, newAn);
         },
         err => showAlertError(props.alertId, err)
       );
@@ -47,11 +43,7 @@ export function Keyword(props: KeywordProps): React.FunctionComponentElement<Key
         newAn => {
           showAlertSuccess(props.alertId, "Semantic annotation created");
           setLabel("");
-          notify({
-            action: NotificationTypeEnum.CREATE,
-            annotationType: AnRecordType.SEMANTIC,
-            annotationId: newAn.id
-          });
+          notify(ActionEnum.CREATE, newAn);
         },
         (err) => showAlertError(props.alertId, err)
       );
@@ -64,11 +56,7 @@ export function Keyword(props: KeywordProps): React.FunctionComponentElement<Key
         newAn => {
           showAlertSuccess(props.alertId, "Comment annotation created");
           setLabel("");
-          notify({
-            action: NotificationTypeEnum.CREATE,
-            annotationType: AnRecordType.COMMENT,
-            annotationId: newAn.id
-          });
+          notify(ActionEnum.CREATE, newAn);
         },
         (err) => showAlertError(props.alertId, err)
       );

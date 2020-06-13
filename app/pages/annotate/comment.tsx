@@ -4,7 +4,7 @@ import { showAlertSuccess, showAlertError } from "../../components/ui";
 import SpinningWheel from "../../components/spinningWheel";
 import * as api from "../../api/annotations";
 import { CommentIcon, CreateIcon } from "../../components/icons";
-import { AnRecordType, NotificationTypeEnum, notify } from "../notify";
+import { ActionEnum, notify } from "../notify";
 
 export interface CommentProps extends PageProps {
   alertId: string;
@@ -24,11 +24,7 @@ export function Comment(props: CommentProps): React.FunctionComponentElement<Com
           setLoading(false);
           showAlertSuccess(props.alertId, "Comment created");
           setComment("");
-          notify({
-            action: NotificationTypeEnum.CREATE,
-            annotationType: AnRecordType.COMMENT,
-            annotationId: newAn.id
-          });
+          notify(ActionEnum.CREATE, newAn);
         },
         (err) => { setLoading(false); showAlertError(props.alertId, err); }
       );

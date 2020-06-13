@@ -11,7 +11,7 @@ import AnnotationTag from "../../components/annotationTag";
 import TargetTr from "../../components/targetTr";
 import InfoPanel from "../../components/infoPanel";
 import * as ac from "../../components/autocomplete/view";
-import { NotificationTypeEnum, notify } from "../notify";
+import { ActionEnum, notify } from "../notify";
 
 const alertId = "anlAlert";
 
@@ -42,11 +42,7 @@ function TagEditor(props: TagEditorProps): React.FunctionComponentElement<TagEdi
       anApi.patchAnnotationBody(user, props.anRecord.id, body, props.authErrAction).then(
         () => {
           showAlertSuccess(alertId, "Annotation updated");
-          notify({
-            action: NotificationTypeEnum.EDIT,
-            annotationType: anModel.getAnType(props.anRecord),
-            annotationId: props.anRecord.id 
-          });
+          notify(ActionEnum.EDIT, props.anRecord);
           props.doneHandler();
         },
         (err) => {
@@ -185,11 +181,7 @@ export default function AnnotationsPage(props: PageProps): React.FunctionCompone
                   if (pendingDeleteAn && user) {
                     anApi.deleteAnnotation(user, pendingDeleteAn.id, props.authErrAction).then(
                       () => {
-                        notify({
-                          action: NotificationTypeEnum.DELETE,
-                          annotationType: anModel.getAnType(pendingDeleteAn),
-                          annotationId: pendingDeleteAn.id
-                        });
+                        notify(ActionEnum.DELETE, pendingDeleteAn);
                         if (loaderRef.current) { loaderRef.current.loadAnnotations(); }
                       },
                       (err) => {

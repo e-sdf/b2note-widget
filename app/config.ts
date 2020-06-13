@@ -14,5 +14,5 @@ export default {
   solrUrl: confRec?.solrUrl ? confRec.solrUrl : "https://b2note.eudat.eu/solr/b2note_index/select",
   imgPath: "/img/",
   pageSize: 10,
-  version: "v3.1.1"
+  version: "v3.1.2"
 };

@@ -5,7 +5,7 @@ import SpinningWheel from "../../components/spinningWheel";
 import * as ac from "../../components/autocomplete/view";
 import * as api from "../../api/annotations";
 import { SemanticIcon, CreateIcon } from "../../components/icons";
-import { AnRecordType, NotificationTypeEnum, notify } from "../notify";
+import { ActionEnum, notify } from "../notify";
 
 export interface SemanticProps extends PageProps {
   alertId: string;
@@ -44,11 +44,7 @@ export function Semantic(props: SemanticProps): React.FunctionComponentElement<S
         newAn => { 
           setLoading(false);
           showAlertSuccess(props.alertId, "Semantic annotation created");
-          notify({
-            action: NotificationTypeEnum.CREATE,
-            annotationType: AnRecordType.SEMANTIC,
-            annotationId: newAn.id
-          });
+          notify(ActionEnum.CREATE, newAn);
         },
         (err) => { setLoading(false); showAlertError(props.alertId, err); }
       );
@@ -61,11 +57,7 @@ export function Semantic(props: SemanticProps): React.FunctionComponentElement<S
         newAn => {
           showAlertSuccess(props.alertId, "Keyword annotation created");
           setLabel("");
-          notify({
-            action: NotificationTypeEnum.CREATE,
-            annotationType: AnRecordType.KEYWORD,
-            annotationId: newAn.id
-          });
+          notify(ActionEnum.CREATE, newAn);
         },
         (err) => showAlertError(props.alertId, err)
       );
