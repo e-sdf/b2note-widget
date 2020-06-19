@@ -1,5 +1,5 @@
 import config from "../config";
-import type { AnRecordType, AnRecord } from "../core/annotationsModel";
+import type { AnnotationType, Annotation } from "../core/annotationsModel";
 import { getAnId, getAnType } from "../core/annotationsModel";
 
 export enum ActionEnum {
@@ -10,11 +10,11 @@ export enum ActionEnum {
 
 export interface Notification {
   action: ActionEnum;
-  annotationType: AnRecordType;
+  annotationType: AnnotationType;
   annotationIRI: string;
 }
 
-export function notify(action: ActionEnum, an: AnRecord): void {
+export function notify(action: ActionEnum, an: Annotation): void {
   const n: Notification = {
     action,
     annotationType: getAnType(an),

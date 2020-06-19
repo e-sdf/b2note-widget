@@ -2,7 +2,7 @@ import _ from "lodash";
 import { matchSwitch } from "@babakness/exhaustive-type-checking";
 import * as React from "react";
 import * as icons from "../../components/icons";
-import type { AnRecord, SearchQuery } from "../../core/annotationsModel";
+import type { Annotation, SearchQuery } from "../../core/annotationsModel";
 import * as ac from "../../components/autocomplete/view";
 import { SearchType, BiOperatorType } from "../../core/searchModel";
 import * as queryParser from "../../core/searchQueryParser";
@@ -165,7 +165,7 @@ function reducer(terms: Array<TermItem>, action: TermsAction): Array<TermItem> {
 }
 
 export interface BasicSearchProps {
-  resultsHandle(results: Array<AnRecord>): void;
+  resultsHandle(results: Array<Annotation>): void;
 }
 
 enum SearchMode { ANY = "any", ALL = "all" }
@@ -217,7 +217,7 @@ export function BasicSearch(props: BasicSearchProps): React.FunctionComponentEle
       nonEmptyTerms.length > 1 ? mkExpression(operator, nonEmptyTerms) : mkValue(nonEmptyTerms[0]);
     setSearching(true);
     api.searchAnnotations(query).then(
-      (anl: Array<AnRecord>) => {
+      (anl: Array<Annotation>) => {
         setSearching(false);
         props.resultsHandle(anl);
       },

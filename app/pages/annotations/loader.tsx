@@ -17,7 +17,7 @@ const alertId = "anlAlert";
 // }
 
 export interface AnItem {
-  anRecord: anModel.AnRecord;
+  annotation: anModel.Annotation;
   // Prepared for target resolving:
   // https://esciencedatalab.atlassian.net/browse/B2NT-137
   // resTargets: Array<ResolvedTarget>;
@@ -45,7 +45,7 @@ export const LoaderFilter = React.forwardRef((props: LoaderProps, ref: React.Ref
   const [semanticFilter, setSemanticFilter] = React.useState(true);
   const [keywordFilter, setKeywordFilter] = React.useState(true);
   const [commentFilter, setCommentFilter] = React.useState(true);
-  const [anRecords, setAnRecords] = React.useState([] as anModel.AnRecord[]);
+  const [annotations, setAnnotations] = React.useState([] as anModel.Annotation[]);
   const [noOfMine, setNoOfMine] = React.useState(null as number|null);
   const [noOfOthers, setNoOfOthers] = React.useState(null as number|null);
   const [noOfSemantic, setNoOfSemantic] = React.useState(null as number|null);
@@ -81,18 +81,18 @@ export const LoaderFilter = React.forwardRef((props: LoaderProps, ref: React.Ref
   function loadAnnotations(): void {
     const mbFilters = mkFilters();
     if (!mbFilters) {
-      setAnRecords([]);
+      setAnnotations([]);
       props.setAnItemsFn([]);
     } else {
       if (props.setLoaderFlagFn) { props.setLoaderFlagFn(true); }
       api.getAnnotationsJSON(mbFilters, props.context.mbUser, props.context.mbTarget).then(
         anl => {
           if (props.setLoaderFlagFn) { props.setLoaderFlagFn(false); }
-          setAnRecords(anl);
+          setAnnotations(anl);
           const targetsPms = anl.map(a => api.getTargets(anModel.getLabel(a)));
           Promise.all(targetsPms).then(targets => {
             props.setAnItemsFn(anl.map((an, i) => ({
-              anRecord: an,
+              annotation: an,
               targets: targets[i],
               showFilesFlag: false
             })));
@@ -103,7 +103,7 @@ export const LoaderFilter = React.forwardRef((props: LoaderProps, ref: React.Ref
             //   const filenamePms = targetsItem.map(t => api.resolveSourceFilename(t.id));
             //   Promise.all(filenamePms).then(filenames => 
             //     props.setAnItems(anl.map(an2 => ({
-            //       anRecord: an2,
+            //       annotation: an2,
             //       resTargets: targetsItem.map((t, ti) => ({ target: t, filename: filenames[ti] })),
             //       showFilesFlag: false
             //     })))
@@ -214,15 +214,15 @@ export const LoaderFilter = React.forwardRef((props: LoaderProps, ref: React.Ref
         <div className="dropdown-menu drop-down-menu-left" aria-labelledby="anl-ddd">
           <button type="button"
             className="dropdown-item"
-            onClick={() => downloadJSON(anRecords)}
+            onClick={() => downloadJSON(annotations)}
           >Download JSON-LD</button>
           <button type="button"
             className="dropdown-item"
-            onClick={() => downloadTurtle(anRecords)}
+            onClick={() => downloadTurtle(annotations)}
           >Download RDF/Turtle</button>
           <button type="button"
             className="dropdown-item"
-            onClick={() => downloadRDF(anRecords)}
+            onClick={() => downloadRDF(annotations)}
           >Download RDF/XML</button>
         </div>
       </div>

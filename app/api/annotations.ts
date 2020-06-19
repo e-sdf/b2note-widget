@@ -34,9 +34,9 @@ type Query = Record<string, any>;
 function mkTypeFilter(f: Filters): Query {
   return {
     type: [ 
-    ...(f.type.semantic ? [anModel.AnRecordType.SEMANTIC]: []), 
-    ...(f.type.keyword ? [anModel.AnRecordType.KEYWORD]: []), 
-    ...(f.type.comment ? [anModel.AnRecordType.COMMENT]: []) 
+    ...(f.type.semantic ? [anModel.AnnotationType.SEMANTIC]: []), 
+    ...(f.type.keyword ? [anModel.AnnotationType.KEYWORD]: []), 
+    ...(f.type.comment ? [anModel.AnnotationType.COMMENT]: []) 
     ]
   };
 }
@@ -66,13 +66,13 @@ function mkQuery(f: Filters, mbUser: AuthUser|null, mbTarget: anModel.Target|nul
   };
 }
 
-export function getAnnotationsJSON(f: Filters, mbUser: AuthUser|null = null, mbTarget: anModel.Target|null = null, download = false): Promise<Array<anModel.AnRecord>> {
+export function getAnnotationsJSON(f: Filters, mbUser: AuthUser|null = null, mbTarget: anModel.Target|null = null, download = false): Promise<Array<anModel.Annotation>> {
   const params = mkQuery(f, mbUser, mbTarget, anModel.Format.JSONLD, download);
   return new Promise((resolve, reject) => {
-    get<Array<anModel.AnRecord>>(annotationsUrl, params).then(
+    get<Array<anModel.Annotation>>(annotationsUrl, params).then(
       data => {
         const cleaned = !f.creator.mine ? 
-          data.filter((r: anModel.AnRecord) => anModel.getCreatorId(r) !== mbUser?.profile.id)
+          data.filter((r: anModel.Annotation) => anModel.getCreatorId(r) !== mbUser?.profile.id)
         : data;
         resolve(cleaned);
       },
@@ -88,8 +88,8 @@ export function getAnnotationsRDF(f: Filters, mbUser: AuthUser|null = null, mbTa
 
 // Creating annotations
 
-function postAnnotation(anRecord: anModel.AnRecord, user: AuthUser, authErrAction: AuthErrAction): Promise<any> {
-  return post<anModel.AnRecord>(annotationsUrl, anRecord, { token: user.token, authErrAction });
+function postAnnotation(annotation: anModel.Annotation, user: AuthUser, authErrAction: AuthErrAction): Promise<any> {
+  return post<anModel.Annotation>(annotationsUrl, annotation, { token: user.token, authErrAction });
 }
 
 export async function postAnnotationSemantic(target: anModel.Target, user: AuthUser, uris: string[], label: string, authErrAction: AuthErrAction): Promise<any> {
@@ -97,7 +97,7 @@ export async function postAnnotationSemantic(target: anModel.Target, user: AuthU
   const anTarget = anModel.mkTarget(target);
   const generator = anModel.mkGenerator(config.version);
   const creator = anModel.mkCreator({id: user.profile.id});
-  const req = anModel.mkAnRecord(body, anTarget, creator, generator, anModel.PurposeType.TAGGING);
+  const req = anModel.mkAnnotation(body, anTarget, creator, generator, anModel.PurposeType.TAGGING);
   return postAnnotation(req, user, authErrAction);
 }
 
@@ -106,7 +106,7 @@ export async function postAnnotationKeyword(target: anModel.Target, user: AuthUs
   const anTarget = anModel.mkTarget(target);
   const creator = anModel.mkCreator({id: user.profile.id});
   const generator = anModel.mkGenerator(config.version);
-  const req = anModel.mkAnRecord(body, anTarget, creator, generator, anModel.PurposeType.TAGGING);
+  const req = anModel.mkAnnotation(body, anTarget, creator, generator, anModel.PurposeType.TAGGING);
   return postAnnotation(req, user, authErrAction);
 }
 
@@ -116,7 +116,7 @@ export async function postAnnotationComment(target: anModel.Target, user: AuthUs
   //TODO: privacy choices handling
   const creator = anModel.mkCreator({id: user.profile.id});
   const generator = anModel.mkGenerator(config.version);
-  const req = anModel.mkAnRecord(body, anTarget, creator, generator, anModel.PurposeType.COMMENTING);
+  const req = anModel.mkAnnotation(body, anTarget, creator, generator, anModel.PurposeType.COMMENTING);
   return postAnnotation(req, user, authErrAction);
 }
 
@@ -140,7 +140,7 @@ export function getTargets(tag: string): Promise<Array<anModel.AnTarget>> {
 
 // Searching annotations
 
-export function searchAnnotations(expression: anModel.SearchQuery): Promise<Array<anModel.AnRecord>> {
+export function searchAnnotations(expression: anModel.SearchQuery): Promise<Array<anModel.Annotation>> {
   const res = searchQueryParser.parse(expression);
   return (
     res.error ?

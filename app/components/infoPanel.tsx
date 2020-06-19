@@ -1,6 +1,6 @@
 import * as _ from "lodash";
 import * as React from "react";
-import type { AnRecord } from "../core/annotationsModel";
+import type { Annotation } from "../core/annotationsModel";
 import * as anModel from "../core/annotationsModel";
 import type { OntologyInfo } from "../core/ontologyRegister";
 import * as oApi from "../api/ontologies";
@@ -8,7 +8,7 @@ import Paginator from "./paginator";
 import SpinningWheel from "./spinningWheel";
 
 interface Props {
-  anRecord: AnRecord;
+  annotation: Annotation;
   closeFn(): void;
 }
 
@@ -20,14 +20,14 @@ export default function InfoPanel(props: Props): React.FunctionComponentElement<
   React.useEffect(
     () => { 
       setLoading(true);
-      oApi.loadOntologiesInfo(props.anRecord).then(
+      oApi.loadOntologiesInfo(props.annotation).then(
         res => { 
           setOntologyInfos(res); 
           setLoading(false);
         }
       );
     },
-    [props.anRecord]
+    [props.annotation]
   );
 
   function renderTable(info: OntologyInfo): React.ReactElement {
@@ -77,7 +77,7 @@ export default function InfoPanel(props: Props): React.FunctionComponentElement<
         <div className="row">
           <div className="col-sm">
             <strong className="mr-auto" style={{fontSize: "125%"}}>
-              {anModel.getLabel(props.anRecord)}
+              {anModel.getLabel(props.annotation)}
             </strong>
           </div>
           <button type="button" className="ml-auto mr-1 close"

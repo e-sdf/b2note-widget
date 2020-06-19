@@ -18,9 +18,9 @@ interface SearchProps {
 }
 
 export default function SearchPage(props: SearchProps): React.FunctionComponentElement<SearchProps> {
-  const [resultsBasic, setResultsBasic] = React.useState(null as Array<anModel.AnRecord>|null);
-  const [resultsAdv, setResultsAdv] = React.useState(null as Array<anModel.AnRecord>|null);
-  const [ontologyInfoRequest, setOntologyInfoRequest] = React.useState(null as anModel.AnRecord|null);
+  const [resultsBasic, setResultsBasic] = React.useState(null as Array<anModel.Annotation>|null);
+  const [resultsAdv, setResultsAdv] = React.useState(null as Array<anModel.Annotation>|null);
+  const [ontologyInfoRequest, setOntologyInfoRequest] = React.useState(null as anModel.Annotation|null);
 
   function clearResults(): void {
     setResultsBasic(null);
@@ -31,7 +31,7 @@ export default function SearchPage(props: SearchProps): React.FunctionComponentE
     setOntologyInfoRequest(null);
   }
 
-  function renderDownloadButton(results: anModel.AnRecord[]): React.ReactElement {
+  function renderDownloadButton(results: anModel.Annotation[]): React.ReactElement {
     return (
       <div className="d-flex flex-row justify-content-center mt-2">
         <div className="dropdown">
@@ -59,17 +59,17 @@ export default function SearchPage(props: SearchProps): React.FunctionComponentE
     );
   }
 
-  function renderAnTags(anl: anModel.AnRecord[]): React.ReactElement {
+  function renderAnTags(anl: anModel.Annotation[]): React.ReactElement {
     return (
       <>
-        {anl.map((anRecord, i) => 
+        {anl.map((annotation, i) => 
           <tr key={i}>
             <td colSpan={2} style={{border: "none", padding: "0 0 0 0.5em"}}>
               <AnnotationTag 
-                anRecord={anRecord}
+                annotation={annotation}
                 mbUser={props.context.mbUser}
                 maxLen={35}
-                onClick={() => setOntologyInfoRequest(anRecord)}/>
+                onClick={() => setOntologyInfoRequest(annotation)}/>
             </td>
           </tr>
         )}
@@ -77,7 +77,7 @@ export default function SearchPage(props: SearchProps): React.FunctionComponentE
     );
   }
 
-  function renderResults(results: Array<anModel.AnRecord>): React.ReactElement {
+  function renderResults(results: Array<anModel.Annotation>): React.ReactElement {
     const resultsDict = _.groupBy(results, o => o.target.source);
 
     function renderItems(): React.ReactElement {
@@ -135,7 +135,7 @@ export default function SearchPage(props: SearchProps): React.FunctionComponentE
     <>
       {ontologyInfoRequest ?
         <InfoPanel 
-          anRecord={ontologyInfoRequest}
+          annotation={ontologyInfoRequest}
           closeFn={closeOntologiesInfo}
         />
       : resultsBasic ? renderResults(resultsBasic) 

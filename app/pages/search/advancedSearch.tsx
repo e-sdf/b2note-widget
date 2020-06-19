@@ -3,7 +3,7 @@ import { matchSwitch } from "@babakness/exhaustive-type-checking";
 import * as React from "react";
 import * as icons from "../../components/icons";
 import * as anModel from "../../core/annotationsModel";
-import type { AnRecord } from "../../core/annotationsModel";
+import type { Annotation } from "../../core/annotationsModel";
 import { SearchType } from "../../core/searchModel";
 import * as queryParser from "../../core/searchQueryParser";
 import * as api from "../../api/annotations";
@@ -14,7 +14,7 @@ import { TermComp } from "./termComp";
 const alertId = "basic-search-alert";
 
 export interface SearchProps {
-  resultsHandle(results: Array<AnRecord>): void;
+  resultsHandle(results: Array<Annotation>): void;
 }
 
 export function AdvancedSearch(props: SearchProps): React.FunctionComponentElement<SearchProps> {
@@ -49,7 +49,7 @@ export function AdvancedSearch(props: SearchProps): React.FunctionComponentEleme
   function submitQuery(): void {
     setSearching(true);
     api.searchAnnotations(_.trim(queryStr)).then(
-      (anl: Array<anModel.AnRecord>) => {
+      (anl: Array<anModel.Annotation>) => {
         setSearching(false);
         props.resultsHandle(anl);
       },

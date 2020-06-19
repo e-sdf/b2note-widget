@@ -16,13 +16,13 @@ import { ActionEnum, notify } from "../notify";
 const alertId = "anlAlert";
 
 interface TagEditorProps extends PageProps {
-  anRecord: anModel.AnRecord;
+  annotation: anModel.Annotation;
   doneHandler(): void;
 }
 
 function TagEditor(props: TagEditorProps): React.FunctionComponentElement<TagEditorProps> {
   const [uris, setUris] = React.useState([] as Array<string>);
-  const [label, setLabel] = React.useState(anModel.getLabel(props.anRecord));
+  const [label, setLabel] = React.useState(anModel.getLabel(props.annotation));
   const [ref, setRef] = React.useState(null as any);
   const user = props.context.mbUser;
 
@@ -34,15 +34,15 @@ function TagEditor(props: TagEditorProps): React.FunctionComponentElement<TagEdi
   function update(): void {
     if (user) {
      const body = 
-       anModel.isSemantic(props.anRecord) ?
+       anModel.isSemantic(props.annotation) ?
          anModel.mkSemanticAnBody(uris, label)
-       : anModel.isKeyword(props.anRecord) ?
+       : anModel.isKeyword(props.annotation) ?
          anModel.mkKeywordAnBody(label)
        : anModel.mkCommentAnBody(label);
-      anApi.patchAnnotationBody(user, props.anRecord.id, body, props.authErrAction).then(
+      anApi.patchAnnotationBody(user, props.annotation.id, body, props.authErrAction).then(
         () => {
           showAlertSuccess(alertId, "Annotation updated");
-          notify(ActionEnum.EDIT, props.anRecord);
+          notify(ActionEnum.EDIT, props.annotation);
           props.doneHandler();
         },
         (err) => {
@@ -62,7 +62,7 @@ function TagEditor(props: TagEditorProps): React.FunctionComponentElement<TagEdi
     <tr>
       <td colSpan={3}>
         <div className="d-flex flex-row">
-          {anModel.isSemantic(props.anRecord) ?
+          {anModel.isSemantic(props.annotation) ?
             <ac.SemanticAutocomplete 
               id="annotations-semantic-autocomplete"
               ref={(comp) => setRef(comp)} 
@@ -99,9 +99,9 @@ export default function AnnotationsPage(props: PageProps): React.FunctionCompone
   const [annotations, setAnnotations] = React.useState(null as Array<AnItem>|null);
   const [loading, setLoading] = React.useState(false);
   const [activeItem, setActiveItem] = React.useState(null as string|null);
-  const [ontologyInfoRequest, setOntologyInfoRequest] = React.useState(null as anModel.AnRecord|null);
+  const [ontologyInfoRequest, setOntologyInfoRequest] = React.useState(null as anModel.Annotation|null);
   const [editedRecordId, setEditedRecordId] = React.useState(null as string|null);
-  const [pendingDeleteAn, setPendingDeleteAn] = React.useState(null as anModel.AnRecord|null);
+  const [pendingDeleteAn, setPendingDeleteAn] = React.useState(null as anModel.Annotation|null);
   const user = props.context.mbUser;
 
   //React.useEffect(() => console.log(annotations), [annotations]);
@@ -111,8 +111,8 @@ export default function AnnotationsPage(props: PageProps): React.FunctionCompone
   }
 
   function renderAnItem(anItem: AnItem): React.ReactElement {
-    const anRecord = anItem.anRecord;
-    const label = anModel.getLabel(anRecord);
+    const annotation = anItem.annotation;
+    const label = anModel.getLabel(annotation);
     const visibility = activeItem === label ? "visible" : "hidden";
 
     function toggleShowFilesFlag(anItem: AnItem): void {
@@ -142,13 +142,13 @@ export default function AnnotationsPage(props: PageProps): React.FunctionCompone
           <button type="button"
             className="btn btn-sm btn-outline-primary list-action-button mr-1"
             data-toggle="tooltip" data-placement="bottom" title="Edit"
-            onClick={() => setEditedRecordId(anRecord.id)}
+            onClick={() => setEditedRecordId(annotation.id)}
           ><icons.EditIcon/>
           </button>
           <button type="button"
             className="btn btn-sm btn-outline-primary list-action-button"
             data-toggle="tooltip" data-placement="bottom" title="Delete"
-            onClick={() => setPendingDeleteAn(anRecord)}
+            onClick={() => setPendingDeleteAn(annotation)}
           ><icons.DeleteIcon/>
           </button>
         </>
@@ -211,18 +211,18 @@ export default function AnnotationsPage(props: PageProps): React.FunctionCompone
             <td style={{verticalAlign: "middle", whiteSpace: "nowrap"}}>
               <AnnotationTag 
                 mbUser={props.context.mbUser}
-                anRecord={anRecord}
+                annotation={annotation}
                 maxLen={17}
-                onClick={() => setOntologyInfoRequest(anRecord)}/>
+                onClick={() => setOntologyInfoRequest(annotation)}/>
             </td>
             <td style={{paddingLeft: 0, paddingRight: 0}}>
               {renderFilesBadge()}
             </td>
             <td style={{whiteSpace: "nowrap", paddingLeft: 0, paddingRight: 0, visibility}}>
-              {anModel.getCreatorId(anRecord) === (props.context.mbUser?.profile.id || "") ? renderActionButtons() : <></>}
+              {anModel.getCreatorId(annotation) === (props.context.mbUser?.profile.id || "") ? renderActionButtons() : <></>}
             </td>
           </tr>
-          {pendingDeleteAn === anRecord ? 
+          {pendingDeleteAn === annotation ? 
             <tr>
               {renderDeleteConfirmation()}
             </tr> : <></>}
@@ -242,9 +242,9 @@ export default function AnnotationsPage(props: PageProps): React.FunctionCompone
     }
 
     return (
-      <React.Fragment key={anRecord.id}>
-        {anRecord.id === editedRecordId ?
-          <TagEditor context={props.context} anRecord={anRecord} doneHandler={reload} authErrAction={props.authErrAction}/>
+      <React.Fragment key={annotation.id}>
+        {annotation.id === editedRecordId ?
+          <TagEditor context={props.context} annotation={annotation} doneHandler={reload} authErrAction={props.authErrAction}/>
         : renderNormalRow()
         }
       </React.Fragment>
@@ -287,7 +287,7 @@ export default function AnnotationsPage(props: PageProps): React.FunctionCompone
   return (
     ontologyInfoRequest ?
       <InfoPanel 
-        anRecord={ontologyInfoRequest}
+        annotation={ontologyInfoRequest}
         closeFn={closeOntologiesInfo}
       />
     : renderAnnotationsTable()
