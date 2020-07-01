@@ -13,10 +13,17 @@ export const KeywordIcon = icons.FaQuoteRight;
 export const CommentIcon = icons.FaCommentDots;
 export const DownloadIcon = icons.FaDownload;
 
+export const PrivateIcon = icons.FaUser;
+export const PublicIcon = icons.FaGlobe;
+
 export const QuestionIcon = icons.FaQuestionCircle;
 export const AllFilesIcon = icons.FaCopy;
 export const MineIcon = icons.FaUser;
-export const OthersIcon = icons.FaUserFriends;
+export const OthersIcon = icons.FaUserSlash;
+
+export const FileThis = icons.FaFile;
+export const FileOther = icons.FaFileExcel;
+export const LookIcon = icons.FaEye;
 
 export const CreateIcon = icons.FaPlus;
 export const EditIcon = icons.FaEdit;

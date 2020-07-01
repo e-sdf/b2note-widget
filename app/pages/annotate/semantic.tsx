@@ -2,6 +2,8 @@ import * as React from "react";
 import type { PageProps } from "../pages";
 import { showAlertSuccess, showAlertError } from "../../components/ui"; 
 import SpinningWheel from "../../components/spinningWheel";
+import VisibilitySwitcher from "./visibilitySwitcher";
+import * as anModel from "../../core/annotationsModel";
 import * as ac from "../../components/autocomplete/view";
 import * as api from "../../api/annotations";
 import { SemanticIcon, CreateIcon } from "../../components/icons";
@@ -14,6 +16,7 @@ export interface SemanticProps extends PageProps {
 export function Semantic(props: SemanticProps): React.FunctionComponentElement<SemanticProps> {
   const [uris, setUris] = React.useState([] as Array<string>);
   const [label, setLabel] = React.useState("");
+  const [visibility, setVisibility] = React.useState(anModel.VisibilityEnum.PRIVATE);
   const [isNew, setIsNew] = React.useState(false);
   const [ref, setRef] = React.useState(null as any);
   const [loading, setLoading] = React.useState(false);
@@ -40,7 +43,7 @@ export function Semantic(props: SemanticProps): React.FunctionComponentElement<S
   function postAnnotationAsSemantic(): void {
     if (target && user) {
       setLoading(true);
-      api.postAnnotationSemantic(target, user, uris, label, props.authErrAction).then(
+      api.postAnnotationSemantic({ target, user, uris, label, visibility, authErrAction: props.authErrAction }).then(
         newAn => { 
           setLoading(false);
           showAlertSuccess(props.alertId, "Semantic annotation created");
@@ -53,7 +56,7 @@ export function Semantic(props: SemanticProps): React.FunctionComponentElement<S
 
   function postAnnotationAsKeyword(): void {
     if (target && user) {
-      api.postAnnotationKeyword(target, user, label, props.authErrAction).then(
+      api.postAnnotationKeyword({ target, user, label, visibility, authErrAction: props.authErrAction }).then(
         newAn => {
           showAlertSuccess(props.alertId, "Keyword annotation created");
           setLabel("");
@@ -113,6 +116,7 @@ export function Semantic(props: SemanticProps): React.FunctionComponentElement<S
           }}
         ><CreateIcon/></button>
       </div>
+      <VisibilitySwitcher visibility={visibility} setVisibility={setVisibility}/>
       <div className="d-flex flex-row justify-content-center">
         <SpinningWheel show={loading}/>
       </div>

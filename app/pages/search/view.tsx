@@ -6,7 +6,7 @@ import * as anModel from "../../core/annotationsModel";
 import { BasicSearch } from "./basicSearch";
 import { AdvancedSearch } from "./advancedSearch";
 import AnnotationTag from "../../components/annotationTag";
-import TargetTr from "../../components/targetTr";
+//import TargetTr from "../../components/targetTr";
 import InfoPanel from "../../components/infoPanel";
 import { DownloadIcon } from "../../components/icons";
 import { downloadJSON, downloadTurtle, downloadRDF } from "../../components/download";
@@ -87,7 +87,9 @@ export default function SearchPage(props: SearchProps): React.FunctionComponentE
             <li key={source} className="list-group-item pt-2 pl-0 pr-0 pb-2">
               <table className="table mb-2">
                 <tbody>
-                  {<TargetTr key={source} mbContextTarget={props.context.mbTarget} target={resultsDict[source][0].target}/>}
+                  <tr>
+                    {/*<TargetTr key={source} mbContextTarget={props.context.mbTarget} target={resultsDict[source][0].target}/>*/}
+                  </tr>
                   {renderAnTags(resultsDict[source])}
                 </tbody>
               </table>

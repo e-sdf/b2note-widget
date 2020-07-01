@@ -2,6 +2,8 @@ import * as React from "react";
 import type { PageProps } from "../pages";
 import { showAlertSuccess, showAlertError } from "../../components/ui"; 
 import SpinningWheel from "../../components/spinningWheel";
+import VisibilitySwitcher from "./visibilitySwitcher";
+import * as anModel from "../../core/annotationsModel";
 import * as oreg from "../../core/ontologyRegister";
 import config from "../../config";
 import * as api from "../../api/annotations";
@@ -13,8 +15,9 @@ export interface KeywordProps extends PageProps {
 }
 
 export function Keyword(props: KeywordProps): React.FunctionComponentElement<KeywordProps> {
-  const [label, setLabel] = React.useState("");
+  const [comment, setComment] = React.useState("");
   const [uris, setUris] = React.useState([] as Array<string>);
+  const [visibility, setVisibility] = React.useState(anModel.VisibilityEnum.PRIVATE);
   const [loading, setLoading] = React.useState(false);
   const [semanticFound, setSemanticFound] = React.useState(false);
   const [tooLong, setTooLong] = React.useState(false);
@@ -22,14 +25,14 @@ export function Keyword(props: KeywordProps): React.FunctionComponentElement<Key
   const target = props.context.mbTarget;
   const user = props.context.mbUser;
 
-  React.useEffect(() => setTooLong(label.length > lengthLimit), [label]);
+  React.useEffect(() => setTooLong(comment.length > lengthLimit), [comment]);
 
   function postAnnotationAsKeyword(): void {
     if (target && user) {
-      api.postAnnotationKeyword(target, user, label, props.authErrAction).then(
+      api.postAnnotationKeyword({ target, user, label: comment, visibility, authErrAction: props.authErrAction }).then(
        newAn => {
           showAlertSuccess(props.alertId, "Keyword annotation created");
-          setLabel("");
+          setComment("");
           notify(ActionEnum.CREATE, newAn);
         },
         err => showAlertError(props.alertId, err)
@@ -39,10 +42,10 @@ export function Keyword(props: KeywordProps): React.FunctionComponentElement<Key
 
   function postAnnotationAsSemantic(): void {
     if (target && user) {
-      api.postAnnotationSemantic(target, user, uris, label, props.authErrAction).then(
+      api.postAnnotationSemantic({ target, user, uris, label: comment, visibility, authErrAction: props.authErrAction }).then(
         newAn => {
           showAlertSuccess(props.alertId, "Semantic annotation created");
-          setLabel("");
+          setComment("");
           notify(ActionEnum.CREATE, newAn);
         },
         (err) => showAlertError(props.alertId, err)
@@ -52,10 +55,10 @@ export function Keyword(props: KeywordProps): React.FunctionComponentElement<Key
 
   function postAnnotationAsComment(): void {
     if (target && user) {
-      api.postAnnotationComment(target, user, label, props.authErrAction).then(
+      api.postAnnotationComment({ target, user, comment, visibility, authErrAction: props.authErrAction }).then(
         newAn => {
           showAlertSuccess(props.alertId, "Comment annotation created");
-          setLabel("");
+          setComment("");
           notify(ActionEnum.CREATE, newAn);
         },
         (err) => showAlertError(props.alertId, err)
@@ -66,10 +69,10 @@ export function Keyword(props: KeywordProps): React.FunctionComponentElement<Key
   function annotate(): void {
     // Check the existence of a semantic tag
     setLoading(true);
-    oreg.getOntologies(config.solrUrl, label).then(oDict => {
+    oreg.getOntologies(config.solrUrl, comment).then(oDict => {
       setLoading(false);
-      if (oDict[label]) {
-        setUris(oDict[label].map(i => i.uris));
+      if (oDict[comment]) {
+        setUris(oDict[comment].map(i => i.uris));
         setSemanticFound(true);
       } else {
         postAnnotationAsKeyword();
@@ -138,19 +141,20 @@ export function Keyword(props: KeywordProps): React.FunctionComponentElement<Key
       <div className="d-flex flex-row align-items-center" style={{margin: "10px"}}>
         <KeywordIcon className="mr-1"/>
         <input className="form-control"
-          value={label}
-          onChange={ev => setLabel(ev.target?.value || "")} 
+          value={comment}
+          onChange={ev => setComment(ev.target?.value || "")} 
         />
         {tooLong ? 
           <></>
         : <button type="button" className="btn btn-primary"
             data-toggle="tooltip" data-placement="bottom" title={props.context.mbUser ? "" : "Not logged in"}
-            disabled={label.length === 0 || !props.context.mbUser || loading}
+            disabled={comment.length === 0 || !props.context.mbUser || loading}
             onClick={annotate}>
             <CreateIcon/>
           </button>
         }
       </div>
+      <VisibilitySwitcher visibility={visibility} setVisibility={setVisibility}/>
       <div className="d-flex flex-row justify-content-center">
         <SpinningWheel show={loading}/>
       </div>
