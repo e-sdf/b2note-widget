@@ -65,14 +65,14 @@ export class SemanticAutocomplete extends React.Component<Props, State> {
   public clear = (): void => {
     const ta = this.typeahead;
     if (ta) {
-      ta.getInstance().clear();
+      ta.clear();
     }
   }
 
   public focus = (): void => {
     const ta = this.typeahead;
     if (ta) {
-      ta.getInstance().focus();
+      ta.focus();
     }
   }
 
