@@ -32,8 +32,11 @@ module.exports = {
       patterns: [
         { from: "node_modules/normalize.css/normalize.css", to: "css" },
         { from: "node_modules/bootstrap/dist/css/bootstrap.min.css", to: "css" },
+        { from: "node_modules/bootstrap/dist/css/bootstrap.min.css.map", to: "css" },
         { from: "node_modules/bootstrap/dist/css/bootstrap-grid.min.css", to: "css" },
+        { from: "node_modules/bootstrap/dist/css/bootstrap-grid.min.css.map", to: "css" },
         { from: "node_modules/bootstrap/dist/js/bootstrap.bundle.min.js", to: "js" },
+        { from: "node_modules/bootstrap/dist/js/bootstrap.bundle.min.js.map", to: "js" },
         { from: "node_modules/jquery/dist/jquery.min.js", to: "js" },
         { from: "node_modules/react-bootstrap-typeahead/css/Typeahead-bs4.min.css", to: "css" }
       ]

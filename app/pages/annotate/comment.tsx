@@ -1,23 +1,24 @@
 import * as React from "react";
-import type { PageProps } from "../pages";
-import { showAlertSuccess, showAlertError } from "../../components/ui"; 
+import type { ApiComponent } from "../../components/defs";
+import Alert from "../../components/alert"; 
 import SpinningWheel from "../../components/spinningWheel";
-import VisibilitySwitcher from "./visibilitySwitcher";
+import VisibilitySwitcher from "../../components/visibilitySwitcher";
 import * as anModel from "../../core/annotationsModel";
 import * as api from "../../api/annotations";
 import { CommentIcon, CreateIcon } from "../../components/icons";
-import { ActionEnum, notify } from "../notify";
+import { ActionEnum, notify } from "../../components/notify";
 
-export interface CommentProps extends PageProps {
-  alertId: string;
-}
-
-export function Comment(props: CommentProps): React.FunctionComponentElement<CommentProps> {
+export function Comment(props: ApiComponent): React.FunctionComponentElement<ApiComponent> {
   const [comment, setComment] = React.useState("");
   const [visibility, setVisibility] = React.useState(anModel.VisibilityEnum.PRIVATE);
   const [loading, setLoading] = React.useState(false);
+  const [successMessage, setSuccessMessage] = React.useState(null as string|null);
+  const [errorMessage, setErrorMessage] = React.useState(null as string|null);
   const target = props.context.mbTarget;
   const user = props.context.mbUser;
+
+  React.useEffect(() => setErrorMessage(null), [successMessage]);
+  React.useEffect(() => { if (loading) { setErrorMessage(null); } }, [loading]);
 
   function annotate(): void {
     if (target && user) {
@@ -25,11 +26,11 @@ export function Comment(props: CommentProps): React.FunctionComponentElement<Com
       api.postAnnotationComment({ target, user, comment, visibility, authErrAction: props.authErrAction }).then(
         newAn => {
           setLoading(false);
-          showAlertSuccess(props.alertId, "Comment created");
+          setSuccessMessage("Comment annotation created");
           setComment("");
           notify(ActionEnum.CREATE, newAn);
         },
-        (err) => { setLoading(false); showAlertError(props.alertId, err); }
+        (err) => { setLoading(false); setErrorMessage(err); }
       );
     }
   }
@@ -49,9 +50,13 @@ export function Comment(props: CommentProps): React.FunctionComponentElement<Com
           <CreateIcon/>
         </button>
       </div>
-      <VisibilitySwitcher visibility={visibility} setVisibility={setVisibility}/>
-      <div className="d-flex flex-row justify-content-center">
+      <div className="d-flex flex-row justify-content-center mt-2">
+        <VisibilitySwitcher text={true} visibility={visibility} setVisibility={setVisibility}/>
+      </div>
+      <div className="d-flex flex-row justify-content-center mt-2">
         <SpinningWheel show={loading}/>
+        <Alert type="success" message={successMessage} closedHandler={() => setSuccessMessage(null)}/>
+        <Alert type="danger" message={errorMessage} closedHandler={() => setErrorMessage(null)}/>
       </div>
     </>
   );

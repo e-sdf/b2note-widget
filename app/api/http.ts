@@ -23,6 +23,7 @@ function errWrapper<T>(pm: Promise<AxiosResponse<T>>): Promise<T> {
       resp => resolve(resp.data),
       err => reject(axiosErrToMsg(err))
     )
+    .catch(err => reject(axiosErrToMsg(err)))
   );
 }
 
@@ -31,7 +32,7 @@ function authWrapper<T>(pm: Promise<AxiosResponse<T>>, authErrAction?: AuthErrAc
     pm.then(
       resp => resolve(resp),
       err => {
-        if (authErrAction && err.response.status === 401) {
+        if (authErrAction && err.response?.status === 401) {
           authErrAction().then(
             newAuth => resolve(newAuth),
             err => reject(err)

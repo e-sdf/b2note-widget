@@ -7,9 +7,8 @@ import type { AuthErrAction } from "../../api/http";
 import type { UserProfile } from "../../core/user";
 import { countries, Experience } from "../../core/user";
 import * as api from "../../api/profile";
-import { showAlertSuccess, showAlertError } from "../../components/ui"; 
-
-const alertId = "profileAlert";
+import Alert from "../../components/alert"; 
+import SpinningWheel from "../../components/spinningWheel";
 
 interface ProfileProps {
   user: AuthUser;
@@ -26,6 +25,9 @@ export default function ProfilePage(props: ProfileProps): React.FunctionComponen
   const [jobTitle, setJobTitle] = React.useState(props.user.profile.jobTitle);
   const [country, setCountry] = React.useState(props.user.profile.country);
   const [experience, setExperience] = React.useState(props.user.profile.experience);
+  const [loading, setLoading] = React.useState(false);
+  const [successMessage, setSuccessMessage] = React.useState(null as string|null);
+  const [errorMessage, setErrorMessage] = React.useState(null as string|null);
   const fields = [givenName, familyName, personName, orcid, organisation, jobTitle, country, experience];
   const [changed, setChanged] = React.useState(false);
   const panelRef = React.useRef(null);
@@ -73,19 +75,15 @@ export default function ProfilePage(props: ProfileProps): React.FunctionComponen
 
 
   function postProfile(): void {
-    if (panelRef.current) {
-      const panelDOM = (panelRef.current as unknown) as Element;
-      panelDOM.scrollTop = 0;
-    }
+    setLoading(true);
     api.patchUserProfilePm(getFields(), props.user.token, props.authErrAction).then(
       updatedProfile => {
         props.updateProfileFn(updatedProfile);
+        setLoading(false);
         setChanged(false);
-        showAlertSuccess(alertId, "Profile updated");
+        setSuccessMessage("Profile updated");
       },
-      () => {
-        showAlertError(alertId, "Failed");
-      }
+      () => { setLoading(false); setErrorMessage("Profile update failed"); }
     );
   }
 
@@ -136,12 +134,7 @@ export default function ProfilePage(props: ProfileProps): React.FunctionComponen
   }
 
   return (
-    <div ref={panelRef} className="container-fluid mt-2" style={{height: "450px", overflow: "auto"}}>
-      <div className="row mt-2">
-        <div className="col-sm">
-          <div id={alertId}></div>
-        </div>
-      </div>
+    <div className="container-fluid mt-2" style={{height: "450px", overflow: "auto"}}>
       <form>
         <div className="form-group">
           <label>B2NOTE ID</label>
@@ -193,7 +186,13 @@ export default function ProfilePage(props: ProfileProps): React.FunctionComponen
         </div>
         {renderCountryInput()}
         {renderExperienceInput()}
-        {renderSaveButton()}
+        {successMessage || errorMessage ?
+          <div className="d-flex flex-row justify-content-center">
+            <SpinningWheel show={loading}/>
+            <Alert type="success" message={successMessage} closedHandler={() => setSuccessMessage(null)}/>
+            <Alert type="danger" message={errorMessage} closedHandler={() => setErrorMessage(null)}/>
+          </div>
+        : renderSaveButton()}
       </form>
     </div>
   );

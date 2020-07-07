@@ -26,7 +26,7 @@ export const FileOther = icons.FaFileExcel;
 export const LookIcon = icons.FaEye;
 
 export const CreateIcon = icons.FaPlus;
-export const EditIcon = icons.FaEdit;
+export const EditIcon = icons.FaPen;
 export const SaveIcon = icons.FaSave;
 
 export const ShowIcon = icons.FaChevronRight;
@@ -41,3 +41,5 @@ export const ErrorIcon = icons.FaExclamation;
 
 export const LeftIcon = icons.FaCaretLeft; 
 export const RightIcon = icons.FaCaretRight; 
+
+export const ArrowRightIcon = icons.FaArrowRight;

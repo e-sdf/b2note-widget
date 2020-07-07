@@ -34,39 +34,48 @@ export default function TagEditor(props: TagEditorProps): React.FunctionComponen
     }
   }, [ref]);
 
+  function renderInput(): React.ReactElement {
+    return (
+      anModel.isSemantic(props.annotation) ?
+        <ac.SemanticAutocomplete 
+          id="annotations-semantic-autocomplete"
+          ref={(comp) => setRef(comp)} 
+          defaultInputValue={label}
+          onChange={gotSuggestion}
+        />
+      : <input type="text" className="form-control"
+          value={label} 
+          onChange={ev => setLabel(ev.target.value)}
+        />
+    );
+  }
+
+  function renderActionButtons(): React.ReactElement {
+    return (
+      <div className="btn-group">
+        <button type="button" className="btn btn-primary"
+          disabled={label.length === 0}
+          onClick={() => {
+            finish();
+            if (ref) {
+              ref.clear();
+            }
+          }}>
+          <icons.SaveIcon/>
+        </button>
+        <button type="button" className="btn btn-secondary"
+          onClick={() => props.cancelledHandler()}>
+          <icons.CancelIcon/>
+        </button>
+      </div>
+    );
+}
+
   return (
-    <tr>
-      <td colSpan={3}>
-        <div className="d-flex flex-row">
-          {anModel.isSemantic(props.annotation) ?
-            <ac.SemanticAutocomplete 
-              id="annotations-semantic-autocomplete"
-              ref={(comp) => setRef(comp)} 
-              defaultInputValue={label}
-              onChange={gotSuggestion}
-            />
-          : <input type="text" className="form-control"
-              value={label} 
-              onChange={ev => setLabel(ev.target.value)}
-            />
-          }
-          <button type="button" className="btn btn-primary"
-            disabled={label.length === 0}
-            onClick={() => {
-              finish();
-              if (ref) {
-                ref.clear();
-              }
-            }}>
-            <icons.SaveIcon/>
-          </button>
-          <button type="button" className="btn btn-danger"
-            onClick={() => props.cancelledHandler()}>
-            <icons.CancelIcon/>
-          </button>
-        </div>
-        </td>
-    </tr>
+    <div className="d-flex flex-row">
+      {renderInput()}
+      {renderActionButtons()}
+    </div>
   );
 }
 

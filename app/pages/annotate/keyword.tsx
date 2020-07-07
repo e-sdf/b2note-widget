@@ -1,67 +1,71 @@
 import * as React from "react";
-import type { PageProps } from "../pages";
-import { showAlertSuccess, showAlertError } from "../../components/ui"; 
+import type { ApiComponent } from "../../components/defs";
+import Alert from "../../components/alert"; 
 import SpinningWheel from "../../components/spinningWheel";
-import VisibilitySwitcher from "./visibilitySwitcher";
+import VisibilitySwitcher from "../../components/visibilitySwitcher";
 import * as anModel from "../../core/annotationsModel";
 import * as oreg from "../../core/ontologyRegister";
 import config from "../../config";
 import * as api from "../../api/annotations";
 import { KeywordIcon, CreateIcon } from "../../components/icons";
-import { ActionEnum, notify } from "../notify";
+import { ActionEnum, notify } from "../../components/notify";
 
-export interface KeywordProps extends PageProps {
-  alertId: string;
-}
-
-export function Keyword(props: KeywordProps): React.FunctionComponentElement<KeywordProps> {
-  const [comment, setComment] = React.useState("");
+export function Keyword(props: ApiComponent): React.FunctionComponentElement<ApiComponent> {
+  const [label, setLabel] = React.useState("");
   const [uris, setUris] = React.useState([] as Array<string>);
   const [visibility, setVisibility] = React.useState(anModel.VisibilityEnum.PRIVATE);
   const [loading, setLoading] = React.useState(false);
+  const [successMessage, setSuccessMessage] = React.useState(null as string|null);
+  const [errorMessage, setErrorMessage] = React.useState(null as string|null);
   const [semanticFound, setSemanticFound] = React.useState(false);
   const [tooLong, setTooLong] = React.useState(false);
   const lengthLimit = 60;
   const target = props.context.mbTarget;
   const user = props.context.mbUser;
 
-  React.useEffect(() => setTooLong(comment.length > lengthLimit), [comment]);
+  React.useEffect(() => setErrorMessage(null), [successMessage]);
+  React.useEffect(() => { if (loading) { setErrorMessage(null); } }, [loading]);
+  React.useEffect(() => setTooLong(label.length > lengthLimit), [label]);
 
   function postAnnotationAsKeyword(): void {
     if (target && user) {
-      api.postAnnotationKeyword({ target, user, label: comment, visibility, authErrAction: props.authErrAction }).then(
-       newAn => {
-          showAlertSuccess(props.alertId, "Keyword annotation created");
-          setComment("");
+      setLoading(true);
+      api.postAnnotationKeyword({ target, user, label, visibility, authErrAction: props.authErrAction }).then(
+        newAn => {
+          setLoading(false);
+          setSuccessMessage("Keyword annotation created");
+          setLabel("");
           notify(ActionEnum.CREATE, newAn);
         },
-        err => showAlertError(props.alertId, err)
+        (err) => { setLoading(false); setErrorMessage(err); }
       );
     }
   }
 
   function postAnnotationAsSemantic(): void {
     if (target && user) {
-      api.postAnnotationSemantic({ target, user, uris, label: comment, visibility, authErrAction: props.authErrAction }).then(
+      setLoading(true);
+      api.postAnnotationSemantic({ target, user, uris, label, visibility, authErrAction: props.authErrAction }).then(
         newAn => {
-          showAlertSuccess(props.alertId, "Semantic annotation created");
-          setComment("");
+          setSuccessMessage("Sematic annotation created");
+          setLabel("");
           notify(ActionEnum.CREATE, newAn);
         },
-        (err) => showAlertError(props.alertId, err)
+        (err) => { setLoading(false); setErrorMessage(err); }
       );
     }
   }
 
   function postAnnotationAsComment(): void {
     if (target && user) {
-      api.postAnnotationComment({ target, user, comment, visibility, authErrAction: props.authErrAction }).then(
+      setLoading(true);
+      api.postAnnotationComment({ target, user, comment: label, visibility, authErrAction: props.authErrAction }).then(
         newAn => {
-          showAlertSuccess(props.alertId, "Comment annotation created");
-          setComment("");
+          setSuccessMessage("Comment annotation created");
+          setLabel("");
           notify(ActionEnum.CREATE, newAn);
         },
-        (err) => showAlertError(props.alertId, err)
+        (err) => { setLoading(false); setErrorMessage(err); }
       );
     }
   }
@@ -69,10 +73,10 @@ export function Keyword(props: KeywordProps): React.FunctionComponentElement<Key
   function annotate(): void {
     // Check the existence of a semantic tag
     setLoading(true);
-    oreg.getOntologies(config.solrUrl, comment).then(oDict => {
+    oreg.getOntologies(config.solrUrl, label).then(oDict => {
       setLoading(false);
-      if (oDict[comment]) {
-        setUris(oDict[comment].map(i => i.uris));
+      if (oDict[label]) {
+        setUris(oDict[label].map(i => i.uris));
         setSemanticFound(true);
       } else {
         postAnnotationAsKeyword();
@@ -82,13 +86,15 @@ export function Keyword(props: KeywordProps): React.FunctionComponentElement<Key
 
   function renderSemantisationDialog(): React.ReactElement {
     return (
-      <div style={{ margin: "15px" }}>
-        <p>
-          We found semantic terms matching the keyword.
+      <div style={{ margin: "5px 15px 0 15px" }}>
+        <div style={{fontSize: "85%"}}>
+          <p>
+            Found semantic terms matching the keyword.
           </p>
-        <p>
-          Would you like to select one or carry on with free-text?
+          <p>
+            Would you like to select one or carry on with free-text?
           </p>
+        </div>
         <div className="d-flex flex-row justify-content-between" style={{ margin: "10px" }}>
           <button type="button" className="btn btn-primary"
             onClick={() => {
@@ -141,22 +147,26 @@ export function Keyword(props: KeywordProps): React.FunctionComponentElement<Key
       <div className="d-flex flex-row align-items-center" style={{margin: "10px"}}>
         <KeywordIcon className="mr-1"/>
         <input className="form-control"
-          value={comment}
-          onChange={ev => setComment(ev.target?.value || "")} 
+          value={label}
+          onChange={ev => setLabel(ev.target?.value || "")} 
         />
         {tooLong ? 
           <></>
         : <button type="button" className="btn btn-primary"
             data-toggle="tooltip" data-placement="bottom" title={props.context.mbUser ? "" : "Not logged in"}
-            disabled={comment.length === 0 || !props.context.mbUser || loading}
+            disabled={label.length === 0 || !props.context.mbUser || loading}
             onClick={annotate}>
             <CreateIcon/>
           </button>
         }
       </div>
-      <VisibilitySwitcher visibility={visibility} setVisibility={setVisibility}/>
-      <div className="d-flex flex-row justify-content-center">
+      <div className="d-flex flex-row justify-content-center mt-2">
+        <VisibilitySwitcher text={true} visibility={visibility} setVisibility={setVisibility}/>
+      </div>
+      <div className="d-flex flex-row justify-content-center mt-2">
         <SpinningWheel show={loading}/>
+        <Alert type="success" message={successMessage} closedHandler={() => setSuccessMessage(null)}/>
+        <Alert type="danger" message={errorMessage} closedHandler={() => setErrorMessage(null)}/>
       </div>
       {tooLong ?
         renderTooLongSubmitVersion()

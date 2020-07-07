@@ -1,121 +1,58 @@
 import _ from "lodash";
 import * as React from "react";
+import * as anModel from "../../core/annotationsModel";
 import type { Context } from "../../context";
 import { Tabs, Tab } from "../../components/ui";
-import * as anModel from "../../core/annotationsModel";
+import type { ApiComponent } from "../../components/defs";
+import AnList from "../../components/anList";
 import { BasicSearch } from "./basicSearch";
 import { AdvancedSearch } from "./advancedSearch";
-import AnnotationTag from "../../components/annotationTag";
-//import TargetTr from "../../components/targetTr";
-import InfoPanel from "../../components/infoPanel";
-import { DownloadIcon } from "../../components/icons";
-import { downloadJSON, downloadTurtle, downloadRDF } from "../../components/download";
+import AnDownloadButton from "../../components/anDownloader";
 
 type TabType = "basic" | "advanced";
 
-interface SearchProps {
-  context: Context;
-}
-
-export default function SearchPage(props: SearchProps): React.FunctionComponentElement<SearchProps> {
+export default function SearchPage(props: ApiComponent): React.FunctionComponentElement<ApiComponent> {
   const [resultsBasic, setResultsBasic] = React.useState(null as Array<anModel.Annotation>|null);
   const [resultsAdv, setResultsAdv] = React.useState(null as Array<anModel.Annotation>|null);
-  const [ontologyInfoRequest, setOntologyInfoRequest] = React.useState(null as anModel.Annotation|null);
+  const [showBanner, setShowBanner] = React.useState(true);
 
   function clearResults(): void {
     setResultsBasic(null);
     setResultsAdv(null);
   }
 
-  function closeOntologiesInfo(): void {
-    setOntologyInfoRequest(null);
-  }
-
-  function renderDownloadButton(results: anModel.Annotation[]): React.ReactElement {
-    return (
-      <div className="d-flex flex-row justify-content-center mt-2">
-        <div className="dropdown">
-          <button className="btn btn-sm btn-outline-primary dropdown-toggle" type="button" id="anl-ddd" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            <DownloadIcon/>
-            <span> </span>
-            Download Results
-          </button>
-          <div className="dropdown-menu" aria-labelledby="anl-ddd">
-            <button type="button"
-              className="dropdown-item"
-              onClick={() => downloadJSON(results)}
-            >Download JSON-LD</button>
-            <button type="button"
-              className="dropdown-item"
-              onClick={() => downloadTurtle(results)}
-            >Download RDF/Turtle</button>
-            <button type="button"
-              className="dropdown-item"
-              onClick={() => downloadRDF(results)}
-            >Download RDF/XML</button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  function renderAnTags(anl: anModel.Annotation[]): React.ReactElement {
-    return (
-      <>
-        {anl.map((annotation, i) => 
-          <tr key={i}>
-            <td colSpan={2} style={{border: "none", padding: "0 0 0 0.5em"}}>
-              <AnnotationTag 
-                annotation={annotation}
-                mbUser={props.context.mbUser}
-                maxLen={35}
-                onClick={() => setOntologyInfoRequest(annotation)}/>
-            </td>
-          </tr>
-        )}
-      </>
-    );
-  }
-
   function renderResults(results: Array<anModel.Annotation>): React.ReactElement {
-    const resultsDict = _.groupBy(results, o => o.target.source);
-
-    function renderItems(): React.ReactElement {
-      return (
-        <>
-          {Object.keys(resultsDict).map(source => 
-            <li key={source} className="list-group-item pt-2 pl-0 pr-0 pb-2">
-              <table className="table mb-2">
-                <tbody>
-                  <tr>
-                    {/*<TargetTr key={source} mbContextTarget={props.context.mbTarget} target={resultsDict[source][0].target}/>*/}
-                  </tr>
-                  {renderAnTags(resultsDict[source])}
-                </tbody>
-              </table>
-            </li>
-          )}
-        </>
-      );
-    }
-
     return (
       <>
         <div className="card">
-          <div className="card-header" style={{padding: "5px 5px 5px 10px"}}>
-            {results.length === 0 ? "No results" : "Targets found:"}
-            <button type="button" className="ml-auto close"
-              onClick={clearResults}
-            ><span>&times;</span>
-          </button>
-          </div>
-          { results.length > 0 ?
-            <ul className="list-group list-group-flush" style={{padding: "10px", maxHeight: "372px", overflow: "auto"}}>
-              {renderItems()}
-            </ul>
-            : <></>}
+          {showBanner ?
+            <div className="card-header" style={{padding: "5px 5px 5px 10px"}}>
+              <div className="d-flex flex-row justify-content-between">
+                {results.length === 0 ?
+                  <div className="font-italic">No results</div>
+                :
+                  <>
+                    <div style={{padding: "4px 120px 0 0"}}>Results found:</div>
+                    <AnDownloadButton annotations={results}/>
+                  </>
+                }
+                <button type="button" className="ml-auto close" onClick={clearResults}>
+                  <span>&times;</span>
+                </button>
+              </div>
+            </div>
+          : <></>
+          }
+          {results.length > 0 ?
+            <div className="anl-table pt-1" style={{height: showBanner ? "415px" : "459px"}}>
+              <AnList
+                context={props.context}
+                annotations={results}
+                ontologyInfoHandler={(visible) => setShowBanner(!visible)}
+                authErrAction={props.authErrAction}/>
+            </div>
+          : <></>}
         </div>
-        {renderDownloadButton(results)}
       </>
     );
   }
@@ -135,12 +72,7 @@ export default function SearchPage(props: SearchProps): React.FunctionComponentE
 
   return (
     <>
-      {ontologyInfoRequest ?
-        <InfoPanel 
-          annotation={ontologyInfoRequest}
-          closeFn={closeOntologiesInfo}
-        />
-      : resultsBasic ? renderResults(resultsBasic) 
+      {resultsBasic ? renderResults(resultsBasic)
       : resultsAdv ? renderResults(resultsAdv)
       : renderSearchInput()}
     </>

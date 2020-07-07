@@ -5,14 +5,14 @@ import { AuthUser } from "../context";
 import { shorten } from "../components/utils";
 import { SemanticIcon, KeywordIcon, CommentIcon } from "./icons";
 
-interface AnnotationProps {
+interface Props {
   annotation: anModel.Annotation;
   mbUser: AuthUser|null;
   maxLen?: number;
   onClick?: () => void;
 }
 
-export default function AnnotationTag(props: AnnotationProps): React.FunctionComponentElement<AnnotationProps> {
+export default function AnTag(props: Props): React.FunctionComponentElement<Props> {
   const annotation = props.annotation;
   const label = anModel.getLabel(annotation);
 

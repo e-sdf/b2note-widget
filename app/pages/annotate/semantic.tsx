@@ -1,27 +1,28 @@
 import * as React from "react";
-import type { PageProps } from "../pages";
-import { showAlertSuccess, showAlertError } from "../../components/ui"; 
+import type { ApiComponent } from "../../components/defs";
 import SpinningWheel from "../../components/spinningWheel";
-import VisibilitySwitcher from "./visibilitySwitcher";
+import Alert from "../../components/alert"; 
+import VisibilitySwitcher from "../../components/visibilitySwitcher";
 import * as anModel from "../../core/annotationsModel";
 import * as ac from "../../components/autocomplete/view";
 import * as api from "../../api/annotations";
 import { SemanticIcon, CreateIcon } from "../../components/icons";
-import { ActionEnum, notify } from "../notify";
+import { ActionEnum, notify } from "../../components/notify";
 
-export interface SemanticProps extends PageProps {
-  alertId: string;
-}
-
-export function Semantic(props: SemanticProps): React.FunctionComponentElement<SemanticProps> {
+export function Semantic(props: ApiComponent): React.FunctionComponentElement<ApiComponent> {
   const [uris, setUris] = React.useState([] as Array<string>);
   const [label, setLabel] = React.useState("");
   const [visibility, setVisibility] = React.useState(anModel.VisibilityEnum.PRIVATE);
+  const [successMessage, setSuccessMessage] = React.useState(null as string|null);
+  const [errorMessage, setErrorMessage] = React.useState(null as string|null);
   const [isNew, setIsNew] = React.useState(false);
   const [ref, setRef] = React.useState(null as any);
   const [loading, setLoading] = React.useState(false);
   const target = props.context.mbTarget;
   const user = props.context.mbUser;
+
+  React.useEffect(() => setErrorMessage(null), [successMessage]);
+  React.useEffect(() => { if (loading) { setErrorMessage(null); } }, [loading]);
 
   function gotSuggestion(suggestions: Array<ac.Suggestion>): void {
     if (suggestions.length > 0) {
@@ -46,10 +47,10 @@ export function Semantic(props: SemanticProps): React.FunctionComponentElement<S
       api.postAnnotationSemantic({ target, user, uris, label, visibility, authErrAction: props.authErrAction }).then(
         newAn => { 
           setLoading(false);
-          showAlertSuccess(props.alertId, "Semantic annotation created");
+          setSuccessMessage("Sematic annotation created");
           notify(ActionEnum.CREATE, newAn);
         },
-        (err) => { setLoading(false); showAlertError(props.alertId, err); }
+        (err) => { setLoading(false); setErrorMessage(err); }
       );
     }
   }
@@ -58,11 +59,11 @@ export function Semantic(props: SemanticProps): React.FunctionComponentElement<S
     if (target && user) {
       api.postAnnotationKeyword({ target, user, label, visibility, authErrAction: props.authErrAction }).then(
         newAn => {
-          showAlertSuccess(props.alertId, "Keyword annotation created");
+          setSuccessMessage("Keyword annotation created");
           setLabel("");
           notify(ActionEnum.CREATE, newAn);
         },
-        (err) => showAlertError(props.alertId, err)
+        (err) => { setLoading(false); setErrorMessage(err); }
       );
     }
   }
@@ -116,9 +117,13 @@ export function Semantic(props: SemanticProps): React.FunctionComponentElement<S
           }}
         ><CreateIcon/></button>
       </div>
-      <VisibilitySwitcher visibility={visibility} setVisibility={setVisibility}/>
-      <div className="d-flex flex-row justify-content-center">
+      <div className="d-flex flex-row justify-content-center mt-2">
+        <VisibilitySwitcher text={true} visibility={visibility} setVisibility={setVisibility}/>
+      </div>
+      <div className="d-flex flex-row justify-content-center mt-2">
         <SpinningWheel show={loading}/>
+        <Alert type="success" message={successMessage} closedHandler={() => setSuccessMessage(null)}/>
+        <Alert type="danger" message={errorMessage} closedHandler={() => setErrorMessage(null)}/>
       </div>
       { isNew ? renderKeywordDialog() : <></>}
     </>

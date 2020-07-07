@@ -39,7 +39,7 @@ function pageToHelp(page: PagesEnum): HelpSection {
   });  
 }
 
-enum LoginStateEnum { NOT_LOGGED, LOGGING, LOGGED, ERROR };
+enum LoginStateEnum { NOT_LOGGED, LOGGING, LOGGED, ERROR }
 
 interface Props {
   context: Context;
@@ -134,7 +134,7 @@ function Widget(props: Props): React.FunctionComponentElement<Context> {
     return matchSwitch(page, {
       [PagesEnum.ANNOTATE]: () => <AnnotatePage context={context} authErrAction={() => loginPm()}/>,
       [PagesEnum.ANNOTATIONS]: () => <AnnotationsPage context={context} authErrAction={() => loginPm()}/>,
-      [PagesEnum.SEARCH]: () => <SearchPage context={context}/>,
+      [PagesEnum.SEARCH]: () => <SearchPage context={context} authErrAction={() => loginPm()}/>,
       [PagesEnum.LOGIN]: () => <AuthProviderSelectionPage selectedHandler={(p) => setChosenAuthProvider(p)}/>,
       [PagesEnum.PROFILE]: () => context.mbUser ? 
         <ProfilePage 
@@ -195,8 +195,10 @@ function Widget(props: Props): React.FunctionComponentElement<Context> {
               {matchSwitch(loginState, {
                 [LoginStateEnum.NOT_LOGGED]: () => <icons.LoginIcon/>,
                 [LoginStateEnum.LOGGING]: () => <span>Logging in...</span>,
-                [LoginStateEnum.LOGGED]: () => <span><icons.UserIcon/> {shorten(context.mbUser?.profile.personName || "", 15)}</span>,
-                [LoginStateEnum.ERROR]: () => <span>Login error, try again <icons.LoginIcon/></span>
+                [LoginStateEnum.LOGGED]: 
+                  () => <span><icons.UserIcon/> {shorten(context.mbUser?.profile.personName || "", 15)}</span>,
+                [LoginStateEnum.ERROR]: 
+                  () => <span style={{fontSize: "90%"}}>Login error, try again</span>
               })}
             </a>
           </li>

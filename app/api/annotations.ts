@@ -146,6 +146,10 @@ export function patchAnnotationBody(user: AuthUser, anIdUrl: string, body: anMod
   return patch(anIdUrl, { body: body as any }, { token: user.token, authErrAction });
 }
 
+export function changeAnVisibility(user: AuthUser, anIdUrl: string, visibility: anModel.VisibilityEnum, authErrAction: AuthErrAction): Promise<any> {
+  return patch(anIdUrl, { visibility }, { token: user.token, authErrAction });
+}
+//
 // Deleting annotations {{{1
 
 export function deleteAnnotation(user: AuthUser, anIdUrl: string, authErrAction: AuthErrAction): Promise<any> {

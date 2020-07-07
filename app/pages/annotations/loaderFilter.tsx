@@ -1,39 +1,15 @@
-import _ from "lodash";
 import * as React from "react";
 import * as icons from "../../components/icons";
 import * as anModel from "../../core/annotationsModel";
 import * as api from "../../api/annotations";
 import type { Context } from "../../context";
-import { showAlertError } from "../../components/ui"; 
-import { downloadJSON, downloadRDF, downloadTurtle } from "../../components/download";
-
-const alertId = "anlAlert";
-
-// Prepared for target resolving:
-// https://esciencedatalab.atlassian.net/browse/B2NT-137
-// export interface ResolvedTarget {
-//   target: anModel.AnTarget;
-//   filename: string|null;
-// }
-
-export interface TagRecord {
-  tag: string;
-  anType: anModel.AnnotationType;
-  annotations: Array<anModel.Annotation>;
-  showAnnotationsFlag: boolean;
-}
-
-export interface TagMapIndex {
-  tag: string;
-  anType: anModel.AnnotationType;
-}
-
-type TagIndex = Record<string, Array<anModel.Annotation>>;
+import AnDownloadButton from "../../components/anDownloader";
+import SpinningWheel from "../../components/spinningWheel";
+import Alert from "../../components/alert";
 
 interface LoaderProps {
   context: Context;
-  setTagRecordsFn: (tagTecords: Array<TagRecord>) => void;
-  setLoaderFlagFn?: (flag: boolean) => void;
+  annotationsLoadedHandler: (anl: Array<anModel.Annotation>) => void;
 }
 
 export interface LoaderInputHandles {
@@ -56,6 +32,8 @@ export const LoaderFilter = React.forwardRef((props: LoaderProps, ref: React.Ref
   const [noOfSemantic, setNoOfSemantic] = React.useState(null as number|null);
   const [noOfKeyword, setNoOfKeyword] = React.useState(null as number|null);
   const [noOfComment, setNoOfComment] = React.useState(null as number|null);
+  const [loading, setLoading] = React.useState(false);
+  const [errorMessage, setErrorMessage] = React.useState(null as string|null);
 
   React.useEffect(() => {
     setMineFilter(logged ? true : false);
@@ -68,7 +46,7 @@ export const LoaderFilter = React.forwardRef((props: LoaderProps, ref: React.Ref
     return (
       (mineFilter || othersFilter) && (semanticFilter || keywordFilter || commentFilter) ?
         {
-          allFiles: allFilesFilter, 
+          allFiles: allFilesFilter,
           creator: {
             mine: mineFilter,
             others: othersFilter
@@ -86,95 +64,23 @@ export const LoaderFilter = React.forwardRef((props: LoaderProps, ref: React.Ref
   function loadAnnotations(): void {
     const mbFilters = mkFilters();
 
-    function mkKey(tag: string, anType: anModel.AnnotationType): string {
-      return tag + "_" + anType;
-    }
-
-    function groupByTag(anl: Array<anModel.Annotation>): [Array<string>, TagIndex] {
-      const index = {} as TagIndex;
-      const tags = new Set<string>();
-      anl.forEach(
-        an => {
-          tags.add(anModel.getLabel(an));
-          const tag = anModel.getLabel(an);
-          const anType = anModel.getAnType(an);
-          const key = mkKey(tag, anType);
-          const ans = index[key];
-          if (ans) {
-            index[key] = [...ans, an];
-          } else {
-            index[key] = [an];
-          }
-        }
-      );
-      return [Array.from(tags), index];
-    }
-
-    function mkTagRecords(anl: Array<anModel.Annotation>): Array<TagRecord> {
-      const [tags, tagIndex] = groupByTag(anl);
-      return tags.reduce(
-        (res, tag) => {
-          const semantic = tagIndex[mkKey(tag, anModel.AnnotationType.SEMANTIC)];
-          const keyword = tagIndex[mkKey(tag, anModel.AnnotationType.KEYWORD)];
-          const comment = tagIndex[mkKey(tag, anModel.AnnotationType.COMMENT)];
-          const semanticItem = semantic ?
-            [{ 
-              tag,
-              anType: anModel.AnnotationType.SEMANTIC,
-              annotations: semantic,
-              showAnnotationsFlag: false
-            }] : [];
-          const keywordItem = keyword ?
-            [{ 
-              tag,
-              anType: anModel.AnnotationType.KEYWORD,
-              annotations: keyword,
-              showAnnotationsFlag: false
-            }] : [];
-          const commentItem = comment ?
-            [{ 
-              tag,
-              anType: anModel.AnnotationType.COMMENT,
-              annotations: comment,
-              showAnnotationsFlag: false
-            }] : [];
-            return [...res, ...semanticItem, ...keywordItem, ...commentItem];
-        },
-        [] as Array<TagRecord>
-      );
-    }
-
     if (!mbFilters) {
       setAnnotations([]);
-      props.setTagRecordsFn([]);
+      props.annotationsLoadedHandler([]);
     } else {
-      if (props.setLoaderFlagFn) { props.setLoaderFlagFn(true); }
+      setLoading(true);
       api.getAnnotationsJSON(mbFilters, props.context.mbUser, props.context.mbTarget).then(
         anl => {
-          if (props.setLoaderFlagFn) { props.setLoaderFlagFn(false); }
+          setLoading(false);
           setAnnotations(anl);
-          const tagRecords = mkTagRecords(anl);
-          props.setTagRecordsFn(tagRecords);
-            // Prepared for target resolving:
-            // https://esciencedatalab.atlassian.net/browse/B2NT-137
-            // anl.map((an, ani) => {
-            //   const targetsItem = targets[ani];
-            //   const filenamePms = targetsItem.map(t => api.resolveSourceFilename(t.id));
-            //   Promise.all(filenamePms).then(filenames => 
-            //     props.setTagRecordss(anl.map(an2 => ({
-            //       annotation: an2,
-            //       resTargets: targetsItem.map((t, ti) => ({ target: t, filename: filenames[ti] })),
-            //       showAnnotationsFlag: false
-            //     })))
-            //   );
-            // });
-            setNoOfMine(anl.filter(a => anModel.getCreatorId(a) === (props.context.mbUser?.profile.id || "")).length);
-            setNoOfOthers(anl.filter(a => anModel.getCreatorId(a) !== (props.context.mbUser?.profile.id || "")).length);
-            setNoOfSemantic(anl.filter(anModel.isSemantic).length);
-            setNoOfKeyword(anl.filter(anModel.isKeyword).length);
-            setNoOfComment(anl.filter(anModel.isComment).length);
-          },
-        error => { showAlertError(alertId, error); }
+          props.annotationsLoadedHandler(anl);
+          setNoOfMine(anl.filter(a => anModel.getCreatorId(a) === (props.context.mbUser?.profile.id || "")).length);
+          setNoOfOthers(anl.filter(a => anModel.getCreatorId(a) !== (props.context.mbUser?.profile.id || "")).length);
+          setNoOfSemantic(anl.filter(anModel.isSemantic).length);
+          setNoOfKeyword(anl.filter(anModel.isKeyword).length);
+          setNoOfComment(anl.filter(anModel.isComment).length);
+        },
+        (err) => { setLoading(false); setErrorMessage(err); }
       );
     }
   }
@@ -182,7 +88,7 @@ export const LoaderFilter = React.forwardRef((props: LoaderProps, ref: React.Ref
   React.useImperativeHandle(ref, () => ({
     loadAnnotations
   }));
-  
+
   React.useEffect(() => {
     loadAnnotations();
   }, allFilters);
@@ -263,43 +169,29 @@ export const LoaderFilter = React.forwardRef((props: LoaderProps, ref: React.Ref
     );
   }
 
-  function renderDownloadButton(): React.ReactElement {
-    return (
-      <div className="dropleft ml-auto">
-        <button className="btn btn-sm btn-outline-primary dropdown-toggle" type="button" id="anl-ddd" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-          <icons.DownloadIcon/>
-        </button>
-        <div className="dropdown-menu drop-down-menu-left" aria-labelledby="anl-ddd">
-          <button type="button"
-            className="dropdown-item"
-            onClick={() => downloadJSON(annotations)}
-          >Download JSON-LD</button>
-          <button type="button"
-            className="dropdown-item"
-            onClick={() => downloadTurtle(annotations)}
-          >Download RDF/Turtle</button>
-          <button type="button"
-            className="dropdown-item"
-            onClick={() => downloadRDF(annotations)}
-          >Download RDF/XML</button>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <>
       {renderLabel()}
       <div className="row mt-2">
         <div className="col-sm">
-          <div className="btn-toolbar" role="toolbar" aria-label="Filters toolbar">
-            {renderFileSelection()}
-            {renderCreatorSelection()}
-            {renderTypeSelection()}
-            {renderDownloadButton()}
+          <div className="d-flex flex-row justify-content-between" role="toolbar" aria-label="Filters toolbar">
+            <div>
+              {renderFileSelection()}
+              {renderCreatorSelection()}
+              {renderTypeSelection()}
+            </div>
+            <div className="">
+              <AnDownloadButton annotations={annotations}/>
+            </div>
           </div>
         </div>
       </div>
+      {loading || errorMessage ?
+        <div className="row flex-row justify-content-center mt-4">
+          <SpinningWheel show={loading}/>
+          <Alert type="danger" message={errorMessage} closedHandler={() => setErrorMessage(null)}/>
+        </div>
+      : <></>}
     </>
   );
 });

@@ -7,10 +7,8 @@ import * as ac from "../../components/autocomplete/view";
 import { SearchType, BiOperatorType } from "../../core/searchModel";
 import * as queryParser from "../../core/searchQueryParser";
 import * as api from "../../api/annotations";
-import { showAlertError } from "../../components/ui"; 
 import SpinningWheel from "../../components/spinningWheel";
-
-const alertId = "basic-search-alert";
+import Alert from "../../components/alert"; 
 
 interface TermCompProps {
   isFirst: boolean;
@@ -171,10 +169,11 @@ export interface BasicSearchProps {
 enum SearchMode { ANY = "any", ALL = "all" }
 
 export function BasicSearch(props: BasicSearchProps): React.FunctionComponentElement<BasicSearchProps> {
-  const [searching, setSearching] = React.useState(false);
   const [terms, dispatch] = React.useReducer(reducer, [] as Array<TermItem>);
   const [nonEmptyTerms, setNonEmptyTerms] = React.useState([] as Array<TermItem>);
   const [mode, setMode] = React.useState(SearchMode.ANY);
+  const [searching, setSearching] = React.useState(false);
+  const [errorMessage, setErrorMessage] = React.useState(null as string|null);
 
   React.useEffect(() => {
     const firstTerm = mkTermItem(0, true, dispatch, submitQuery);
@@ -221,10 +220,7 @@ export function BasicSearch(props: BasicSearchProps): React.FunctionComponentEle
         setSearching(false);
         props.resultsHandle(anl);
       },
-      (err) => {
-        setSearching(false);
-        showAlertError(alertId, err);
-      }
+      () => { setSearching(false); setErrorMessage("Search failed due to error"); }
     );
   }
 
@@ -266,8 +262,8 @@ export function BasicSearch(props: BasicSearchProps): React.FunctionComponentEle
       </div>
       <div className="row justify-content-center">
         <SpinningWheel show={searching}/>
+        <Alert type="danger" message={errorMessage} closedHandler={() => setErrorMessage(null)}/>
       </div>
-      <div id={alertId}></div>
     </div>
   );
 }

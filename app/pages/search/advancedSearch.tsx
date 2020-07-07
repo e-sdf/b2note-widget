@@ -7,11 +7,9 @@ import type { Annotation } from "../../core/annotationsModel";
 import { SearchType } from "../../core/searchModel";
 import * as queryParser from "../../core/searchQueryParser";
 import * as api from "../../api/annotations";
-import { showAlertError } from "../../components/ui"; 
 import SpinningWheel from "../../components/spinningWheel";
+import Alert from "../../components/alert"; 
 import { TermComp } from "./termComp";
-
-const alertId = "basic-search-alert";
 
 export interface SearchProps {
   resultsHandle(results: Array<Annotation>): void;
@@ -24,6 +22,7 @@ export function AdvancedSearch(props: SearchProps): React.FunctionComponentEleme
   const [queryStr, setQueryStr] = React.useState("");
   const [queryError, setQueryError] = React.useState(null as queryParser.ParseError|null);
   const [searching, setSearching] = React.useState(false);
+  const [errorMessage, setErrorMessage] = React.useState(null as string|null);
 
   function queryChanged(query: string): void {
     setQueryStr(query);
@@ -53,10 +52,7 @@ export function AdvancedSearch(props: SearchProps): React.FunctionComponentEleme
         setSearching(false);
         props.resultsHandle(anl);
       },
-      (err) => {
-        setSearching(false);
-        showAlertError(alertId, err);
-      }
+      () => { setSearching(false); setErrorMessage("Search failed due to error"); }
     );
   }
 
@@ -162,8 +158,8 @@ export function AdvancedSearch(props: SearchProps): React.FunctionComponentEleme
       {renderSearchButton()}
       <div className="row justify-content-center">
         <SpinningWheel show={searching}/>
+        <Alert type="danger" message={errorMessage} closedHandler={() => setErrorMessage(null)}/>
       </div>
-      <div id={alertId}></div>
     </div>
   );
 }

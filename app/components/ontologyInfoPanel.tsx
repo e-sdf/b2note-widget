@@ -12,7 +12,7 @@ interface Props {
   closeFn(): void;
 }
 
-export default function InfoPanel(props: Props): React.FunctionComponentElement<Props> {
+export default function OntologyInfoPanel(props: Props): React.FunctionComponentElement<Props> {
   const [loading, setLoading] = React.useState(false);
   const [ontologyInfos, setOntologyInfos] = React.useState([] as Array<OntologyInfo>);
   const [activePage, setActivePage] = React.useState(1);
@@ -36,7 +36,7 @@ export default function InfoPanel(props: Props): React.FunctionComponentElement<
         <tbody>
           <tr>
             <th>Description:</th>
-            <td>{(info.descriptions || []).map(d => <>{d}<br/></>)}</td>
+            <td>{(info.descriptions || []).map((d, i) => <span key={i}>{d}<br/></span>)}</td>
           </tr>
           <tr>
             <th>Short<br/>Form:</th>
@@ -52,11 +52,11 @@ export default function InfoPanel(props: Props): React.FunctionComponentElement<
           </tr>
           <tr>
             <th>Synonyms</th>
-            <td>{info.synonyms.map(s => 
-              <>
+            <td>{info.synonyms.map((s, i) => 
+              <span key={i}>
                 {s}
                 {s === _.last(info.synonyms) ? <></> : <br/>}
-              </>
+              </span>
               )}
             </td>
           </tr>
@@ -71,35 +71,35 @@ export default function InfoPanel(props: Props): React.FunctionComponentElement<
 
   return (
     <>
-      <div className="container-fluid mt-2">
-      </div>
-      <div className="container-fluid anl-ontology-pane">
+      <div className="container-fluid">
         <div className="row">
-          <div className="col-sm">
+          <div className="col">
             <strong className="mr-auto" style={{fontSize: "125%"}}>
               {anModel.getLabel(props.annotation)}
             </strong>
+            <button type="button" className="ml-auto close"
+              onClick={() => props.closeFn()}
+            ><span>&times;</span>
+            </button>
           </div>
-          <button type="button" className="ml-auto mr-1 close"
-            onClick={() => props.closeFn()}
-          ><span>&times;</span>
-          </button>
         </div>
-        <div className="row mt-2 justify-content-center">
-            <SpinningWheel show={loading}/>
-        </div>
-        <div className="row">
+      </div>
+      <div className="ml-auto mr-auto">
+        <SpinningWheel show={loading}/>
+      </div>
+      <div className="row">
+        <div className="col">
           {!loading ?
             ontologyInfos.length > 0 ? 
             renderTable(ontologyInfos[activePage - 1])
             : "No ontologies found"
-            : <></>}
+          : <></>}
         </div>
-        <div className="row d-flex flex-row justify-content-center">
-          {ontologyInfos.length > 0 ? 
-            <Paginator maxPage={ontologyInfos.length} pageChangedFn={setActivePage}/>
-            : <></>}
-        </div>
+      </div>
+      <div className="ml-auto mr-auto">
+        {ontologyInfos.length > 0 ? 
+          <Paginator maxPage={ontologyInfos.length} pageChangedFn={setActivePage}/>
+          : <></>}
       </div>
     </>
   );

@@ -1,16 +1,14 @@
 import * as React from "react";
 import { Tabs, Tab } from "../../components/ui";
-import type { PageProps } from "../pages";
+import type { ApiComponent } from "../../components/defs";
 import { Semantic } from "./semantic";
 import { Keyword } from "./keyword";
 import { Comment } from "./comment";
 import * as icons from "../../components/icons";
 
-const alertId = "anAlert";
-
 enum TabType { SEMANTIC = "semantic", KEYWORD = "keyword", COMMENT = "comment" }
 
-export default function AnnotatePage(props: PageProps): React.FunctionComponentElement<PageProps> {
+export default function AnnotatePage(props: ApiComponent): React.FunctionComponentElement<ApiComponent> {
   const [activeTab, setActiveTab] = React.useState(TabType.SEMANTIC);
 
   function renderTargetInfo(): React.ReactElement {
@@ -52,16 +50,15 @@ export default function AnnotatePage(props: PageProps): React.FunctionComponentE
         <div style={{marginTop: "10px"}}>
           <Tabs key={activeTab} id="annotateTabs" activeTab={activeTab} activeHandle={setActiveTab}> 
             <Tab tabId={TabType.SEMANTIC} title={<span>Semantic<br/>tag</span>}>
-              <Semantic context={props.context} alertId={alertId} authErrAction={props.authErrAction}/>
+              <Semantic context={props.context} authErrAction={props.authErrAction}/>
             </Tab>
             <Tab tabId={TabType.KEYWORD} title={<span>Free-text<br/>keyword</span>}>
-              <Keyword context={props.context} alertId={alertId} authErrAction={props.authErrAction}/>
+              <Keyword context={props.context} authErrAction={props.authErrAction}/>
             </Tab>
             <Tab tabId={TabType.COMMENT} title={<span>Comment<br/>&nbsp;</span>}>
-              <Comment context={props.context} alertId={alertId} authErrAction={props.authErrAction}/>
+              <Comment context={props.context} authErrAction={props.authErrAction}/>
             </Tab>
           </Tabs>
-          <div id={alertId}></div>
         </div>
         : 
           props.context.mbUser ? <></> : 
