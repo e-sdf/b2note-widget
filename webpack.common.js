@@ -38,7 +38,7 @@ module.exports = {
         { from: "node_modules/bootstrap/dist/js/bootstrap.bundle.min.js", to: "js" },
         { from: "node_modules/bootstrap/dist/js/bootstrap.bundle.min.js.map", to: "js" },
         { from: "node_modules/jquery/dist/jquery.min.js", to: "js" },
-        { from: "node_modules/react-bootstrap-typeahead/css/Typeahead-bs4.min.css", to: "css" }
+        { from: "node_modules/react-bootstrap-typeahead/css/Typeahead.min.css", to: "css" }
       ]
     }),
     new MiniCssExtractPlugin({

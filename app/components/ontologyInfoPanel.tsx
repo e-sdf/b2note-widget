@@ -84,7 +84,7 @@ export default function OntologyInfoPanel(props: Props): React.FunctionComponent
           </div>
         </div>
       </div>
-      <div className="ml-auto mr-auto">
+      <div className="row justify-content-center">
         <SpinningWheel show={loading}/>
       </div>
       <div className="row">

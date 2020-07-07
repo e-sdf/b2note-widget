@@ -14,18 +14,10 @@
 #widget-version a {
   color: white;
 }
-.list-action-button {
-  border: none;
-  margin: 0;
-}
 .anl-table {
   display: block;
-  height: 330px;
-  overflow: auto;
-}
-.anl-ontology-pane {
-  display: block;
-  height: 435px;
+  height: 380px;
+  width: 100%;
   overflow: auto;
 }
 .btn-filter-off:hover {
