@@ -184,7 +184,7 @@ function Widget(props: Props): React.FunctionComponentElement<Context> {
           <li className="nav-item ml-auto">
             <a
               className={"nav-link" + activeFlag(PagesEnum.PROFILE)} href="#" 
-              data-toggle="tooltip" data-placement="bottom" title={context.mbUser ? "Profile" : "Login"}
+              data-toggle="tooltip" data-placement="bottom" title={context.mbUser ? context.mbUser.profile.email : "Login"}
               onClick={() =>
                 matchSwitch(loginState, {
                   [LoginStateEnum.NOT_LOGGED]: () => firstLogin(),
