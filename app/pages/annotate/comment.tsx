@@ -44,7 +44,7 @@ export function Comment(props: ApiComponent): React.FunctionComponentElement<Api
           onChange={ev => setComment(ev.target?.value || "")} 
         />
         <button type="button" className="btn btn-primary"
-          data-toggle="tooltip" data-placement="bottom" title={props.context.mbUser ? "" : "Not logged in"}
+          data-toggle="tooltip" data-placement="bottom" title={props.context.mbUser ? "Create annotation" : "Not logged in"}
           disabled={comment.length === 0 || !props.context.mbUser || loading}
           onClick={annotate}>
           <CreateIcon/>

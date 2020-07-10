@@ -1,14 +1,17 @@
 import * as _ from "lodash";
 import * as React from "react";
-import type { Annotation } from "../core/annotationsModel";
-import * as anModel from "../core/annotationsModel";
 import type { OntologyInfo } from "../core/ontologyRegister";
 import * as oApi from "../api/ontologies";
 import Paginator from "./paginator";
 import SpinningWheel from "./spinningWheel";
 
+export interface OntologyInfoRequest {
+  label: string;
+  uris: Array<string>;
+}
+
 interface Props {
-  annotation: Annotation;
+  infoRequest: OntologyInfoRequest;
   closeFn(): void;
 }
 
@@ -20,14 +23,18 @@ export default function OntologyInfoPanel(props: Props): React.FunctionComponent
   React.useEffect(
     () => { 
       setLoading(true);
-      oApi.loadOntologiesInfo(props.annotation).then(
+      oApi.loadOntologiesInfo(props.infoRequest.uris).then(
         res => { 
           setOntologyInfos(res); 
+          setLoading(false);
+        },
+        () => {
+          setOntologyInfos([]);
           setLoading(false);
         }
       );
     },
-    [props.annotation]
+    [props.infoRequest]
   );
 
   const rowCls = "border-bottom pb-1 mb-1";
@@ -37,7 +44,7 @@ export default function OntologyInfoPanel(props: Props): React.FunctionComponent
       <>
         <div className={"d-flex flex-row pl-2 pr-2 pb-1 mb-2 bg-light"}>
           <strong className="mr-auto" style={{fontSize: "125%"}}>
-            {anModel.getLabel(props.annotation)}
+            {props.infoRequest.label}
           </strong>
           <button type="button" className="ml-auto close"
             onClick={() => props.closeFn()}
@@ -104,7 +111,7 @@ export default function OntologyInfoPanel(props: Props): React.FunctionComponent
         {!loading ?
           ontologyInfos.length > 0 ? 
           renderTable(ontologyInfos[activePage - 1])
-          : "No ontologies found"
+          : <span className="font-italic">No ontologies found</span>
           : <></>}
         <div className="ml-auto mr-auto">
           {ontologyInfos.length > 0 ? 

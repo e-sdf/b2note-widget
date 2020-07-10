@@ -1,6 +1,9 @@
 import * as React from "react";
+import * as ac from "../../components/autocomplete/view";
 import { Tabs, Tab } from "../../components/ui";
 import type { ApiComponent } from "../../components/defs";
+import type { OntologyInfoRequest } from "../../components/ontologyInfoPanel";
+import OntologyInfoPanel from "../../components/ontologyInfoPanel";
 import { Semantic } from "./semantic";
 import { Keyword } from "./keyword";
 import { Comment } from "./comment";
@@ -10,6 +13,10 @@ enum TabType { SEMANTIC = "semantic", KEYWORD = "keyword", COMMENT = "comment" }
 
 export default function AnnotatePage(props: ApiComponent): React.FunctionComponentElement<ApiComponent> {
   const [activeTab, setActiveTab] = React.useState(TabType.SEMANTIC);
+  const [semanticSuggestion, setSemanticSuggestion] = React.useState(null as ac.Suggestion|null);
+  const [ontologyInfoRequest, setOntologyInfoRequest] = React.useState(null as OntologyInfoRequest|null);
+
+  React.useEffect(() => console.log(semanticSuggestion), [semanticSuggestion]);
 
   function renderTargetInfo(): React.ReactElement {
     return (
@@ -44,27 +51,39 @@ export default function AnnotatePage(props: ApiComponent): React.FunctionCompone
   }
 
   return (
-    <>
-      {renderTargetInfo()}
-      {props.context.mbUser && props.context.mbTarget ?
-        <div style={{marginTop: "10px"}}>
-          <Tabs key={activeTab} id="annotateTabs" activeTab={activeTab} activeHandle={setActiveTab}> 
-            <Tab tabId={TabType.SEMANTIC} title={<span>Semantic<br/>tag</span>}>
-              <Semantic context={props.context} authErrAction={props.authErrAction}/>
-            </Tab>
-            <Tab tabId={TabType.KEYWORD} title={<span>Free-text<br/>keyword</span>}>
-              <Keyword context={props.context} authErrAction={props.authErrAction}/>
-            </Tab>
-            <Tab tabId={TabType.COMMENT} title={<span>Comment<br/>&nbsp;</span>}>
-              <Comment context={props.context} authErrAction={props.authErrAction}/>
-            </Tab>
-          </Tabs>
-        </div>
-        : 
-          props.context.mbUser ? <></> : 
-          <div className="container-fluid">
-            <h3 className="text-danger">You need to log in to make annotations</h3>
-          </div>}
-    </>
+    ontologyInfoRequest ? 
+      <div className="anl-table" style={{height: 462}}>
+        <OntologyInfoPanel 
+          infoRequest={ontologyInfoRequest}
+          closeFn={() => setOntologyInfoRequest(null)}/>
+      </div>
+    :
+      <>
+        {renderTargetInfo()}
+        {props.context.mbUser && props.context.mbTarget ?
+          <div style={{marginTop: "10px"}}>
+            <Tabs key={activeTab} id="annotateTabs" activeTab={activeTab} activeHandle={setActiveTab}> 
+              <Tab tabId={TabType.SEMANTIC} title={<span>Semantic<br/>tag</span>}>
+                <Semantic 
+                  suggestion={semanticSuggestion}
+                  setSuggestionHandler={setSemanticSuggestion}
+                  showInfoHandler={setOntologyInfoRequest}
+                  context={props.context}
+                  authErrAction={props.authErrAction}/>
+              </Tab>
+              <Tab tabId={TabType.KEYWORD} title={<span>Free-text<br/>keyword</span>}>
+                <Keyword context={props.context} authErrAction={props.authErrAction}/>
+              </Tab>
+              <Tab tabId={TabType.COMMENT} title={<span>Comment<br/>&nbsp;</span>}>
+                <Comment context={props.context} authErrAction={props.authErrAction}/>
+              </Tab>
+            </Tabs>
+          </div>
+          : 
+            props.context.mbUser ? <></> : 
+            <div className="container-fluid">
+              <h3 className="text-danger">You need to log in to make annotations</h3>
+            </div>}
+      </>
   );
 }

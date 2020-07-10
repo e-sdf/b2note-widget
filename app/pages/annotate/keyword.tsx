@@ -153,7 +153,7 @@ export function Keyword(props: ApiComponent): React.FunctionComponentElement<Api
         {tooLong ? 
           <></>
         : <button type="button" className="btn btn-primary"
-            data-toggle="tooltip" data-placement="bottom" title={props.context.mbUser ? "" : "Not logged in"}
+            data-toggle="tooltip" data-placement="bottom" title={props.context.mbUser ? "Create annotation" : "Not logged in"}
             disabled={label.length === 0 || !props.context.mbUser || loading}
             onClick={annotate}>
             <CreateIcon/>

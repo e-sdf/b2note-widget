@@ -190,8 +190,8 @@ export default function AnList(props: Props): React.FunctionComponentElement<Pro
 
   return (
     ontologyInfoRequest ?
-      <OntologyInfoPanel
-        annotation={ontologyInfoRequest}
+      <OntologyInfoPanel 
+        infoRequest={{label: anModel.getLabel(ontologyInfoRequest), uris: anModel.getSources(ontologyInfoRequest)}}
         closeFn={closeOntologiesInfo}
       />
     : 
