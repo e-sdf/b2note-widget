@@ -1,12 +1,12 @@
 import { matchSwitch } from '@babakness/exhaustive-type-checking';
 import * as React from "react";
 import * as ReactDOM from "react-dom";
-import config from "../config";
-import type { Token } from "../api/http";
-import * as auth from "../api/auth";
-import * as profileApi from "../api/profile";
-import { Context } from "../context";
-import * as icons from "../components/icons";
+import { config } from "../config";
+import type { Token } from "client/api/http";
+import * as auth from "client/api/auth";
+import * as profileApi from "client/api/profile";
+import { Context } from "client/context";
+import * as icons from "client/components/icons";
 import { PagesEnum } from "../pages/pages";
 import AnnotatePage from "../pages/annotate/view";
 import AnnotationsPage from "../pages/annotations/view";
@@ -15,7 +15,7 @@ import AuthProviderSelectionPage from "../pages/login";
 import ProfilePage from "../pages/profile/view";
 import HelpPage from "../pages/help/view";
 import { HelpSection } from "../pages/help/defs";
-import { shorten } from "../components/utils";
+import { shorten } from "client/components/utils";
 
 function WidgetInfo(): React.ReactElement {
   return (
@@ -55,7 +55,7 @@ function Widget(props: Props): React.FunctionComponentElement<Context> {
 
   function retrieveProfile(provider: auth.AuthProvidersEnum|null, token: Token|null): void {
     if (provider && token) {
-      profileApi.getUserProfilePm(token, () => auth.loginPm(provider)).then(
+      profileApi.getUserProfilePm(config, token, () => auth.loginPm(config, provider)).then(
         profile => {
           setLoginState(LoginStateEnum.LOGGED);
           setContext({ ...context, mbUser: { token, profile }});
@@ -72,7 +72,7 @@ function Widget(props: Props): React.FunctionComponentElement<Context> {
     return new Promise((resolve, reject) => {
       setLoginState(LoginStateEnum.LOGGING);
       if (chosenAuthProvider) {
-        auth.loginPm(chosenAuthProvider).then(
+        auth.loginPm(props.context.config, chosenAuthProvider).then(
           token => {
             retrieveProfile(chosenAuthProvider, token);
             resolve(token);
@@ -135,9 +135,10 @@ function Widget(props: Props): React.FunctionComponentElement<Context> {
       [PagesEnum.ANNOTATE]: () => <AnnotatePage context={context} authErrAction={() => loginPm()}/>,
       [PagesEnum.ANNOTATIONS]: () => <AnnotationsPage context={context} authErrAction={() => loginPm()}/>,
       [PagesEnum.SEARCH]: () => <SearchPage context={context} authErrAction={() => loginPm()}/>,
-      [PagesEnum.LOGIN]: () => <AuthProviderSelectionPage selectedHandler={(p) => setChosenAuthProvider(p)}/>,
+      [PagesEnum.LOGIN]: () => <AuthProviderSelectionPage config={config} selectedHandler={(p) => setChosenAuthProvider(p)}/>,
       [PagesEnum.PROFILE]: () => context.mbUser ? 
         <ProfilePage 
+          config={props.context.config}
           user={context.mbUser}
           updateProfileFn={() => retrieveProfile(authProvider, context.mbUser?.token ? context.mbUser.token : null)} authErrAction={() => loginPm()}/>
       : <></>,

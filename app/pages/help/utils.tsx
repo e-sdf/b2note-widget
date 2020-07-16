@@ -1,6 +1,6 @@
 import * as React from "react";
-import config from "../../config";
-import { b2noteBlue } from "../../components/defs";
+import { config } from "../../config";
+import { b2noteBlue } from "client/components/defs";
 
 export const imgHelpPath = config.widgetServerUrl + config.imgPath + "help/";
 

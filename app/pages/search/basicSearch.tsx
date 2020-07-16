@@ -1,16 +1,17 @@
 import _ from "lodash";
 import { matchSwitch } from "@babakness/exhaustive-type-checking";
 import * as React from "react";
-import * as icons from "../../components/icons";
-import type { Annotation, SearchQuery } from "../../core/annotationsModel";
-import * as ac from "../../components/autocomplete/view";
-import { SearchType, BiOperatorType } from "../../core/searchModel";
-import * as queryParser from "../../core/searchQueryParser";
-import * as api from "../../api/annotations";
-import SpinningWheel from "../../components/spinningWheel";
-import Alert from "../../components/alert"; 
+import * as icons from "client/components/icons";
+import type { Annotation, SearchQuery } from "core/annotationsModel";
+import * as ac from "client/components/autocomplete";
+import { SearchType, BiOperatorType } from "core/searchModel";
+import * as queryParser from "core/searchQueryParser";
+import * as api from "client/api/annotations";
+import SpinningWheel from "client/components/spinningWheel";
+import Alert from "client/components/alert"; 
 
 interface TermCompProps {
+  solrUrl: string;
   isFirst: boolean;
   updateAnTypeHandle(sType: SearchType): void;
   updateValueHandle(value: string): void;
@@ -53,6 +54,7 @@ function TermComp(props: TermCompProps): TermComp {
         <>
           <ac.SemanticAutocomplete 
             id="basicSearch-semantic-autocomplete"
+            solrUrl={props.solrUrl}
             onChange={gotSuggestion}
            />
           <div className="form-group">
@@ -110,20 +112,22 @@ function mkTermId(): number {
   return Date.now();
 }
 
-function mkTermItem(id: number, isFirst: boolean, dispatch: React.Dispatch<TermsAction>, submitFn: () => void): TermItem {
+function mkTermItem(solrUrl: string, id: number, isFirst: boolean, dispatch: React.Dispatch<TermsAction>, submitFn: () => void): TermItem {
   return {
     id,
     sType: SearchType.REGEX,
     value: "",
     includeSynonyms: false,
-    termComp: <TermComp 
-      key={id}
-      isFirst={isFirst} 
-      updateAnTypeHandle={(sType: SearchType): void => dispatch({ type: TermsActionType.UPDATE_STYPE, termId: id, sType })}
-      updateValueHandle={(value: string): void => dispatch({ type: TermsActionType.UPDATE_VALUE, termId: id, value })}
-      updateSynonymsHandle={(flag: boolean): void => dispatch({ type: TermsActionType.UPDATE_SYNONYMS_FLAG, termId: id, includeSynonyms: flag })}
-      deleteHandle={() => dispatch({ type: TermsActionType.DELETE, termId: id })}
-      submitHandle={submitFn}/>
+    termComp: 
+      <TermComp 
+        key={id}
+        solrUrl={solrUrl}
+        isFirst={isFirst} 
+        updateAnTypeHandle={(sType: SearchType): void => dispatch({ type: TermsActionType.UPDATE_STYPE, termId: id, sType })}
+        updateValueHandle={(value: string): void => dispatch({ type: TermsActionType.UPDATE_VALUE, termId: id, value })}
+        updateSynonymsHandle={(flag: boolean): void => dispatch({ type: TermsActionType.UPDATE_SYNONYMS_FLAG, termId: id, includeSynonyms: flag })}
+        deleteHandle={() => dispatch({ type: TermsActionType.DELETE, termId: id })}
+        submitHandle={submitFn}/>
   };
 }
 
@@ -163,6 +167,7 @@ function reducer(terms: Array<TermItem>, action: TermsAction): Array<TermItem> {
 }
 
 export interface BasicSearchProps {
+  solrUrl: string;
   resultsHandle(results: Array<Annotation>): void;
 }
 
@@ -176,7 +181,7 @@ export function BasicSearch(props: BasicSearchProps): React.FunctionComponentEle
   const [errorMessage, setErrorMessage] = React.useState(null as string|null);
 
   React.useEffect(() => {
-    const firstTerm = mkTermItem(0, true, dispatch, submitQuery);
+    const firstTerm = mkTermItem(props.solrUrl, 0, true, dispatch, submitQuery);
     dispatch({ type: TermsActionType.ADD, termId: firstTerm.id, newTerm: firstTerm });
   }, []);
 
@@ -188,7 +193,7 @@ export function BasicSearch(props: BasicSearchProps): React.FunctionComponentEle
 
   function addTerm(): void {
     const termId = mkTermId();
-    const newTerm = mkTermItem(termId, false, dispatch, submitQuery);
+    const newTerm = mkTermItem(props.solrUrl, termId, false, dispatch, submitQuery);
     dispatch({ 
       type: TermsActionType.ADD,
       termId,

@@ -1,7 +1,7 @@
 import * as React from "react";
-import * as anModel from "../../core/annotationsModel";
-import type { ApiComponent } from "../../components/defs";
-import AnList from "../../components/anList";
+import * as anModel from "core/annotationsModel";
+import type { ApiComponent } from "client/components/defs";
+import AnList from "client/components/anList";
 import { LoaderFilter } from "./loaderFilter";
 
 export default function AnnotationsPage(props: ApiComponent): React.FunctionComponentElement<ApiComponent> {

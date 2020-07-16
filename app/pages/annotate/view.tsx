@@ -1,13 +1,13 @@
 import * as React from "react";
-import * as ac from "../../components/autocomplete/view";
-import { Tabs, Tab } from "../../components/ui";
-import type { ApiComponent } from "../../components/defs";
-import type { OntologyInfoRequest } from "../../components/ontologyInfoPanel";
-import OntologyInfoPanel from "../../components/ontologyInfoPanel";
+import * as ac from "client/components/autocomplete";
+import { Tabs, Tab } from "client/components/ui";
+import type { ApiComponent } from "client/components/defs";
+import type { OntologyInfoRequest } from "client/components/ontologyInfoPanel";
+import OntologyInfoPanel from "client/components/ontologyInfoPanel";
 import { Semantic } from "./semantic";
 import { Keyword } from "./keyword";
 import { Comment } from "./comment";
-import * as icons from "../../components/icons";
+import * as icons from "client/components/icons";
 
 enum TabType { SEMANTIC = "semantic", KEYWORD = "keyword", COMMENT = "comment" }
 
@@ -54,6 +54,7 @@ export default function AnnotatePage(props: ApiComponent): React.FunctionCompone
     ontologyInfoRequest ? 
       <div className="anl-table" style={{height: 462}}>
         <OntologyInfoPanel 
+          solrUrl={props.context.config.solrUrl}
           infoRequest={ontologyInfoRequest}
           closeFn={() => setOntologyInfoRequest(null)}/>
       </div>

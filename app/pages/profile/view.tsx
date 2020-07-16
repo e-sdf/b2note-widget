@@ -1,16 +1,18 @@
 import _ from "lodash";
 import * as React from "react";
+import type { ConfRec } from "client/config";
 import { $enum } from "ts-enum-util";
 import { Typeahead } from "react-bootstrap-typeahead";
-import type { AuthUser } from "../../context";
-import type { AuthErrAction } from "../../api/http";
-import type { UserProfile } from "../../core/user";
-import { countries, Experience } from "../../core/user";
-import * as api from "../../api/profile";
-import Alert from "../../components/alert"; 
-import SpinningWheel from "../../components/spinningWheel";
+import type { AuthUser } from "client/context";
+import type { AuthErrAction } from "client/api/http";
+import type { UserProfile } from "core/user";
+import { countries, Experience } from "core/user";
+import * as api from "client/api/profile";
+import Alert from "client/components/alert"; 
+import SpinningWheel from "client/components/spinningWheel";
 
 interface ProfileProps {
+  config: ConfRec;
   user: AuthUser;
   updateProfileFn(profile: UserProfile): void;
   authErrAction: AuthErrAction;
@@ -76,7 +78,7 @@ export default function ProfilePage(props: ProfileProps): React.FunctionComponen
 
   function postProfile(): void {
     setLoading(true);
-    api.patchUserProfilePm(getFields(), props.user.token, props.authErrAction).then(
+    api.patchUserProfilePm(props.config, getFields(), props.user.token, props.authErrAction).then(
       updatedProfile => {
         props.updateProfileFn(updatedProfile);
         setLoading(false);

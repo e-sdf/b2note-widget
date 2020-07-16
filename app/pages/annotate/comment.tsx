@@ -1,12 +1,12 @@
 import * as React from "react";
-import type { ApiComponent } from "../../components/defs";
-import Alert from "../../components/alert"; 
-import SpinningWheel from "../../components/spinningWheel";
-import VisibilitySwitcher from "../../components/visibilitySwitcher";
-import * as anModel from "../../core/annotationsModel";
-import * as api from "../../api/annotations";
-import { CommentIcon, CreateIcon } from "../../components/icons";
-import { ActionEnum, notify } from "../../components/notify";
+import type { ApiComponent } from "client/components/defs";
+import Alert from "client/components/alert"; 
+import SpinningWheel from "client/components/spinningWheel";
+import VisibilitySwitcher from "client/components/visibilitySwitcher";
+import * as anModel from "core/annotationsModel";
+import * as api from "client/api/annotations";
+import { CommentIcon, CreateIcon } from "client/components/icons";
+import { ActionEnum, notify } from "client/components/notify";
 
 export function Comment(props: ApiComponent): React.FunctionComponentElement<ApiComponent> {
   const [comment, setComment] = React.useState("");
@@ -23,12 +23,12 @@ export function Comment(props: ApiComponent): React.FunctionComponentElement<Api
   function annotate(): void {
     if (target && user) {
       setLoading(true);
-      api.postAnnotationComment({ target, user, comment, visibility, authErrAction: props.authErrAction }).then(
+      api.postAnnotationComment(props.context.config, { target, user, comment, visibility, authErrAction: props.authErrAction }).then(
         newAn => {
           setLoading(false);
           setSuccessMessage("Comment annotation created");
           setComment("");
-          notify(ActionEnum.CREATE, newAn);
+          notify(props.context.config, ActionEnum.CREATE, newAn);
         },
         (err) => { setLoading(false); setErrorMessage(err); }
       );

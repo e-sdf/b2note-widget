@@ -1,7 +1,7 @@
 import * as React from "react";
 import type { SectionProps } from "./defs";
 import { imgHelpPath } from "./utils";
-import * as icons from "../../components/icons";
+import * as icons from "client/components/icons";
 
 export default function AnnotateSection(props: SectionProps): React.FunctionComponentElement<SectionProps> {
   return (

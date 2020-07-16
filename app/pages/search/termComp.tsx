@@ -1,9 +1,9 @@
 import * as React from "react";
-import * as icons from "../../components/icons";
-import * as ac from "../../components/autocomplete/view";
-import { SearchType } from "../../core/searchModel";
+import * as ac from "client/components/autocomplete";
+import { SearchType } from "core/searchModel";
 
 interface TermCompProps {
+  solrUrl: string;
   updateAnTypeHandle(sType: SearchType): void;
   updateValueHandle(value: string): void;
   updateSynonymsHandle(flag: boolean): void;
@@ -41,6 +41,7 @@ export function TermComp(props: TermCompProps): React.FunctionComponentElement<T
         <>
           <ac.SemanticAutocomplete 
             id="basicSearch-semantic-autocomplete"
+            solrUrl={props.solrUrl} 
             onChange={gotSuggestion}
            />
           <div className="form-check mt-2">

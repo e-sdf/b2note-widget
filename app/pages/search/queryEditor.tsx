@@ -1,8 +1,8 @@
 import { matchSwitch } from "@babakness/exhaustive-type-checking";
 import * as React from "react";
-import * as icons from "../../components/icons";
-import { SearchType, BiOperatorType } from "../../core/searchModel";
-import * as queryParser from "../../core/searchQueryParser";
+import * as icons from "client/components/icons";
+import { SearchType } from "core/searchModel";
+import * as queryParser from "core/searchQueryParser";
 
 export interface QueryEditorProps {
   addTerm(tType: SearchType, tVal: string, inclSyns: boolean): void;
@@ -18,7 +18,7 @@ export function QueryEditor(props: QueryEditorProps): React.FunctionComponentEle
     const res = queryParser.parse(query);
     setQueryError(res.error ? res.error : null);
   }
-  
+
   function termStr(tType: SearchType, tVal: string, inclSyns: boolean): string {
     const quotize: (s: string) => string = (s) => s.includes(" ") ? `"${s}"` : s;
 
@@ -28,10 +28,6 @@ export function QueryEditor(props: QueryEditorProps): React.FunctionComponentEle
       [SearchType.KEYWORD]: () => `k:${quotize(tVal)}`,
       [SearchType.COMMENT]: () => `c:${quotize(tVal)}`,
     });
-  }
-
-  function addTerm(tType: SearchType, tVal: string, inclSyns: boolean): void {
-    setQueryStr(queryStr + termStr(tType, tVal, inclSyns)); 
   }
 
   return (
@@ -45,8 +41,8 @@ export function QueryEditor(props: QueryEditorProps): React.FunctionComponentEle
         {queryStr.length > 0 ?
           <div className="ml-1"
             data-toggle="tooltip" data-placement="bottom" title={queryError ? `Error at ${queryError.location}: ${queryError.message}` : ""}>
-            {queryError ? 
-              <icons.ErrorIcon className="text-danger" /> 
+            {queryError ?
+              <icons.ErrorIcon className="text-danger" />
             : <icons.OKIcon className="text-success" />}
           </div>
           : ""}
@@ -54,4 +50,3 @@ export function QueryEditor(props: QueryEditorProps): React.FunctionComponentEle
     </div>
   );
 }
-

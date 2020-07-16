@@ -1,14 +1,13 @@
 import * as React from "react";
-import type { ApiComponent } from "../../components/defs";
-import Alert from "../../components/alert"; 
-import SpinningWheel from "../../components/spinningWheel";
-import VisibilitySwitcher from "../../components/visibilitySwitcher";
-import * as anModel from "../../core/annotationsModel";
-import * as oreg from "../../core/ontologyRegister";
-import config from "../../config";
-import * as api from "../../api/annotations";
-import { KeywordIcon, CreateIcon } from "../../components/icons";
-import { ActionEnum, notify } from "../../components/notify";
+import type { ApiComponent } from "client/components/defs";
+import Alert from "client/components/alert"; 
+import SpinningWheel from "client/components/spinningWheel";
+import VisibilitySwitcher from "client/components/visibilitySwitcher";
+import * as anModel from "core/annotationsModel";
+import * as oreg from "core/ontologyRegister";
+import * as api from "client/api/annotations";
+import { KeywordIcon, CreateIcon } from "client/components/icons";
+import { ActionEnum, notify } from "client/components/notify";
 
 export function Keyword(props: ApiComponent): React.FunctionComponentElement<ApiComponent> {
   const [label, setLabel] = React.useState("");
@@ -30,12 +29,12 @@ export function Keyword(props: ApiComponent): React.FunctionComponentElement<Api
   function postAnnotationAsKeyword(): void {
     if (target && user) {
       setLoading(true);
-      api.postAnnotationKeyword({ target, user, label, visibility, authErrAction: props.authErrAction }).then(
+      api.postAnnotationKeyword(props.context.config, { target, user, label, visibility, authErrAction: props.authErrAction }).then(
         newAn => {
           setLoading(false);
           setSuccessMessage("Keyword annotation created");
           setLabel("");
-          notify(ActionEnum.CREATE, newAn);
+          notify(props.context.config, ActionEnum.CREATE, newAn);
         },
         (err) => { setLoading(false); setErrorMessage(err); }
       );
@@ -45,11 +44,11 @@ export function Keyword(props: ApiComponent): React.FunctionComponentElement<Api
   function postAnnotationAsSemantic(): void {
     if (target && user) {
       setLoading(true);
-      api.postAnnotationSemantic({ target, user, uris, label, visibility, authErrAction: props.authErrAction }).then(
+      api.postAnnotationSemantic(props.context.config, { target, user, uris, label, visibility, authErrAction: props.authErrAction }).then(
         newAn => {
           setSuccessMessage("Sematic annotation created");
           setLabel("");
-          notify(ActionEnum.CREATE, newAn);
+          notify(props.context.config, ActionEnum.CREATE, newAn);
         },
         (err) => { setLoading(false); setErrorMessage(err); }
       );
@@ -59,11 +58,11 @@ export function Keyword(props: ApiComponent): React.FunctionComponentElement<Api
   function postAnnotationAsComment(): void {
     if (target && user) {
       setLoading(true);
-      api.postAnnotationComment({ target, user, comment: label, visibility, authErrAction: props.authErrAction }).then(
+      api.postAnnotationComment(props.context.config, { target, user, comment: label, visibility, authErrAction: props.authErrAction }).then(
         newAn => {
           setSuccessMessage("Comment annotation created");
           setLabel("");
-          notify(ActionEnum.CREATE, newAn);
+          notify(props.context.config, ActionEnum.CREATE, newAn);
         },
         (err) => { setLoading(false); setErrorMessage(err); }
       );
@@ -73,7 +72,7 @@ export function Keyword(props: ApiComponent): React.FunctionComponentElement<Api
   function annotate(): void {
     // Check the existence of a semantic tag
     setLoading(true);
-    oreg.getOntologies(config.solrUrl, label).then(oDict => {
+    oreg.getOntologies(props.context.config.solrUrl, label).then(oDict => {
       setLoading(false);
       if (oDict[label]) {
         setUris(oDict[label].map(i => i.uris));

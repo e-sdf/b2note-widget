@@ -1,13 +1,12 @@
 import _ from "lodash";
 import * as React from "react";
-import * as anModel from "../../core/annotationsModel";
-import type { Context } from "../../context";
-import { Tabs, Tab } from "../../components/ui";
-import type { ApiComponent } from "../../components/defs";
-import AnList from "../../components/anList";
+import * as anModel from "core/annotationsModel";
+import { Tabs, Tab } from "client/components/ui";
+import type { ApiComponent } from "client/components/defs";
+import AnList from "client/components/anList";
 import { BasicSearch } from "./basicSearch";
 import { AdvancedSearch } from "./advancedSearch";
-import AnDownloadButton from "../../components/anDownloader";
+import AnDownloadButton from "client/components/anDownloader";
 
 type TabType = "basic" | "advanced";
 
@@ -33,7 +32,7 @@ export default function SearchPage(props: ApiComponent): React.FunctionComponent
                 :
                   <>
                     <div style={{padding: "4px 120px 0 0"}}>Results found:</div>
-                    <AnDownloadButton annotations={results}/>
+                    <AnDownloadButton config={props.context.config} annotations={results}/>
                   </>
                 }
                 <button type="button" className="ml-auto close" onClick={clearResults}>
@@ -61,10 +60,10 @@ export default function SearchPage(props: ApiComponent): React.FunctionComponent
     return (
       <Tabs id="searchTabs" activeTab={"basic" as TabType}>
         <Tab tabId={"basic" as TabType} title="Basic Search">
-          <BasicSearch resultsHandle={setResultsBasic}/>
+          <BasicSearch solrUrl={props.context.config.solrUrl} resultsHandle={setResultsBasic}/>
         </Tab>
         <Tab tabId={"advanced" as TabType} title="Advanced Search">
-          <AdvancedSearch resultsHandle={setResultsAdv}/>
+          <AdvancedSearch solrUrl={props.context.config.solrUrl} resultsHandle={setResultsAdv}/>
         </Tab>
       </Tabs>
     );

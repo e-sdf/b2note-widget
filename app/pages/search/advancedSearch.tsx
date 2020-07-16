@@ -1,17 +1,18 @@
 import _ from "lodash";
 import { matchSwitch } from "@babakness/exhaustive-type-checking";
 import * as React from "react";
-import * as icons from "../../components/icons";
-import * as anModel from "../../core/annotationsModel";
-import type { Annotation } from "../../core/annotationsModel";
-import { SearchType } from "../../core/searchModel";
-import * as queryParser from "../../core/searchQueryParser";
-import * as api from "../../api/annotations";
-import SpinningWheel from "../../components/spinningWheel";
-import Alert from "../../components/alert"; 
+import * as icons from "client/components/icons";
+import * as anModel from "core/annotationsModel";
+import type { Annotation } from "core/annotationsModel";
+import { SearchType } from "core/searchModel";
+import * as queryParser from "core/searchQueryParser";
+import * as api from "client/api/annotations";
+import SpinningWheel from "client/components/spinningWheel";
+import Alert from "client/components/alert"; 
 import { TermComp } from "./termComp";
 
 export interface SearchProps {
+  solrUrl: string;
   resultsHandle(results: Array<Annotation>): void;
 }
 
@@ -100,6 +101,7 @@ export function AdvancedSearch(props: SearchProps): React.FunctionComponentEleme
           <label>Add search term:</label>
           <div className="form-group d-flex flex-row">
             <TermComp 
+              solrUrl={props.solrUrl}
               updateAnTypeHandle={setTermType}
               updateValueHandle={setTermValue}
               updateSynonymsHandle={setIncludeSynonyms}/>

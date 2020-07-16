@@ -1,12 +1,21 @@
 {
   "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "*": [
+        "*",
+        "b2note-core/src/*",
+        "b2note-client-lib/src/*"
+      ]
+    },
+    "rootDirs": [
+      "app",
+      "b2note-core/src",
+      "b2note-client-lib/src"
+    ],
     "target": "es5",
     "sourceMap": true,
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "es6"
-    ],
+    "lib": ["dom", "dom.iterable", "es6"],
     "allowJs": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
@@ -20,10 +29,6 @@
     "noEmit": false,
     "jsx": "react"
   },
-  "include": [
-    "app/**/*"
-  ],
-  "exclude": [
-    "node_modules"
-  ]
+  "include": ["app/**/*", "b2note-core/src/**/*", "b2note-client-lib/src/**/*"],
+  "exclude": ["node_modules"]
 }

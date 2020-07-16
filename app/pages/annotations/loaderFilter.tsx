@@ -1,11 +1,11 @@
 import * as React from "react";
-import * as icons from "../../components/icons";
-import * as anModel from "../../core/annotationsModel";
-import * as api from "../../api/annotations";
-import type { Context } from "../../context";
-import AnDownloadButton from "../../components/anDownloader";
-import SpinningWheel from "../../components/spinningWheel";
-import Alert from "../../components/alert";
+import * as icons from "client/components/icons";
+import * as anModel from "core/annotationsModel";
+import * as api from "client/api/annotations";
+import type { Context } from "client/context";
+import AnDownloadButton from "client/components/anDownloader";
+import SpinningWheel from "client/components/spinningWheel";
+import Alert from "client/components/alert";
 
 interface LoaderProps {
   context: Context;
@@ -181,7 +181,7 @@ export const LoaderFilter = React.forwardRef((props: LoaderProps, ref: React.Ref
               {renderTypeSelection()}
             </div>
             <div className="">
-              <AnDownloadButton annotations={annotations}/>
+              <AnDownloadButton config={props.context.config} annotations={annotations}/>
             </div>
           </div>
         </div>

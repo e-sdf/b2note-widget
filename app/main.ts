@@ -1,5 +1,6 @@
+import { config } from "./config";
 import * as widget from "./widget/view";
-import { pidInputElemId, sourceInputElemId } from "./core/widgetDefs";
+import { pidInputElemId, sourceInputElemId } from "core/widgetDefs";
 
 $(document).ready(() => {
   if (widget.canRenderWidgetInfo()) {
@@ -13,7 +14,7 @@ $(document).ready(() => {
       if (!sourceDOM || !sourceDOM.value) {
         console.error(`<input type="hidden" id="${sourceInputElemId}" value="..."> element not found in DOM`);
       } else {
-        widget.renderWidget({ mbUser: null, mbTarget: { pid: pidDOM.value, source: sourceDOM.value } });
+        widget.renderWidget({ config, mbUser: null, mbTarget: { pid: pidDOM.value, source: sourceDOM.value } });
       }
     }
   }

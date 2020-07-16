@@ -1,14 +1,14 @@
 import * as React from "react";
-import type { ApiComponent } from "../../components/defs";
-import SpinningWheel from "../../components/spinningWheel";
-import Alert from "../../components/alert";
-import VisibilitySwitcher from "../../components/visibilitySwitcher";
-import type { OntologyInfoRequest } from "../../components/ontologyInfoPanel";
-import * as anModel from "../../core/annotationsModel";
-import * as ac from "../../components/autocomplete/view";
-import * as api from "../../api/annotations";
-import * as icons from "../../components/icons";
-import { ActionEnum, notify } from "../../components/notify";
+import type { ApiComponent } from "client/components/defs";
+import SpinningWheel from "client/components/spinningWheel";
+import Alert from "client/components/alert";
+import VisibilitySwitcher from "client/components/visibilitySwitcher";
+import type { OntologyInfoRequest } from "client/components/ontologyInfoPanel";
+import * as anModel from "core/annotationsModel";
+import * as ac from "client/components/autocomplete";
+import * as api from "client/api/annotations";
+import * as icons from "client/components/icons";
+import { ActionEnum, notify } from "client/components/notify";
 
 interface Props extends ApiComponent {
   suggestion: ac.Suggestion|null;
@@ -59,11 +59,11 @@ export function Semantic(props: Props): React.FunctionComponentElement<Props> {
   function postAnnotationAsSemantic(): void {
     if (target && user) {
       setLoading(true);
-      api.postAnnotationSemantic({ target, user, uris, label, visibility, authErrAction: props.authErrAction }).then(
+      api.postAnnotationSemantic(props.context.config, { target, user, uris, label, visibility, authErrAction: props.authErrAction }).then(
         newAn => {
           setLoading(false);
           setSuccessMessage("Sematic annotation created");
-          notify(ActionEnum.CREATE, newAn);
+          notify(props.context.config, ActionEnum.CREATE, newAn);
         },
         (err) => { setLoading(false); setErrorMessage(err); }
       );
@@ -72,11 +72,11 @@ export function Semantic(props: Props): React.FunctionComponentElement<Props> {
 
   function postAnnotationAsKeyword(): void {
     if (target && user) {
-      api.postAnnotationKeyword({ target, user, label, visibility, authErrAction: props.authErrAction }).then(
+      api.postAnnotationKeyword(props.context.config, { target, user, label, visibility, authErrAction: props.authErrAction }).then(
         newAn => {
           setSuccessMessage("Keyword annotation created");
           setSuggestion(null);
-          notify(ActionEnum.CREATE, newAn);
+          notify(props.context.config, ActionEnum.CREATE, newAn);
         },
         (err) => { setLoading(false); setErrorMessage(err); }
       );
@@ -119,6 +119,7 @@ export function Semantic(props: Props): React.FunctionComponentElement<Props> {
         <icons.SemanticIcon className="mr-1"/>
         <ac.SemanticAutocomplete
           id="annotate-semantic-autocomplete"
+          solrUrl={props.context.config.solrUrl}
           ref={(comp) => setRef(comp)}
           defaultInputValue={suggestion?.labelOrig || ""}
           allowNew={true}
