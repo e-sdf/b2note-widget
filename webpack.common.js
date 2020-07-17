@@ -1,5 +1,6 @@
 "use strict";
 
+const path = require("path");
 const CopyPlugin = require("copy-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
@@ -10,7 +11,11 @@ module.exports = {
     filename: "js/app.js"
   },
   resolve: {
-    extensions: [".tsx", ".ts", ".js", ".json", ".css", ".less"]
+    extensions: [".tsx", ".ts", ".js", ".json", ".css", ".less"],
+    alias: {
+      core: path.resolve(__dirname, "b2note-core/src/core/"),
+      client: path.resolve(__dirname, "b2note-client-lib/src/client/")
+    }
   },
   module: {
     rules: [
