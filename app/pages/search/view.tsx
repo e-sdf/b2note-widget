@@ -60,10 +60,10 @@ export default function SearchPage(props: ApiComponent): React.FunctionComponent
     return (
       <Tabs id="searchTabs" activeTab={"basic" as TabType}>
         <Tab tabId={"basic" as TabType} title="Basic Search">
-          <BasicSearch solrUrl={props.context.config.solrUrl} resultsHandle={setResultsBasic}/>
+          <BasicSearch context={props.context} resultsHandle={setResultsBasic}/>
         </Tab>
         <Tab tabId={"advanced" as TabType} title="Advanced Search">
-          <AdvancedSearch solrUrl={props.context.config.solrUrl} resultsHandle={setResultsAdv}/>
+          <AdvancedSearch context={props.context} resultsHandle={setResultsAdv}/>
         </Tab>
       </Tabs>
     );

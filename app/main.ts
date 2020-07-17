@@ -1,6 +1,7 @@
 import { config } from "./config";
 import * as widget from "./widget/view";
 import { pidInputElemId, sourceInputElemId } from "core/widgetDefs";
+import { notifyLoaded } from "client/components/notify";
 
 $(document).ready(() => {
   if (widget.canRenderWidgetInfo()) {
@@ -18,4 +19,5 @@ $(document).ready(() => {
       }
     }
   }
+  notifyLoaded();
 });

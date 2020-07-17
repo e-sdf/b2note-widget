@@ -1,6 +1,7 @@
 import _ from "lodash";
 import { matchSwitch } from "@babakness/exhaustive-type-checking";
 import * as React from "react";
+import { Context } from "client/context";
 import * as icons from "client/components/icons";
 import * as anModel from "core/annotationsModel";
 import type { Annotation } from "core/annotationsModel";
@@ -8,11 +9,11 @@ import { SearchType } from "core/searchModel";
 import * as queryParser from "core/searchQueryParser";
 import * as api from "client/api/annotations";
 import SpinningWheel from "client/components/spinningWheel";
-import Alert from "client/components/alert"; 
+import Alert from "client/components/alert";
 import { TermComp } from "./termComp";
 
 export interface SearchProps {
-  solrUrl: string;
+  context: Context;
   resultsHandle(results: Array<Annotation>): void;
 }
 
@@ -30,7 +31,7 @@ export function AdvancedSearch(props: SearchProps): React.FunctionComponentEleme
     const res = queryParser.parse(_.trim(query));
     setQueryError(res.error ? res.error : null);
   }
-  
+
   function termStr(tType: SearchType, tVal: string, inclSyns: boolean): string {
     const quotize: (s: string) => string = (s) => s.includes(" ") ? `"${s}"` : s;
 
@@ -48,7 +49,7 @@ export function AdvancedSearch(props: SearchProps): React.FunctionComponentEleme
 
   function submitQuery(): void {
     setSearching(true);
-    api.searchAnnotations(_.trim(queryStr)).then(
+    api.searchAnnotations(props.context.config, _.trim(queryStr)).then(
       (anl: Array<anModel.Annotation>) => {
         setSearching(false);
         props.resultsHandle(anl);
@@ -62,11 +63,11 @@ export function AdvancedSearch(props: SearchProps): React.FunctionComponentEleme
       <div style={{paddingLeft: "10px"}}>
         <button type="button" className="btn btn-block btn-outline-primary" style={{height: "100%"}}
           data-toggle="tooltip" data-placement="bottom" title="Add"
-          onClick={() => { 
+          onClick={() => {
             add(termStr(termType, termValue, includeSynonyms));
             setTermValue("");
           }}>
-          <icons.AddIcon/> 
+          <icons.AddIcon/>
         </button>
       </div>
     );
@@ -86,7 +87,7 @@ export function AdvancedSearch(props: SearchProps): React.FunctionComponentEleme
           <button type="button" className="btn btn-sm btn-outline-primary ml-1 mr-1"
             onClick={() => add(" NOT ")}>NOT</button>
         </div>
-      </> 
+      </>
     );
   }
 
@@ -100,8 +101,8 @@ export function AdvancedSearch(props: SearchProps): React.FunctionComponentEleme
         <div className="card-body" style={{padding: "10px"}}>
           <label>Add search term:</label>
           <div className="form-group d-flex flex-row">
-            <TermComp 
-              solrUrl={props.solrUrl}
+            <TermComp
+              solrUrl={props.context.config.solrUrl}
               updateAnTypeHandle={setTermType}
               updateValueHandle={setTermValue}
               updateSynonymsHandle={setIncludeSynonyms}/>
@@ -129,8 +130,8 @@ export function AdvancedSearch(props: SearchProps): React.FunctionComponentEleme
             {queryStr.length > 0 ?
               <div className="ml-1"
                 data-toggle="tooltip" data-placement="bottom" title={queryError ? `Error at ${queryError.location}: ${queryError.message}` : ""}>
-                {queryError ? 
-                  <icons.ErrorIcon className="text-danger" /> 
+                {queryError ?
+                  <icons.ErrorIcon className="text-danger" />
                   : <icons.OKIcon className="text-success" />}
               </div>
               : <></>}
@@ -147,7 +148,7 @@ export function AdvancedSearch(props: SearchProps): React.FunctionComponentEleme
           data-toggle="tooltip" data-placement="bottom" title="Make search"
           disabled={queryStr.length === 0 || queryError !== null}
           onClick={submitQuery}>
-          <icons.SearchIcon/> Search 
+          <icons.SearchIcon/> Search
         </button>
       </div>
     );

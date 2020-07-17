@@ -1,12 +1,12 @@
 import * as React from "react";
 import type { ApiComponent } from "client/components/defs";
-import Alert from "client/components/alert"; 
+import Alert from "client/components/alert";
 import SpinningWheel from "client/components/spinningWheel";
 import VisibilitySwitcher from "client/components/visibilitySwitcher";
 import * as anModel from "core/annotationsModel";
 import * as api from "client/api/annotations";
 import { CommentIcon, CreateIcon } from "client/components/icons";
-import { ActionEnum, notify } from "client/components/notify";
+import { ActionEnum, anNotify } from "client/components/notify";
 
 export function Comment(props: ApiComponent): React.FunctionComponentElement<ApiComponent> {
   const [comment, setComment] = React.useState("");
@@ -28,7 +28,7 @@ export function Comment(props: ApiComponent): React.FunctionComponentElement<Api
           setLoading(false);
           setSuccessMessage("Comment annotation created");
           setComment("");
-          notify(props.context.config, ActionEnum.CREATE, newAn);
+          anNotify(props.context.config, ActionEnum.CREATE, newAn);
         },
         (err) => { setLoading(false); setErrorMessage(err); }
       );
@@ -41,7 +41,7 @@ export function Comment(props: ApiComponent): React.FunctionComponentElement<Api
         <CommentIcon className="mr-1"/>
         <textarea className="form-control"
           value={comment}
-          onChange={ev => setComment(ev.target?.value || "")} 
+          onChange={ev => setComment(ev.target?.value || "")}
         />
         <button type="button" className="btn btn-primary"
           data-toggle="tooltip" data-placement="bottom" title={props.context.mbUser ? "Create annotation" : "Not logged in"}
@@ -61,4 +61,3 @@ export function Comment(props: ApiComponent): React.FunctionComponentElement<Api
     </>
   );
 }
-

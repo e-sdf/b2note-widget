@@ -1,6 +1,7 @@
 import _ from "lodash";
 import { matchSwitch } from "@babakness/exhaustive-type-checking";
 import * as React from "react";
+import { Context } from "client/context";
 import * as icons from "client/components/icons";
 import type { Annotation, SearchQuery } from "core/annotationsModel";
 import * as ac from "client/components/autocomplete";
@@ -8,7 +9,7 @@ import { SearchType, BiOperatorType } from "core/searchModel";
 import * as queryParser from "core/searchQueryParser";
 import * as api from "client/api/annotations";
 import SpinningWheel from "client/components/spinningWheel";
-import Alert from "client/components/alert"; 
+import Alert from "client/components/alert";
 
 interface TermCompProps {
   solrUrl: string;
@@ -50,9 +51,9 @@ function TermComp(props: TermCompProps): TermComp {
         <option value={SearchType.KEYWORD}>Free-text keyword</option>
         <option value={SearchType.COMMENT}>Comment</option>
       </select>
-      {inputType === SearchType.SEMANTIC ? 
+      {inputType === SearchType.SEMANTIC ?
         <>
-          <ac.SemanticAutocomplete 
+          <ac.SemanticAutocomplete
             id="basicSearch-semantic-autocomplete"
             solrUrl={props.solrUrl}
             onChange={gotSuggestion}
@@ -60,7 +61,7 @@ function TermComp(props: TermCompProps): TermComp {
           <div className="form-group">
             <div className="form-check">
               <input className="form-check-input" type="checkbox"
-                checked={includeSynonyms} 
+                checked={includeSynonyms}
                 onChange={ev => {
                   const val = ev.target.checked;
                   setIncludeSynonyms(val);
@@ -74,7 +75,7 @@ function TermComp(props: TermCompProps): TermComp {
           </div>
         </>
         : <input type="text" className="form-control"
-          value={value} 
+          value={value}
           // onKeyPress={(ev) => { if (ev.charCode == 13) { props.submitHandle(); } }}
           onChange={ev => {
             const val: string = ev.target.value;
@@ -100,7 +101,7 @@ interface TermItem {
   termComp: TermComp;
 }
 
-enum TermsActionType { 
+enum TermsActionType {
   ADD = "ADD",
   UPDATE_STYPE = "UPDATE_STYPE",
   UPDATE_VALUE = "UPDATE_VALUE",
@@ -118,11 +119,11 @@ function mkTermItem(solrUrl: string, id: number, isFirst: boolean, dispatch: Rea
     sType: SearchType.REGEX,
     value: "",
     includeSynonyms: false,
-    termComp: 
-      <TermComp 
+    termComp:
+      <TermComp
         key={id}
         solrUrl={solrUrl}
-        isFirst={isFirst} 
+        isFirst={isFirst}
         updateAnTypeHandle={(sType: SearchType): void => dispatch({ type: TermsActionType.UPDATE_STYPE, termId: id, sType })}
         updateValueHandle={(value: string): void => dispatch({ type: TermsActionType.UPDATE_VALUE, termId: id, value })}
         updateSynonymsHandle={(flag: boolean): void => dispatch({ type: TermsActionType.UPDATE_SYNONYMS_FLAG, termId: id, includeSynonyms: flag })}
@@ -160,14 +161,14 @@ function reducer(terms: Array<TermItem>, action: TermsAction): Array<TermItem> {
   return matchSwitch(action.type, {
     [TermsActionType.ADD]: () => [ ...terms, (action as AddTermAction).newTerm ],
     [TermsActionType.UPDATE_STYPE]: () => terms.map(t => t.id === action.termId ? { ...t, sType: (action as UpdateStypeTermAction).sType } : t),
-    [TermsActionType.UPDATE_VALUE]: () => terms.map(t => t.id === action.termId ? { ...t, value: (action as UpdateValueTermAction).value } : t), 
+    [TermsActionType.UPDATE_VALUE]: () => terms.map(t => t.id === action.termId ? { ...t, value: (action as UpdateValueTermAction).value } : t),
     [TermsActionType.UPDATE_SYNONYMS_FLAG]: () => terms.map(t => t.id === action.termId ? { ...t, includeSynonyms: (action as UpdateSynonymsFlagTermAction).includeSynonyms } : t),
     [TermsActionType.DELETE]: () => terms.filter(t => t.id !== action.termId)
   });
 }
 
 export interface BasicSearchProps {
-  solrUrl: string;
+  context: Context;
   resultsHandle(results: Array<Annotation>): void;
 }
 
@@ -181,20 +182,20 @@ export function BasicSearch(props: BasicSearchProps): React.FunctionComponentEle
   const [errorMessage, setErrorMessage] = React.useState(null as string|null);
 
   React.useEffect(() => {
-    const firstTerm = mkTermItem(props.solrUrl, 0, true, dispatch, submitQuery);
+    const firstTerm = mkTermItem(props.context.config.solrUrl, 0, true, dispatch, submitQuery);
     dispatch({ type: TermsActionType.ADD, termId: firstTerm.id, newTerm: firstTerm });
   }, []);
 
   React.useEffect(() => {
-    setNonEmptyTerms(terms.filter(t => t.value.length > 0)); 
+    setNonEmptyTerms(terms.filter(t => t.value.length > 0));
   }, [terms]);
 
   //const nonEmptyTerms: () => Array<TermItem> = () => terms.filter(t => t.value.length > 1);
 
   function addTerm(): void {
     const termId = mkTermId();
-    const newTerm = mkTermItem(props.solrUrl, termId, false, dispatch, submitQuery);
-    dispatch({ 
+    const newTerm = mkTermItem(props.context.config.solrUrl, termId, false, dispatch, submitQuery);
+    dispatch({
       type: TermsActionType.ADD,
       termId,
       newTerm
@@ -217,10 +218,10 @@ export function BasicSearch(props: BasicSearchProps): React.FunctionComponentEle
 
   function submitQuery(): void {
     const operator = mode === SearchMode.ANY ? BiOperatorType.OR : BiOperatorType.AND;
-    const query: SearchQuery = 
+    const query: SearchQuery =
       nonEmptyTerms.length > 1 ? mkExpression(operator, nonEmptyTerms) : mkValue(nonEmptyTerms[0]);
     setSearching(true);
-    api.searchAnnotations(query).then(
+    api.searchAnnotations(props.context.config, query).then(
       (anl: Array<Annotation>) => {
         setSearching(false);
         props.resultsHandle(anl);
@@ -256,13 +257,13 @@ export function BasicSearch(props: BasicSearchProps): React.FunctionComponentEle
         <button type="button" className="btn btn-secondary"
           data-toggle="tooltip" data-placement="bottom" title="Add another expression"
           onClick={addTerm}>
-          <icons.AddIcon/> 
+          <icons.AddIcon/>
         </button>
         <button type="button" className="btn btn-primary" style={{marginLeft: "10px"}}
           data-toggle="tooltip" data-placement="bottom" title="Make search"
           disabled={nonEmptyTerms.length === 0}
           onClick={submitQuery}>
-          <icons.SearchIcon/> 
+          <icons.SearchIcon/>
         </button>
       </div>
       <div className="row justify-content-center">
@@ -272,4 +273,3 @@ export function BasicSearch(props: BasicSearchProps): React.FunctionComponentEle
     </div>
   );
 }
-

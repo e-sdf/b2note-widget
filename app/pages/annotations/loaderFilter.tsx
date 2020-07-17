@@ -69,7 +69,7 @@ export const LoaderFilter = React.forwardRef((props: LoaderProps, ref: React.Ref
       props.annotationsLoadedHandler([]);
     } else {
       setLoading(true);
-      api.getAnnotationsJSON(mbFilters, props.context.mbUser, props.context.mbTarget).then(
+      api.getAnnotationsJSON(props.context, mbFilters, props.context.mbTarget).then(
         anl => {
           setLoading(false);
           setAnnotations(anl);

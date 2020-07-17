@@ -8,7 +8,7 @@ import * as anModel from "core/annotationsModel";
 import * as ac from "client/components/autocomplete";
 import * as api from "client/api/annotations";
 import * as icons from "client/components/icons";
-import { ActionEnum, notify } from "client/components/notify";
+import { ActionEnum, anNotify } from "client/components/notify";
 
 interface Props extends ApiComponent {
   suggestion: ac.Suggestion|null;
@@ -63,7 +63,7 @@ export function Semantic(props: Props): React.FunctionComponentElement<Props> {
         newAn => {
           setLoading(false);
           setSuccessMessage("Sematic annotation created");
-          notify(props.context.config, ActionEnum.CREATE, newAn);
+          anNotify(props.context.config, ActionEnum.CREATE, newAn);
         },
         (err) => { setLoading(false); setErrorMessage(err); }
       );
@@ -76,7 +76,7 @@ export function Semantic(props: Props): React.FunctionComponentElement<Props> {
         newAn => {
           setSuccessMessage("Keyword annotation created");
           setSuggestion(null);
-          notify(props.context.config, ActionEnum.CREATE, newAn);
+          anNotify(props.context.config, ActionEnum.CREATE, newAn);
         },
         (err) => { setLoading(false); setErrorMessage(err); }
       );
@@ -117,13 +117,15 @@ export function Semantic(props: Props): React.FunctionComponentElement<Props> {
     return (
       <div className="d-flex flex-row align-items-center" style={{margin: "10px"}}>
         <icons.SemanticIcon className="mr-1"/>
-        <ac.SemanticAutocomplete
-          id="annotate-semantic-autocomplete"
-          solrUrl={props.context.config.solrUrl}
-          ref={(comp) => setRef(comp)}
-          defaultInputValue={suggestion?.labelOrig || ""}
-          allowNew={true}
-          onChange={gotSuggestion}/>
+        <div style={{width: 350}}>
+          <ac.SemanticAutocomplete
+            id="annotate-semantic-autocomplete"
+            solrUrl={props.context.config.solrUrl}
+            ref={(comp) => setRef(comp)}
+            defaultInputValue={suggestion?.labelOrig || ""}
+            allowNew={true}
+            onChange={gotSuggestion}/>
+        </div>
       </div>
     );
   }

@@ -1,13 +1,13 @@
 import * as React from "react";
 import type { ApiComponent } from "client/components/defs";
-import Alert from "client/components/alert"; 
+import Alert from "client/components/alert";
 import SpinningWheel from "client/components/spinningWheel";
 import VisibilitySwitcher from "client/components/visibilitySwitcher";
 import * as anModel from "core/annotationsModel";
 import * as oreg from "core/ontologyRegister";
 import * as api from "client/api/annotations";
 import { KeywordIcon, CreateIcon } from "client/components/icons";
-import { ActionEnum, notify } from "client/components/notify";
+import { ActionEnum, anNotify } from "client/components/notify";
 
 export function Keyword(props: ApiComponent): React.FunctionComponentElement<ApiComponent> {
   const [label, setLabel] = React.useState("");
@@ -34,7 +34,7 @@ export function Keyword(props: ApiComponent): React.FunctionComponentElement<Api
           setLoading(false);
           setSuccessMessage("Keyword annotation created");
           setLabel("");
-          notify(props.context.config, ActionEnum.CREATE, newAn);
+          anNotify(props.context.config, ActionEnum.CREATE, newAn);
         },
         (err) => { setLoading(false); setErrorMessage(err); }
       );
@@ -48,7 +48,7 @@ export function Keyword(props: ApiComponent): React.FunctionComponentElement<Api
         newAn => {
           setSuccessMessage("Sematic annotation created");
           setLabel("");
-          notify(props.context.config, ActionEnum.CREATE, newAn);
+          anNotify(props.context.config, ActionEnum.CREATE, newAn);
         },
         (err) => { setLoading(false); setErrorMessage(err); }
       );
@@ -62,7 +62,7 @@ export function Keyword(props: ApiComponent): React.FunctionComponentElement<Api
         newAn => {
           setSuccessMessage("Comment annotation created");
           setLabel("");
-          notify(props.context.config, ActionEnum.CREATE, newAn);
+          anNotify(props.context.config, ActionEnum.CREATE, newAn);
         },
         (err) => { setLoading(false); setErrorMessage(err); }
       );
@@ -125,7 +125,7 @@ export function Keyword(props: ApiComponent): React.FunctionComponentElement<Api
           This text seems long for a keyword (&gt;{lengthLimit} characters).
         </p>
         <p>
-          Do you want to use it as:  
+          Do you want to use it as:
         </p>
         <div className="d-flex flex-row justify-content-between" style={{ margin: "10px" }}>
           <button type="button" className="btn btn-primary"
@@ -147,9 +147,9 @@ export function Keyword(props: ApiComponent): React.FunctionComponentElement<Api
         <KeywordIcon className="mr-1"/>
         <input className="form-control"
           value={label}
-          onChange={ev => setLabel(ev.target?.value || "")} 
+          onChange={ev => setLabel(ev.target?.value || "")}
         />
-        {tooLong ? 
+        {tooLong ?
           <></>
         : <button type="button" className="btn btn-primary"
             data-toggle="tooltip" data-placement="bottom" title={props.context.mbUser ? "Create annotation" : "Not logged in"}
