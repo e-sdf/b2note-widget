@@ -1,6 +1,7 @@
 import { config } from "./config";
 import * as widget from "./widget/view";
 import { pidInputElemId, sourceInputElemId } from "core/widgetDefs";
+import authStorage from "client/api/auth/storage-window";
 import { notifyLoaded } from "client/components/notify";
 
 $(document).ready(() => {
@@ -15,9 +16,10 @@ $(document).ready(() => {
       if (!sourceDOM || !sourceDOM.value) {
         console.error(`<input type="hidden" id="${sourceInputElemId}" value="..."> element not found in DOM`);
       } else {
-        widget.renderWidget({ config, mbUser: null, mbTarget: { pid: pidDOM.value, source: sourceDOM.value } });
+        widget.renderWidget({ config, authStorage, mbUser: null, mbTarget: { pid: pidDOM.value, source: sourceDOM.value } });
       }
     }
   }
+  window.addEventListener("message", (msg) => console.log(msg), false);
   notifyLoaded();
 });

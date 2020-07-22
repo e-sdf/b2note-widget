@@ -3,7 +3,7 @@ import * as React from "react";
 import * as ReactDOM from "react-dom";
 import { config } from "../config";
 import type { Token } from "client/api/http";
-import * as auth from "client/api/auth";
+import * as auth from "client/api/auth/auth";
 import * as profileApi from "client/api/profile";
 import { Context } from "client/context";
 import * as icons from "client/components/icons";
@@ -36,7 +36,7 @@ function pageToHelp(page: PagesEnum): HelpSection {
     [PagesEnum.LOGIN]: () => HelpSection.LOGIN,
     [PagesEnum.PROFILE]: () => HelpSection.PROFILE,
     [PagesEnum.HELP]: () => HelpSection.TOC // just for type exahaustivness, not used actually
-  });  
+  });
 }
 
 enum LoginStateEnum { NOT_LOGGED, LOGGING, LOGGED, ERROR }
@@ -45,7 +45,7 @@ interface Props {
   context: Context;
 }
 
-function Widget(props: Props): React.FunctionComponentElement<Context> {
+function Widget(props: Props): React.FunctionComponentElement<Props> {
   const [page, setPage] = React.useState(props.context.mbTarget ? PagesEnum.ANNOTATE : PagesEnum.ANNOTATIONS);
   const [helpPage, setHelpPage] = React.useState(PagesEnum.ANNOTATE);
   const [context, setContext] = React.useState(props.context);
@@ -55,7 +55,7 @@ function Widget(props: Props): React.FunctionComponentElement<Context> {
 
   function retrieveProfile(provider: auth.AuthProvidersEnum|null, token: Token|null): void {
     if (provider && token) {
-      profileApi.getUserProfilePm(config, token, () => auth.loginPm(config, provider)).then(
+      profileApi.getUserProfilePm(config, token, () => auth.loginPm(context, provider)).then(
         profile => {
           setLoginState(LoginStateEnum.LOGGED);
           setContext({ ...context, mbUser: { token, profile }});
@@ -65,14 +65,14 @@ function Widget(props: Props): React.FunctionComponentElement<Context> {
           console.error(err);
         }
       );
-    } 
+    }
   }
 
   function loginPm(): Promise<Token> {
     return new Promise((resolve, reject) => {
       setLoginState(LoginStateEnum.LOGGING);
       if (chosenAuthProvider) {
-        auth.loginPm(props.context.config, chosenAuthProvider).then(
+        auth.loginPm(props.context, chosenAuthProvider).then(
           token => {
             retrieveProfile(chosenAuthProvider, token);
             resolve(token);
@@ -91,7 +91,7 @@ function Widget(props: Props): React.FunctionComponentElement<Context> {
   }
 
   function firstLogin(): void {
-    auth.retrieveStoredAuthPm().then(
+    context.authStorage.retrieve().then(
       sAuth => {
         setLoginState(LoginStateEnum.LOGGING);
         setAuthProvider(sAuth.provider);
@@ -102,7 +102,7 @@ function Widget(props: Props): React.FunctionComponentElement<Context> {
   }
 
   function logout(): void {
-    auth.invalidateLoginPm().then(
+    context.authStorage.delete().then(
       () => {
       setContext({ ...context, mbUser: null });
       setLoginState(LoginStateEnum.NOT_LOGGED);
@@ -112,14 +112,14 @@ function Widget(props: Props): React.FunctionComponentElement<Context> {
     );
   }
 
-  React.useEffect(() => { 
+  React.useEffect(() => {
     if (context.mbTarget) {
       firstLogin();
     }
   }, []);
 
   React.useEffect(
-    () => { 
+    () => {
       if (chosenAuthProvider !== null) {
         setAuthProvider(chosenAuthProvider);
         loginPm().then(() => setPage(PagesEnum.ANNOTATE));
@@ -136,14 +136,14 @@ function Widget(props: Props): React.FunctionComponentElement<Context> {
       [PagesEnum.ANNOTATIONS]: () => <AnnotationsPage context={context} authErrAction={() => loginPm()}/>,
       [PagesEnum.SEARCH]: () => <SearchPage context={context} authErrAction={() => loginPm()}/>,
       [PagesEnum.LOGIN]: () => <AuthProviderSelectionPage config={config} selectedHandler={(p) => setChosenAuthProvider(p)}/>,
-      [PagesEnum.PROFILE]: () => context.mbUser ? 
-        <ProfilePage 
+      [PagesEnum.PROFILE]: () => context.mbUser ?
+        <ProfilePage
           config={props.context.config}
           user={context.mbUser}
           updateProfileFn={() => retrieveProfile(authProvider, context.mbUser?.token ? context.mbUser.token : null)} authErrAction={() => loginPm()}/>
       : <></>,
       [PagesEnum.HELP]: () => <HelpPage section={pageToHelp(helpPage)}/>
-    });  
+    });
   }
 
   function renderNavbar(): React.ReactElement {
@@ -154,7 +154,7 @@ function Widget(props: Props): React.FunctionComponentElement<Context> {
         <ul className="navbar-nav" style={{width: "100%"}}>
           <li className="nav-item">
             <a
-              className={"nav-link" + activeFlag(PagesEnum.ANNOTATE)} href="#" 
+              className={"nav-link" + activeFlag(PagesEnum.ANNOTATE)} href="#"
               data-toggle="tooltip" data-placement="bottom" title="Annotate"
               onClick={() => setPage(PagesEnum.ANNOTATE)}
               ><icons.AnnotateIcon/>
@@ -162,7 +162,7 @@ function Widget(props: Props): React.FunctionComponentElement<Context> {
           </li>
           <li className="nav-item">
             <a
-              className={"nav-link" + activeFlag(PagesEnum.ANNOTATIONS)} href="#" 
+              className={"nav-link" + activeFlag(PagesEnum.ANNOTATIONS)} href="#"
               data-toggle="tooltip" data-placement="bottom" title="Annotations"
               onClick={() => setPage(PagesEnum.ANNOTATIONS)}
               ><icons.AnnotationsIcon/>
@@ -170,21 +170,21 @@ function Widget(props: Props): React.FunctionComponentElement<Context> {
           </li>
           <li className="nav-item">
             <a
-              className={"nav-link" + activeFlag(PagesEnum.SEARCH)} href="#" 
+              className={"nav-link" + activeFlag(PagesEnum.SEARCH)} href="#"
               data-toggle="tooltip" data-placement="bottom" title="Search"
               onClick={() => setPage(PagesEnum.SEARCH)}
               ><icons.SearchIcon/>
             </a>
           </li>
           <li className="nav-item">
-            <a className={"nav-link" + activeFlag(PagesEnum.HELP)} href="#"data-toggle="tooltip" 
+            <a className={"nav-link" + activeFlag(PagesEnum.HELP)} href="#"data-toggle="tooltip"
                data-placement="bottom" title="Context Help"
               onClick={() => setPage(PagesEnum.HELP)}
             ><icons.HelpIcon/></a>
           </li>
           <li className="nav-item ml-auto">
             <a
-              className={"nav-link" + activeFlag(PagesEnum.PROFILE)} href="#" 
+              className={"nav-link" + activeFlag(PagesEnum.PROFILE)} href="#"
               data-toggle="tooltip" data-placement="bottom" title={context.mbUser ? context.mbUser.profile.email : "Login"}
               onClick={() =>
                 matchSwitch(loginState, {
@@ -196,17 +196,17 @@ function Widget(props: Props): React.FunctionComponentElement<Context> {
               {matchSwitch(loginState, {
                 [LoginStateEnum.NOT_LOGGED]: () => <icons.LoginIcon/>,
                 [LoginStateEnum.LOGGING]: () => <span>Logging in...</span>,
-                [LoginStateEnum.LOGGED]: 
+                [LoginStateEnum.LOGGED]:
                   () => <span><icons.UserIcon/> {shorten(context.mbUser?.profile.personName || "", 13)}</span>,
-                [LoginStateEnum.ERROR]: 
+                [LoginStateEnum.ERROR]:
                   () => <span style={{fontSize: "90%"}}>Login error, try again</span>
               })}
             </a>
           </li>
-          {loginState === LoginStateEnum.LOGGED ? 
+          {loginState === LoginStateEnum.LOGGED ?
             <li className="nav-item">
               <a className="nav-link" style={{paddingLeft: 0}}
-                href="#"data-toggle="tooltip" 
+                href="#"data-toggle="tooltip"
                 data-placement="bottom" title="Logout"
                 onClick={logout}
               ><icons.LogoutIcon/></a>
@@ -227,7 +227,7 @@ function Widget(props: Props): React.FunctionComponentElement<Context> {
         </a>
       </div>
       {renderNavbar()}
-      {pageComp()} 
+      {pageComp()}
     </div>
   );
 }
