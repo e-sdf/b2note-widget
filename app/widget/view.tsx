@@ -3,6 +3,7 @@ import * as React from "react";
 import * as ReactDOM from "react-dom";
 import { config } from "../config";
 import type { Token } from "client/api/http";
+import {  AuthProvidersEnum  } from 'client/api/auth/defs';
 import * as auth from "client/api/auth/auth";
 import * as profileApi from "client/api/profile";
 import { Context } from "client/context";
@@ -16,6 +17,7 @@ import ProfilePage from "../pages/profile/view";
 import HelpPage from "../pages/help/view";
 import { HelpSection } from "../pages/help/defs";
 import { shorten } from "client/components/utils";
+import { notifyLoaded } from "client/components/notify";
 
 function WidgetInfo(): React.ReactElement {
   return (
@@ -49,11 +51,11 @@ function Widget(props: Props): React.FunctionComponentElement<Props> {
   const [page, setPage] = React.useState(props.context.mbTarget ? PagesEnum.ANNOTATE : PagesEnum.ANNOTATIONS);
   const [helpPage, setHelpPage] = React.useState(PagesEnum.ANNOTATE);
   const [context, setContext] = React.useState(props.context);
-  const [authProvider, setAuthProvider] = React.useState(null as null|auth.AuthProvidersEnum);
-  const [chosenAuthProvider, setChosenAuthProvider] = React.useState(null as null | auth.AuthProvidersEnum);
+  const [authProvider, setAuthProvider] = React.useState(null as null|AuthProvidersEnum);
+  const [chosenAuthProvider, setChosenAuthProvider] = React.useState(null as null|AuthProvidersEnum);
   const [loginState, setLoginState] = React.useState(LoginStateEnum.NOT_LOGGED);
 
-  function retrieveProfile(provider: auth.AuthProvidersEnum|null, token: Token|null): void {
+  function retrieveProfile(provider: AuthProvidersEnum|null, token: Token|null): void {
     if (provider && token) {
       profileApi.getUserProfilePm(config, token, () => auth.loginPm(context, provider)).then(
         profile => {
@@ -64,6 +66,16 @@ function Widget(props: Props): React.FunctionComponentElement<Props> {
           setLoginState(LoginStateEnum.ERROR);
           console.error(err);
         }
+      );
+    }
+  }
+
+  function handleExternalLogin(msg: MessageEvent): void {
+    if (msg.origin === "http://mpagasas.di.uoa.gr:4200") {
+      const servicesToken = msg.data.token;
+      setLoginState(LoginStateEnum.LOGGING);
+      auth.takeLoginPm(context, AuthProvidersEnum.OPEN_AIRE, servicesToken).then(
+        token => retrieveProfile(chosenAuthProvider, token)
       );
     }
   }
@@ -113,6 +125,8 @@ function Widget(props: Props): React.FunctionComponentElement<Props> {
   }
 
   React.useEffect(() => {
+    window.addEventListener("message", (msg) => handleExternalLogin(msg), false);
+    notifyLoaded(); // Notify the hosting service that the widget has been loaded
     if (context.mbTarget) {
       firstLogin();
     }

@@ -1,6 +1,6 @@
 import * as React from "react";
 import type { ConfRec } from "client/config";
-import { AuthProvidersEnum } from "client/api/auth/auth";
+import { AuthProvidersEnum } from "client/api/auth/defs";
 
 interface Props {
   config: ConfRec;

@@ -2,7 +2,6 @@ import { config } from "./config";
 import * as widget from "./widget/view";
 import { pidInputElemId, sourceInputElemId } from "core/widgetDefs";
 import authStorage from "client/api/auth/storage-window";
-import { notifyLoaded } from "client/components/notify";
 
 $(document).ready(() => {
   if (widget.canRenderWidgetInfo()) {
@@ -20,6 +19,4 @@ $(document).ready(() => {
       }
     }
   }
-  window.addEventListener("message", (msg) => console.log(msg), false);
-  notifyLoaded();
 });
