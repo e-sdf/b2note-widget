@@ -72,32 +72,41 @@ function Widget(props: Props): React.FunctionComponentElement<Props> {
 
   function handleExternalLogin(msg: MessageEvent): void {
     if (msg.origin === "http://mpagasas.di.uoa.gr:4200") {
+      console.log("Received message from the hosting service: ");
+      console.log(msg.data);
       const servicesToken = msg.data.token;
-      setLoginState(LoginStateEnum.LOGGING);
-      auth.takeLoginPm(context, AuthProvidersEnum.OPEN_AIRE, servicesToken).then(
-        token => retrieveProfile(chosenAuthProvider, token)
-      );
+      if (servicesToken && loginState !== LoginStateEnum.LOGGING) {
+        setLoginState(LoginStateEnum.LOGGING);
+        auth.takeLoginPm(context, AuthProvidersEnum.OPEN_AIRE, servicesToken).then(
+          token => retrieveProfile(chosenAuthProvider, token),
+          err => setLoginState(LoginStateEnum.NOT_LOGGED)
+        );
+      }
     }
   }
 
   function loginPm(): Promise<Token> {
     return new Promise((resolve, reject) => {
-      setLoginState(LoginStateEnum.LOGGING);
-      if (chosenAuthProvider) {
-        auth.loginPm(props.context, chosenAuthProvider).then(
-          token => {
-            retrieveProfile(chosenAuthProvider, token);
-            resolve(token);
-          },
-          err => {
-            setLoginState(LoginStateEnum.ERROR);
-            console.error(err);
-            reject();
-          }
-        );
-      } else {
-        setPage(PagesEnum.LOGIN);
+      if (loginState === LoginStateEnum.LOGGING) {
         reject();
+      } else {
+        setLoginState(LoginStateEnum.LOGGING);
+        if (chosenAuthProvider) {
+          auth.loginPm(props.context, chosenAuthProvider).then(
+            token => {
+              retrieveProfile(chosenAuthProvider, token);
+              resolve(token);
+            },
+            err => {
+              setLoginState(LoginStateEnum.ERROR);
+              console.error(err);
+              reject();
+            }
+          );
+        } else {
+          setPage(PagesEnum.LOGIN);
+          reject();
+        }
       }
     });
   }
@@ -126,10 +135,15 @@ function Widget(props: Props): React.FunctionComponentElement<Props> {
 
   React.useEffect(() => {
     window.addEventListener("message", (msg) => handleExternalLogin(msg), false);
-    notifyLoaded(); // Notify the hosting service that the widget has been loaded
-    if (context.mbTarget) {
-      firstLogin();
-    }
+    notifyLoaded(); // Notify the hosting service that the widget has been loaded and is ready to possibly receive a login token
+    setTimeout(
+      () => { // Wait 500ms and then check if we should not login ourselves.
+        if (context.mbTarget && loginState === LoginStateEnum.NOT_LOGGED) {
+          firstLogin();
+        }
+      },
+      500
+    );
   }, []);
 
   React.useEffect(
