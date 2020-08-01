@@ -7,7 +7,7 @@ export const config: ConfRec = {
   apiPath: confRec?.apiPath ? confRec.apiPath : "/api",
   solrUrl: confRec?.solrUrl ? confRec.solrUrl : "https://b2note.eudat.eu/solr/b2note_index/select",
   imgPath: "/img/",
-  version: "v3.4.2"
+  version: "v3.4.3"
 };
 
 export const endpointUrl = config.apiServerUrl + config.apiPath;

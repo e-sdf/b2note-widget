@@ -24,10 +24,11 @@ export function Semantic(props: Props): React.FunctionComponentElement<Props> {
   const [successMessage, setSuccessMessage] = React.useState(null as string|null);
   const [errorMessage, setErrorMessage] = React.useState(null as string|null);
   const [isNew, setIsNew] = React.useState(false);
-  const [ref, setRef] = React.useState(null as any);
   const [loading, setLoading] = React.useState(false);
   const target = props.context.mbTarget;
   const user = props.context.mbUser;
+
+  const inputRef = React.useRef(null as any);
 
   React.useEffect(() => setErrorMessage(null), [successMessage]);
   React.useEffect(() => { if (loading) { setErrorMessage(null); } }, [loading]);
@@ -103,7 +104,7 @@ export function Semantic(props: Props): React.FunctionComponentElement<Props> {
           <button type="button" className="btn btn-warning"
             onClick={() => {
               setIsNew(false);
-              if (ref) { ref.clear(); }
+              if (inputRef?.current) { inputRef.current.clear(); }
             }}>
             Select<br/>different one
             </button>
@@ -120,8 +121,8 @@ export function Semantic(props: Props): React.FunctionComponentElement<Props> {
         <div style={{width: 350}}>
           <ac.SemanticAutocomplete
             id="annotate-semantic-autocomplete"
+            ref={inputRef}
             solrUrl={props.context.config.solrUrl}
-            ref={(comp) => setRef(comp)}
             defaultInputValue={suggestion?.labelOrig || ""}
             allowNew={true}
             onChange={gotSuggestion}/>
@@ -149,7 +150,7 @@ export function Semantic(props: Props): React.FunctionComponentElement<Props> {
             disabled={disabled}
             onClick={() => {
               postAnnotationAsSemantic();
-              if (ref) { ref.clear(); }
+              if (inputRef?.current) { inputRef.current.clear(); }
             }}>
             <icons.CreateIcon/>
           </button>

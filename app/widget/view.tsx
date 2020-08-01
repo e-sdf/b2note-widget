@@ -3,7 +3,7 @@ import * as React from "react";
 import * as ReactDOM from "react-dom";
 import { config } from "../config";
 import type { Token } from "client/api/http";
-import {  AuthProvidersEnum  } from 'client/api/auth/defs';
+import { AuthProvidersEnum } from "client/api/auth/defs";
 import * as auth from "client/api/auth/auth";
 import * as profileApi from "client/api/profile";
 import { Context } from "client/context";
@@ -52,7 +52,7 @@ function Widget(props: Props): React.FunctionComponentElement<Props> {
   const [helpPage, setHelpPage] = React.useState(PagesEnum.ANNOTATE);
   const [context, setContext] = React.useState(props.context);
   const [authProvider, setAuthProvider] = React.useState(null as null|AuthProvidersEnum);
-  const [chosenAuthProvider, setChosenAuthProvider] = React.useState(null as null|AuthProvidersEnum);
+  const [chosenAuthProvider, setChosenAuthProvider] = React.useState(null as null | AuthProvidersEnum);
   const [loginState, setLoginState] = React.useState(LoginStateEnum.NOT_LOGGED);
 
   function retrieveProfile(provider: AuthProvidersEnum|null, token: Token|null): void {
@@ -85,28 +85,30 @@ function Widget(props: Props): React.FunctionComponentElement<Props> {
     }
   }
 
-  function loginPm(): Promise<Token> {
+  function loginPm(): Promise<Token|null> {
     return new Promise((resolve, reject) => {
-      if (loginState === LoginStateEnum.LOGGING) {
-        reject();
+
+      function cancel() {
+        setLoginState(LoginStateEnum.NOT_LOGGED);
+        resolve(null);
+      }
+
+      setLoginState(LoginStateEnum.LOGGING);
+      if (chosenAuthProvider) {
+        auth.loginPm(props.context, chosenAuthProvider, cancel).then(
+          token => {
+            retrieveProfile(chosenAuthProvider, token);
+            resolve(token);
+          },
+          err => {
+            setLoginState(LoginStateEnum.ERROR);
+            console.error(err);
+            reject();
+          }
+        );
       } else {
-        setLoginState(LoginStateEnum.LOGGING);
-        if (chosenAuthProvider) {
-          auth.loginPm(props.context, chosenAuthProvider).then(
-            token => {
-              retrieveProfile(chosenAuthProvider, token);
-              resolve(token);
-            },
-            err => {
-              setLoginState(LoginStateEnum.ERROR);
-              console.error(err);
-              reject();
-            }
-          );
-        } else {
-          setPage(PagesEnum.LOGIN);
-          reject();
-        }
+        setPage(PagesEnum.LOGIN);
+        reject();
       }
     });
   }
@@ -282,11 +284,11 @@ export function renderWidget(context: Context): void {
   if (container) {
     ReactDOM.render(<Widget context={context}/>, container);
     if (context.mbTarget) {
-      console.log(`Annotating pid="${context.mbTarget.pid}" source="${context.mbTarget.source}"`);
+      console.log(`[B2NOTE] Annotating pid="${context.mbTarget.pid}" source="${context.mbTarget.source}"`);
     } else {
-      console.log("No target, will be in the view more");
+      console.log("[B2NOTE] No target, will be in the view more");
     }
   } else {
-    console.error("widget DOM element missing");
+    console.error("[B2NOTE]widget DOM element missing");
   }
 }
