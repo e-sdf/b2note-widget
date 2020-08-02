@@ -13,8 +13,10 @@ module.exports = {
   resolve: {
     extensions: [".tsx", ".ts", ".js", ".json", ".css", ".less"],
     alias: {
-      core: path.resolve(__dirname, "b2note-core/src/core/"),
-      client: path.resolve(__dirname, "b2note-client-lib/src/client/")
+      "core": path.resolve(__dirname, "b2note-core/src/core/"),
+      "client": path.resolve(__dirname, "b2note-client-lib/src/client/"),
+      "react": "preact/compat",
+      "react-dom": "preact/compat"
     }
   },
   module: {
