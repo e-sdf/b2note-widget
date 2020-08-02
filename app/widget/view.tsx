@@ -22,7 +22,7 @@ import { notifyLoaded } from "client/components/notify";
 function WidgetInfo(): React.ReactElement {
   return (
     <div>
-      <img src="img/logo.png" width="100%"/>
+      <img src="img/logo.png" style={{width: "100%"}}/>
       <p style={{fontStyle: "italic"}}>
         Use POST request to load the annotation target.
       </p>
@@ -250,7 +250,7 @@ function Widget(props: Props): React.FunctionComponentElement<Props> {
 
   return (
     <div>
-      <img src="img/logo.png" width="100%"/>
+      <img src="img/logo.png" style={{width: "100%"}}/>
       <div id="widget-version">
         <a href="https://github.com/e-sdf/b2note-reactjs/releases" target="_blank" rel="noopener noreferrer">
           {config.version}
