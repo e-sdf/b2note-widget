@@ -70,15 +70,18 @@ function Widget(props: Props): React.FunctionComponentElement<Props> {
     }
   }
 
+  // Currently hardcoded for OpenAIRE, needs to be refactored
   function handleExternalLogin(msg: MessageEvent): void {
     if (msg.origin === "http://mpagasas.di.uoa.gr:4200") {
-      console.log("Received message from the hosting service: ");
-      console.log(msg.data);
       const servicesToken = msg.data.token;
       if (servicesToken && loginState !== LoginStateEnum.LOGGING) {
+        const provider = AuthProvidersEnum.OPEN_AIRE;
         setLoginState(LoginStateEnum.LOGGING);
-        auth.takeLoginPm(context, AuthProvidersEnum.OPEN_AIRE, servicesToken).then(
-          token => retrieveProfile(chosenAuthProvider, token),
+        auth.takeLoginPm(context, provider, servicesToken).then(
+          token => {
+            setAuthProvider(provider);
+            retrieveProfile(provider, token);
+          },
           err => setLoginState(LoginStateEnum.NOT_LOGGED)
         );
       }
