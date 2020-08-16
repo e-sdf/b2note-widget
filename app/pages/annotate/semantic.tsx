@@ -8,7 +8,7 @@ import * as anModel from "core/annotationsModel";
 import * as ac from "client/components/autocomplete";
 import * as api from "client/api/annotations";
 import * as icons from "client/components/icons";
-import { ActionEnum, anNotify } from "client/components/notify";
+import { ActionEnum, anNotify } from "client/notify";
 
 interface Props extends ApiComponent {
   suggestion: ac.Suggestion|null;

@@ -7,7 +7,7 @@ import * as anModel from "core/annotationsModel";
 import * as oreg from "core/ontologyRegister";
 import * as api from "client/api/annotations";
 import { KeywordIcon, CreateIcon } from "client/components/icons";
-import { ActionEnum, anNotify } from "client/components/notify";
+import { ActionEnum, anNotify } from "client/notify";
 
 export function Keyword(props: ApiComponent): React.FunctionComponentElement<ApiComponent> {
   const [label, setLabel] = React.useState("");

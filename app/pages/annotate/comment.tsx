@@ -6,7 +6,7 @@ import VisibilitySwitcher from "client/components/visibilitySwitcher";
 import * as anModel from "core/annotationsModel";
 import * as api from "client/api/annotations";
 import { CommentIcon, CreateIcon } from "client/components/icons";
-import { ActionEnum, anNotify } from "client/components/notify";
+import { ActionEnum, anNotify } from "client/notify";
 
 export function Comment(props: ApiComponent): React.FunctionComponentElement<ApiComponent> {
   const [comment, setComment] = React.useState("");
