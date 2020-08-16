@@ -70,7 +70,7 @@ function Widget(props: Props): React.FunctionComponentElement<Props> {
     }
   }
 
-  // Currently hardcoded for OpenAIRE, needs to be refactored
+  // Currently hardcoded for OpenAIRE
   function handleExternalLogin(msg: MessageEvent): void {
     if (msg.origin === "http://mpagasas.di.uoa.gr:4200") {
       const servicesToken = msg.data.token;
