@@ -1,7 +1,7 @@
 import { config } from "./config";
 import * as widget from "./widget/view";
 import { pidInputElemId, sourceInputElemId } from "core/widgetDefs";
-import authStorage from "client/api/auth/storage-window";
+import authStorage from "app/api/auth/storage-window";
 
 $(document).ready(() => {
   if (widget.canRenderWidgetInfo()) {

@@ -1,15 +1,15 @@
 import _ from "lodash";
 import * as React from "react";
-import type { ConfRec } from "client/config";
+import type { ConfRec } from "app/config";
 import { $enum } from "ts-enum-util";
 import { Typeahead } from "react-bootstrap-typeahead";
-import type { AuthUser } from "client/context";
-import type { AuthErrAction } from "client/api/http";
+import type { AuthUser } from "app/context";
+import type { AuthErrAction } from "app/api/http";
 import type { UserProfile } from "core/user";
 import { countries, Experience } from "core/user";
-import * as api from "client/api/profile";
-import Alert from "client/components/alert"; 
-import SpinningWheel from "client/components/spinningWheel";
+import * as api from "app/api/profile";
+import Alert from "app/components/alert";
+import SpinningWheel from "app/components/spinningWheel";
 
 interface ProfileProps {
   config: ConfRec;

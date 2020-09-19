@@ -1,7 +1,7 @@
 import * as React from "react";
 import type { SectionProps } from "./defs";
 import { imgHelpPath } from "./utils";
-import * as icons from "client/components/icons";
+import * as icons from "app/components/icons";
 
 export default function AnnotateSection(props: SectionProps): React.FunctionComponentElement<SectionProps> {
   return (
@@ -43,7 +43,7 @@ export default function AnnotateSection(props: SectionProps): React.FunctionComp
       </p>
       <img src={imgHelpPath + "semanticKeyword.png"}/>
       <img src={imgHelpPath + "semanticKeyword2.png"}/>
-      
+
       <h3 id="keyword">Creating a free-text keyword annotation</h3>
       <p>
         Free-text keyword annotations are designed for cases when the exact term you want is missing from the <a href="#semantic">&quot;Semantic tag&quot; autocomplete</a> and you want a plain-text tag to be used in the annotation.
@@ -100,4 +100,3 @@ export default function AnnotateSection(props: SectionProps): React.FunctionComp
     </>
   );
 }
-

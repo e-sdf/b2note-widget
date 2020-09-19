@@ -1,6 +1,6 @@
 import * as React from "react";
 import type { SectionProps } from "./defs";
-import * as icons from "client/components/icons";
+import * as icons from "app/components/icons";
 
 export default function SearchSection(props: SectionProps): React.FunctionComponentElement<SectionProps> {
   return (
@@ -16,7 +16,7 @@ export default function SearchSection(props: SectionProps): React.FunctionCompon
       <p>
         These two approaches may be combined, i.e. it is possible to construct the query using the Query Builder and then edit it manually.
       </p>
-      
+
       <h3>Query Builder</h3>
       <p>
         The Query Builder enables to add search terms and logical connectives that form a search query (see below for its syntax). The <span className="text-primary"><icons.AddIcon/></span> button adds the term into the query. Next, you can add one of the logical connectives AND, OR, XOR, NOT and another term. You can build a complex query by repeating these steps.
@@ -84,4 +84,3 @@ export default function SearchSection(props: SectionProps): React.FunctionCompon
     </>
   );
 }
-

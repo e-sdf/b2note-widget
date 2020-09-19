@@ -1,7 +1,7 @@
 import * as React from "react";
 import * as anModel from "core/annotationsModel";
-import type { ApiComponent } from "client/components/defs";
-import AnList from "client/components/anList";
+import type { ApiComponent } from "app/components/defs";
+import AnList from "app/components/anList";
 import { LoaderFilter } from "./loaderFilter";
 
 export default function AnnotationsPage(props: ApiComponent): React.FunctionComponentElement<ApiComponent> {
@@ -24,7 +24,7 @@ export default function AnnotationsPage(props: ApiComponent): React.FunctionComp
         </div>
       : <></>}
       <div className="anl-table pt-1" style={showFilter ? {} : { height: "460px" }}>
-        {annotations ? 
+        {annotations ?
           <AnList
             context={props.context}
             annotations={annotations}

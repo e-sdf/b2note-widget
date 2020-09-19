@@ -2,12 +2,12 @@ import { matchSwitch } from '@babakness/exhaustive-type-checking';
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 import { config } from "../config";
-import type { Token } from "client/api/http";
-import { AuthProvidersEnum } from "client/api/auth/defs";
-import * as auth from "client/api/auth/auth";
-import * as profileApi from "client/api/profile";
-import { Context } from "client/context";
-import * as icons from "client/components/icons";
+import type { Token } from "app/api/http";
+import { AuthProvidersEnum } from "app/api/auth/defs";
+import * as auth from "app/api/auth/auth";
+import * as profileApi from "app/api/profile";
+import { Context } from "app/context";
+import * as icons from "app/components/icons";
 import { PagesEnum } from "../pages/pages";
 import AnnotatePage from "../pages/annotate/view";
 import AnnotationsPage from "../pages/annotations/view";
@@ -16,8 +16,8 @@ import AuthProviderSelectionPage from "../pages/login";
 import ProfilePage from "../pages/profile/view";
 import HelpPage from "../pages/help/view";
 import { HelpSection } from "../pages/help/defs";
-import { shorten } from "client/components/utils";
-import { notifyLoaded } from "client/components/notify";
+import { notifyLoaded } from "app/components/notify";
+import { shorten } from "app/components/utils";
 
 function WidgetInfo(): React.ReactElement {
   return (

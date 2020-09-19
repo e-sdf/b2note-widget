@@ -1,6 +1,6 @@
 import { matchSwitch } from "@babakness/exhaustive-type-checking";
 import * as React from "react";
-import * as icons from "client/components/icons";
+import * as icons from "app/components/icons";
 import { SearchType } from "core/searchModel";
 import * as queryParser from "core/searchQueryParser";
 

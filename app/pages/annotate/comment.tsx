@@ -1,14 +1,14 @@
 import * as React from "react";
-import type { ApiComponent } from "client/components/defs";
-import Alert from "client/components/alert";
-import SpinningWheel from "client/components/spinningWheel";
-import VisibilitySwitcher from "client/components/visibilitySwitcher";
+import type { ApiComponent } from "app/components/defs";
+import Alert from "app/components/alert";
+import SpinningWheel from "app/components/spinningWheel";
+import VisibilitySwitcher from "app/components/visibilitySwitcher";
 import * as anModel from "core/annotationsModel";
-import * as api from "client/api/annotations";
-import { CommentIcon, CreateIcon } from "client/components/icons";
-import { ActionEnum, anNotify } from "client/notify";
+import * as api from "app/api/annotations";
+import { CommentIcon, CreateIcon } from "app/components/icons";
+import { ActionEnum, anNotify } from "app/notify";
 
-export function Comment(props: ApiComponent): React.FunctionComponentElement<ApiComponent> {
+export default function Comment(props: ApiComponent): React.FunctionComponentElement<ApiComponent> {
   const [comment, setComment] = React.useState("");
   const [visibility, setVisibility] = React.useState(anModel.VisibilityEnum.PRIVATE);
   const [loading, setLoading] = React.useState(false);
@@ -44,7 +44,7 @@ export function Comment(props: ApiComponent): React.FunctionComponentElement<Api
           onChange={ev => setComment(ev.target?.value || "")}
         />
         <button type="button" className="btn btn-primary"
-          data-toggle="tooltip" data-placement="bottom" title={props.context.mbUser ? "Create annotation" : "Not logged in"}
+          data-toggle="tooltip" data-placement="bottom" title={props.context.mbUser ? "Create comment annotation" : "Not logged in"}
           disabled={comment.length === 0 || !props.context.mbUser || loading}
           onClick={annotate}>
           <CreateIcon/>

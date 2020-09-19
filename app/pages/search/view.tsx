@@ -1,12 +1,12 @@
 import _ from "lodash";
 import * as React from "react";
 import * as anModel from "core/annotationsModel";
-import { Tabs, Tab } from "client/components/ui";
-import type { ApiComponent } from "client/components/defs";
-import AnList from "client/components/anList";
+import { Tabs, Tab } from "app/components/ui";
+import type { ApiComponent } from "app/components/defs";
+import AnList from "app/components/anList";
 import { BasicSearch } from "./basicSearch";
 import { AdvancedSearch } from "./advancedSearch";
-import AnDownloadButton from "client/components/anDownloader";
+import AnDownloadButton from "app/components/anDownloader";
 
 type TabType = "basic" | "advanced";
 

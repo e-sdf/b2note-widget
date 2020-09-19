@@ -1,14 +1,14 @@
 import * as React from "react";
-import type { ApiComponent } from "client/components/defs";
-import SpinningWheel from "client/components/spinningWheel";
-import Alert from "client/components/alert";
-import VisibilitySwitcher from "client/components/visibilitySwitcher";
-import type { OntologyInfoRequest } from "client/components/ontologyInfoPanel";
+import type { ApiComponent } from "app/components/defs";
+import SpinningWheel from "app/components/spinningWheel";
+import Alert from "app/components/alert";
+import VisibilitySwitcher from "app/components/visibilitySwitcher";
+import type { OntologyInfoRequest } from "app/components/ontologyInfoPanel";
 import * as anModel from "core/annotationsModel";
-import * as ac from "client/components/autocomplete";
-import * as api from "client/api/annotations";
-import * as icons from "client/components/icons";
-import { ActionEnum, anNotify } from "client/notify";
+import * as ac from "app/components/autocomplete";
+import * as api from "app/api/annotations";
+import * as icons from "app/components/icons";
+import { ActionEnum, anNotify } from "app/notify";
 
 interface Props extends ApiComponent {
   suggestion: ac.Suggestion|null;
@@ -16,10 +16,10 @@ interface Props extends ApiComponent {
   showInfoHandler(oir: OntologyInfoRequest): void;
 }
 
-export function Semantic(props: Props): React.FunctionComponentElement<Props> {
+export default function Semantic(props: Props): React.FunctionComponentElement<Props> {
   const [suggestion, setSuggestion] = React.useState(props.suggestion);
   const [uris, setUris] = React.useState([] as Array<string>);
-  const [label, setLabel] = React.useState("");
+  const [value, setValue] = React.useState("");
   const [visibility, setVisibility] = React.useState(anModel.VisibilityEnum.PRIVATE);
   const [successMessage, setSuccessMessage] = React.useState(null as string|null);
   const [errorMessage, setErrorMessage] = React.useState(null as string|null);
@@ -37,14 +37,14 @@ export function Semantic(props: Props): React.FunctionComponentElement<Props> {
     if (suggestion) {
       if (suggestion.customOption) {
         setIsNew(true);
-        setLabel(suggestion.label);
+        setValue(suggestion.label);
       } else {
         setIsNew(false);
-        setLabel(suggestion.labelOrig || "");
+        setValue(suggestion.labelOrig || "");
         setUris((suggestion.items || []).map(i => i.uris));
       }
     } else {
-      setLabel("");
+      setValue("");
       setUris([]);
     }
   }, [suggestion]);
@@ -60,7 +60,7 @@ export function Semantic(props: Props): React.FunctionComponentElement<Props> {
   function postAnnotationAsSemantic(): void {
     if (target && user) {
       setLoading(true);
-      api.postAnnotationSemantic(props.context.config, { target, user, uris, label, visibility, authErrAction: props.authErrAction }).then(
+      api.postAnnotationSemantic(props.context.config, { target, user, uris, value, visibility, authErrAction: props.authErrAction }).then(
         newAn => {
           setLoading(false);
           setSuccessMessage("Sematic annotation created");
@@ -73,7 +73,7 @@ export function Semantic(props: Props): React.FunctionComponentElement<Props> {
 
   function postAnnotationAsKeyword(): void {
     if (target && user) {
-      api.postAnnotationKeyword(props.context.config, { target, user, label, visibility, authErrAction: props.authErrAction }).then(
+      api.postAnnotationKeyword(props.context.config, { target, user, value, visibility, authErrAction: props.authErrAction }).then(
         newAn => {
           setSuccessMessage("Keyword annotation created");
           setSuggestion(null);
@@ -133,20 +133,20 @@ export function Semantic(props: Props): React.FunctionComponentElement<Props> {
 
 
   function renderActionRow(): React.ReactElement {
-    const disabled = label.length === 0 || !props.context.mbUser || loading;
+    const disabled = value.length === 0 || !props.context.mbUser || loading;
 
     return (
       <div className="d-flex flex-row justify-content-between" style={{margin: "10px 10px 10px 30px"}}>
         <button type="button" className="btn btn-info"
           data-toggle="tooltip" data-placement="bottom" title="Show ontology details"
           disabled={disabled}
-          onClick={() => props.showInfoHandler({label, uris})}>
+          onClick={() => props.showInfoHandler({label: value, uris})}>
           <icons.HelpIcon/>
         </button>
         <div>
           <VisibilitySwitcher text={false} visibility={visibility} setVisibility={setVisibility}/>
           <button type="button" className="btn btn-primary ml-2"
-            data-toggle="tooltip" data-placement="bottom" title={props.context.mbUser ? "Create annotation" : "Not logged in"}
+            data-toggle="tooltip" data-placement="bottom" title={props.context.mbUser ? "Create semantic annotation" : "Not logged in"}
             disabled={disabled}
             onClick={() => {
               postAnnotationAsSemantic();

@@ -1,6 +1,6 @@
 import * as React from "react";
 import type { SectionProps } from "./defs";
-import * as icons from "client/components/icons";
+import * as icons from "app/components/icons";
 import { renderMenuItemTr } from "./utils";
 
 export default function MenuSection(props: SectionProps): React.FunctionComponentElement<SectionProps> {
@@ -24,5 +24,3 @@ export default function MenuSection(props: SectionProps): React.FunctionComponen
     </>
   );
 }
-
-

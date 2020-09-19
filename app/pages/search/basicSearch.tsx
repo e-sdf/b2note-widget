@@ -1,16 +1,16 @@
 import _ from "lodash";
 import { matchSwitch } from "@babakness/exhaustive-type-checking";
 import * as React from "react";
-import { Context } from "client/context";
-import * as icons from "client/components/icons";
+import { Context } from "app/context";
+import * as icons from "app/components/icons";
 import type { Annotation } from "core/annotationsModel";
-import type { SearchQuery } from "core/queryModel";
-import * as ac from "client/components/autocomplete";
+import type { SearchQuery } from "core/anQueryModel";
+import * as ac from "app/components/autocomplete";
 import { SearchType, BiOperatorType } from "core/searchModel";
 import * as queryParser from "core/searchQueryParser";
-import * as api from "client/api/annotations";
-import SpinningWheel from "client/components/spinningWheel";
-import Alert from "client/components/alert";
+import * as api from "app/api/annotations";
+import SpinningWheel from "app/components/spinningWheel";
+import Alert from "app/components/alert";
 
 interface TermCompProps {
   solrUrl: string;
@@ -222,7 +222,7 @@ export function BasicSearch(props: BasicSearchProps): React.FunctionComponentEle
     const query: SearchQuery =
       nonEmptyTerms.length > 1 ? mkExpression(operator, nonEmptyTerms) : mkValue(nonEmptyTerms[0]);
     setSearching(true);
-    api.searchAnnotations(props.context.config, query).then(
+    api.searchAnnotations(query).then(
       (anl: Array<Annotation>) => {
         setSearching(false);
         props.resultsHandle(anl);

@@ -1,7 +1,7 @@
 import * as React from "react";
 import type { SectionProps } from "./defs";
 import { imgHelpPath } from "./utils";
-import * as icons from "client/components/icons";
+import * as icons from "app/components/icons";
 import { renderFilterItemTr } from "./utils";
 
 const btnCol = "#6c757d";
@@ -16,7 +16,7 @@ export default function AnnotationsSection(props: SectionProps): React.FunctionC
       <ul>
         <li>browse existing annotations,</li>
         <li>view their details,</li>
-        <li>filter the list of displayed annotations,</li> 
+        <li>filter the list of displayed annotations,</li>
         <li>export annotations to JSON-LD or RDF/XML.</li>
       </ul>
 
@@ -80,4 +80,3 @@ export default function AnnotationsSection(props: SectionProps): React.FunctionC
     </>
   );
 }
-

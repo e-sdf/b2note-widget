@@ -1,5 +1,5 @@
 import * as React from "react";
-import * as ac from "client/components/autocomplete";
+import * as ac from "app/components/autocomplete";
 import { SearchType } from "core/searchModel";
 
 interface TermCompProps {
@@ -37,16 +37,16 @@ export function TermComp(props: TermCompProps): React.FunctionComponentElement<T
         <option value={SearchType.KEYWORD}>Free-text keyword</option>
         <option value={SearchType.COMMENT}>Comment</option>
       </select>
-      {inputType === SearchType.SEMANTIC ? 
+      {inputType === SearchType.SEMANTIC ?
         <>
-          <ac.SemanticAutocomplete 
+          <ac.SemanticAutocomplete
             id="basicSearch-semantic-autocomplete"
-            solrUrl={props.solrUrl} 
+            solrUrl={props.solrUrl}
             onChange={gotSuggestion}
            />
           <div className="form-check mt-2">
             <input className="form-check-input" type="checkbox"
-              checked={includeSynonyms} 
+              checked={includeSynonyms}
               onChange={ev => {
                 const val = ev.target.checked;
                 setIncludeSynonyms(val);
@@ -59,7 +59,7 @@ export function TermComp(props: TermCompProps): React.FunctionComponentElement<T
           </div>
         </>
         : <input type="text" className="form-control"
-          value={value} 
+          value={value}
           // onKeyPress={(ev) => { if (ev.charCode == 13) { props.submitHandle(); } }}
           onChange={ev => {
             const val: string = ev.target.value;

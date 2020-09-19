@@ -1,6 +1,6 @@
 import * as React from "react";
 import { config } from "../../config";
-import { b2noteBlue } from "client/components/defs";
+import { b2noteBlue } from "app/components/defs";
 
 export const imgHelpPath = config.widgetServerUrl + config.imgPath + "help/";
 
@@ -25,4 +25,3 @@ export function renderMenuItemTr(icon: React.ReactElement, text: string): React.
 export function renderFilterItemTr(icon: React.ReactElement, text: string): React.ReactElement {
   return renderButtonItemTr(icon, "1px solid gray", "#ffffff", text);
 }
-

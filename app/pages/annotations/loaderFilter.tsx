@@ -1,11 +1,11 @@
 import * as React from "react";
-import * as icons from "client/components/icons";
+import * as icons from "app/components/icons";
 import * as anModel from "core/annotationsModel";
-import * as api from "client/api/annotations";
-import type { Context } from "client/context";
-import AnDownloadButton from "client/components/anDownloader";
-import SpinningWheel from "client/components/spinningWheel";
-import Alert from "client/components/alert";
+import * as api from "app/api/annotations";
+import type { Context } from "app/context";
+import AnDownloadButton from "app/components/anDownloader";
+import SpinningWheel from "app/components/spinningWheel";
+import Alert from "app/components/alert";
 
 interface LoaderProps {
   context: Context;

@@ -1,13 +1,13 @@
 import * as React from "react";
-import * as ac from "client/components/autocomplete";
-import { Tabs, Tab } from "client/components/ui";
-import type { ApiComponent } from "client/components/defs";
-import type { OntologyInfoRequest } from "client/components/ontologyInfoPanel";
-import OntologyInfoPanel from "client/components/ontologyInfoPanel";
-import { Semantic } from "./semantic";
-import { Keyword } from "./keyword";
-import { Comment } from "./comment";
-import * as icons from "client/components/icons";
+import * as ac from "app/components/autocomplete";
+import { Tabs, Tab } from "app/components/ui";
+import type { ApiComponent } from "app/components/defs";
+import type { OntologyInfoRequest } from "app/components/ontologyInfoPanel";
+import OntologyInfoPanel from "app/components/ontologyInfoPanel";
+import Semantic from "./semantic";
+import Keyword from "./keyword";
+import Comment from "./comment";
+import * as icons from "app/components/icons";
 
 enum TabType { SEMANTIC = "semantic", KEYWORD = "keyword", COMMENT = "comment" }
 
