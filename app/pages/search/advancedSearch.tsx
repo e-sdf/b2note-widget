@@ -1,7 +1,7 @@
 import _ from "lodash";
 import { matchSwitch } from "@babakness/exhaustive-type-checking";
 import * as React from "react";
-import { Context } from "app/context";
+import { AppContext } from "app/context";
 import * as icons from "app/components/icons";
 import * as anModel from "core/annotationsModel";
 import type { Annotation } from "core/annotationsModel";
@@ -10,10 +10,10 @@ import * as queryParser from "core/searchQueryParser";
 import * as api from "app/api/annotations";
 import SpinningWheel from "app/components/spinningWheel";
 import Alert from "app/components/alert";
-import { TermComp } from "./termComp";
+import TermComp from "./termComp";
 
 export interface SearchProps {
-  context: Context;
+  appContext: AppContext;
   resultsHandle(results: Array<Annotation>): void;
 }
 
@@ -58,15 +58,17 @@ export function AdvancedSearch(props: SearchProps): React.FunctionComponentEleme
     );
   }
 
+  function addTerm(): void {
+    add(termStr(termType, termValue, includeSynonyms));
+    setTermValue("");
+  }
+
   function renderAddTermButton(): React.ReactElement {
     return (
       <div style={{paddingLeft: "10px"}}>
         <button type="button" className="btn btn-block btn-outline-primary" style={{height: "100%"}}
           data-toggle="tooltip" data-placement="bottom" title="Add"
-          onClick={() => {
-            add(termStr(termType, termValue, includeSynonyms));
-            setTermValue("");
-          }}>
+          onClick={addTerm}>
           <icons.AddIcon/>
         </button>
       </div>
@@ -101,11 +103,15 @@ export function AdvancedSearch(props: SearchProps): React.FunctionComponentEleme
         <div className="card-body" style={{padding: "10px"}}>
           <label>Add search term:</label>
           <div className="form-group d-flex flex-row">
-            <TermComp
-              solrUrl={props.context.config.solrUrl}
-              updateAnTypeHandle={setTermType}
-              updateValueHandle={setTermValue}
-              updateSynonymsHandle={setIncludeSynonyms}/>
+            <div style={{marginRight: 30}}>
+              <TermComp
+                appContext={props.appContext}
+                isFirst={true}
+                updateAnTypeHandle={setTermType}
+                updateValueHandle={setTermValue}
+                updateSynonymsHandle={setIncludeSynonyms}
+                submitHandle={addTerm}/>
+            </div>
             {renderAddTermButton()}
           </div>
           {renderConnectives()}

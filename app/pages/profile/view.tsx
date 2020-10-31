@@ -4,7 +4,7 @@ import type { ConfRec } from "app/config";
 import { $enum } from "ts-enum-util";
 import { Typeahead } from "react-bootstrap-typeahead";
 import type { AuthUser } from "app/context";
-import type { AuthErrAction } from "app/api/http";
+import type { AuthErrAction } from "core/http";
 import type { UserProfile } from "core/user";
 import { countries, Experience } from "core/user";
 import * as api from "app/api/profile";

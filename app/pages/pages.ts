@@ -1,8 +1,9 @@
-export enum PagesEnum { 
+export enum PagesEnum {
   ANNOTATE = "annotate",
   ANNOTATIONS = "annotations",
   SEARCH = "search",
   HELP =  "help",
   LOGIN = "login",
-  PROFILE = "profile"
+  PROFILE = "profile",
+  REPORT_BUG = "reportBug"
 }

@@ -1,32 +1,32 @@
 import { matchSwitch } from "@babakness/exhaustive-type-checking";
 import * as React from "react";
 import * as anModel from "core/annotationsModel";
-import { AuthUser } from "../context";
-import { shorten } from "../components/utils";
-import { SemanticIcon, KeywordIcon, CommentIcon, TripleIcon, QuestionIcon } from "./icons";
+import { shorten } from "./utils";
+import { SemanticIcon, KeywordIcon, CommentIcon, QuestionIcon } from "./icons";
 
-interface Props {
-  annotation: anModel.Annotation;
-  mbUser: AuthUser|null;
+interface TagDisplayProps {
   maxLen?: number;
   onClick?: () => void;
 }
 
-export default function AnTag(props: Props): React.FunctionComponentElement<Props> {
-  const annotation = props.annotation;
-  const label = anModel.getLabel(annotation);
+interface AnTagDisplayProps extends TagDisplayProps {
+  anBody: anModel.AnBody;
+}
+export function AnTagDisplay(props: AnTagDisplayProps): React.FunctionComponentElement<AnTagDisplayProps> {
+  const anBody = props.anBody;
+  const label = anModel.getLabelFromBody(anBody);
 
-  const icon = matchSwitch(anModel.getAnType(annotation), {
-    [anModel.AnnotationType.SEMANTIC]: () => <SemanticIcon className="text-secondary" />,
-    [anModel.AnnotationType.KEYWORD]: () => <KeywordIcon className="text-secondary" />,
-    [anModel.AnnotationType.COMMENT]: () => <CommentIcon className="text-secondary" />,
-    [anModel.AnnotationType.TRIPLE]: () => <TripleIcon className="text-secondary" />,
-    [anModel.AnnotationType.UNKNOWN]: () => <QuestionIcon className="text-secondary" />,
+  const icon = matchSwitch(anModel.getAnBodyType(anBody), {
+    [anModel.AnBodyType.SEMANTIC]: () => <SemanticIcon className="text-secondary" />,
+    [anModel.AnBodyType.KEYWORD]: () => <KeywordIcon className="text-secondary" />,
+    [anModel.AnBodyType.COMMENT]: () => <CommentIcon className="text-secondary" />,
+    [anModel.AnBodyType.TRIPLE]: () => <QuestionIcon className="text-secondary" />,
+    [anModel.AnBodyType.UNKNOWN]: () => <QuestionIcon className="text-secondary" />,
   });
 
   function renderSemanticLabel(): React.ReactElement {
     const shortened = props.maxLen ? shorten(label, props.maxLen - 4) : label;
-    const ontologiesNo = anModel.getSources(annotation).length;
+    const ontologiesNo = anModel.getSourcesFromAnBody(anBody).length;
     return (
       <a
         href="#"
@@ -47,8 +47,7 @@ export default function AnTag(props: Props): React.FunctionComponentElement<Prop
       <span
         data-toggle="tooltip"
         data-placement="bottom"
-        title={label}
-      >
+        title={label}>
         {shortened}
       </span>
     );
@@ -58,7 +57,7 @@ export default function AnTag(props: Props): React.FunctionComponentElement<Prop
     <div>
       {icon}
       <span> </span>
-      {anModel.isSemantic(annotation)
+      {anModel.isSemanticAnBody(anBody)
         ? renderSemanticLabel()
         : renderOtherLabel()}
     </div>

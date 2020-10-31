@@ -1,8 +1,8 @@
 import _ from "lodash";
 import * as React from "react";
+import type { SysContext, AppContext } from "app/context";
 import * as anModel from "core/annotationsModel";
 import { Tabs, Tab } from "app/components/ui";
-import type { ApiComponent } from "app/components/defs";
 import AnList from "app/components/anList";
 import { BasicSearch } from "./basicSearch";
 import { AdvancedSearch } from "./advancedSearch";
@@ -10,7 +10,12 @@ import AnDownloadButton from "app/components/anDownloader";
 
 type TabType = "basic" | "advanced";
 
-export default function SearchPage(props: ApiComponent): React.FunctionComponentElement<ApiComponent> {
+interface Props {
+  sysContext: SysContext;
+  appContext: AppContext;
+}
+
+export default function SearchPage(props: Props): React.FunctionComponentElement<Props> {
   const [resultsBasic, setResultsBasic] = React.useState(null as Array<anModel.Annotation>|null);
   const [resultsAdv, setResultsAdv] = React.useState(null as Array<anModel.Annotation>|null);
   const [showBanner, setShowBanner] = React.useState(true);
@@ -32,7 +37,7 @@ export default function SearchPage(props: ApiComponent): React.FunctionComponent
                 :
                   <>
                     <div style={{padding: "4px 120px 0 0"}}>Results found:</div>
-                    <AnDownloadButton config={props.context.config} annotations={results}/>
+                    <AnDownloadButton config={props.sysContext.config} annotations={results}/>
                   </>
                 }
                 <button type="button" className="ml-auto close" onClick={clearResults}>
@@ -45,10 +50,11 @@ export default function SearchPage(props: ApiComponent): React.FunctionComponent
           {results.length > 0 ?
             <div className="anl-table pt-1" style={{height: showBanner ? "415px" : "459px"}}>
               <AnList
-                context={props.context}
+                sysContext={props.sysContext}
+                appContext={props.appContext}
                 annotations={results}
-                ontologyInfoHandler={(visible) => setShowBanner(!visible)}
-                authErrAction={props.authErrAction}/>
+                displayTargets={true}
+                ontologyInfoHandler={(visible) => setShowBanner(!visible)}/>
             </div>
           : <></>}
         </div>
@@ -60,10 +66,10 @@ export default function SearchPage(props: ApiComponent): React.FunctionComponent
     return (
       <Tabs id="searchTabs" activeTab={"basic" as TabType}>
         <Tab tabId={"basic" as TabType} title="Basic Search">
-          <BasicSearch context={props.context} resultsHandle={setResultsBasic}/>
+          <BasicSearch appContext={props.appContext} resultsHandle={setResultsBasic}/>
         </Tab>
         <Tab tabId={"advanced" as TabType} title="Advanced Search">
-          <AdvancedSearch context={props.context} resultsHandle={setResultsAdv}/>
+          <AdvancedSearch appContext={props.appContext} resultsHandle={setResultsAdv}/>
         </Tab>
       </Tabs>
     );

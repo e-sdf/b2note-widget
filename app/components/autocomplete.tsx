@@ -1,7 +1,9 @@
 import _ from "lodash";
 import * as React from "react";
+import type { AppContext } from "app/context";
 import type { OntologyTerm, OTermsDict } from "core/ontologyRegister";
-import { getOTerms } from "core/ontologyRegister";
+import type { OntologySources } from "core/apiModels/ontologyQueryModel";
+import { findOTerms } from "app/api/ontologyRegister";
 import { AsyncTypeahead } from "react-bootstrap-typeahead";
 
 export interface Suggestion {
@@ -13,16 +15,16 @@ export interface Suggestion {
 
 function mkSuggestion(item: OntologyTerm): Suggestion {
   return {
-    label: item.labels + " (" + item.ontologyAcronym + " " + item.shortForm + ")",
-    labelOrig: item.labels,
+    label: item.label + " (" + item.ontologyAcronym + " " + item.shortForm + ")",
+    labelOrig: item.label,
     items: [item]
   };
 }
 
 function aggregateGroup(group: Array<OntologyTerm>): Suggestion {
   return {
-    label: group[0].labels + " (" + group.length + ")",
-    labelOrig: group[0].labels,
+    label: group[0].label + " (" + group.length + ")",
+    labelOrig: group[0].label,
     items: group
   };
 }
@@ -32,18 +34,19 @@ function mkSuggestions(oDict: OTermsDict): Array<Suggestion> {
     const og = oDict[oKey];
     return og.length > 1 ? aggregateGroup(og) : mkSuggestion(og[0]);
   });
-  //console.log(res);
   return res;
 }
 
 
 interface Props {
-  solrUrl: string;
+  appContext: AppContext;
   id: string;
+  sources?: OntologySources;
   autoFocus?: boolean;
   defaultInputValue?: string;
   allowNew?: boolean;
   onChange: (val: Array<Suggestion>) => void;
+  onSubmit?: () => void;
 }
 
 interface InputHandles {
@@ -53,6 +56,7 @@ interface InputHandles {
 
 export const SemanticAutocomplete = React.forwardRef((props: Props, ref: React.Ref<InputHandles>) => {
   const tRef = React.useRef(null);
+  const [suggestions, setSuggestions] = React.useState([] as Array<Suggestion>);
   const [loading, setLoading] = React.useState(false);
   const [options, setOptions] = React.useState([] as Array<Suggestion>);
 
@@ -90,13 +94,15 @@ export const SemanticAutocomplete = React.forwardRef((props: Props, ref: React.R
       isLoading={loading}
       onSearch={query => {
         setLoading(true);
-        getOTerms(props.solrUrl, query)
+        findOTerms(props.appContext, query, props.sources)
         .then((termsDict) => {
           setLoading(false);
           setOptions(mkSuggestions(termsDict));
         });
       }}
-      onChange={props.onChange}
+      onChange={s => {setSuggestions(s); props.onChange(s)}}
+      onKeyDown={ev => {if (props.onSubmit && suggestions.length > 0 && (ev as KeyboardEvent).code === "Enter") {props.onSubmit();}}}
+      useCache={false}
       options={options}
     />
   );

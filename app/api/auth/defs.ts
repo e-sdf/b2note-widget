@@ -1,4 +1,4 @@
-import type { Token } from "../http";
+import type { Token } from "core/http";
 
 export enum AuthProvidersEnum {
   B2ACCESS = "b2access",

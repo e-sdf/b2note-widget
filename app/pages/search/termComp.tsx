@@ -1,15 +1,22 @@
 import * as React from "react";
+import type { AppContext } from "app/context";
 import * as ac from "app/components/autocomplete";
 import { SearchType } from "core/searchModel";
+import * as icons from "app/components/icons";
 
 interface TermCompProps {
-  solrUrl: string;
+  appContext: AppContext;
+  isFirst: boolean;
   updateAnTypeHandle(sType: SearchType): void;
   updateValueHandle(value: string): void;
   updateSynonymsHandle(flag: boolean): void;
+  deleteHandle?(): void;
+  submitHandle(): void;
 }
 
-export function TermComp(props: TermCompProps): React.FunctionComponentElement<TermCompProps> {
+export type TermCompType = React.FunctionComponentElement<TermCompProps>;
+
+export default function TermComp(props: TermCompProps): React.FunctionComponentElement<TermCompProps> {
   const [inputType, setInputType] = React.useState(SearchType.REGEX);
   const [value, setValue] = React.useState("");
   const [includeSynonyms, setIncludeSynonyms] = React.useState(false);
@@ -32,7 +39,7 @@ export function TermComp(props: TermCompProps): React.FunctionComponentElement<T
             props.updateValueHandle("");
           }
         }}>
-        <option value={SearchType.REGEX}>All types (regular expression)</option>
+        <option value={SearchType.REGEX}>All types</option>
         <option value={SearchType.SEMANTIC}>Semantic tag</option>
         <option value={SearchType.KEYWORD}>Free-text keyword</option>
         <option value={SearchType.COMMENT}>Comment</option>
@@ -41,7 +48,7 @@ export function TermComp(props: TermCompProps): React.FunctionComponentElement<T
         <>
           <ac.SemanticAutocomplete
             id="basicSearch-semantic-autocomplete"
-            solrUrl={props.solrUrl}
+            appContext={props.appContext}
             onChange={gotSuggestion}
            />
           <div className="form-check mt-2">
@@ -60,12 +67,18 @@ export function TermComp(props: TermCompProps): React.FunctionComponentElement<T
         </>
         : <input type="text" className="form-control"
           value={value}
-          // onKeyPress={(ev) => { if (ev.charCode == 13) { props.submitHandle(); } }}
+          onKeyPress={(ev) => { if ((ev as any).code === "Enter") { props.submitHandle(); } }}
           onChange={ev => {
             const val: string = ev.target.value;
             setValue(val);
             props.updateValueHandle(val);
           }}/>
+      }
+      {props.isFirst ? <></> :
+        <button type="button" className="btn btn-sm btn-danger"
+          onClick={() => { if (props.deleteHandle) { props.deleteHandle(); } }}>
+          <icons.DeleteIcon/>
+        </button>
       }
     </div>
   );

@@ -1,7 +1,7 @@
 import type { ConfRec } from "../config";
-import type { AnnotationType, Annotation } from "core/annotationsModel";
+import type { AnBodyType, Annotation } from "core/annotationsModel";
 import * as anModel from "core/annotationsModel";
-import { getAnId, getAnType } from "core/annotationsModel";
+import { getAnId, getAnBodyType } from "core/annotationsModel";
 
 export enum ActionEnum {
   CREATE = "create",
@@ -11,14 +11,14 @@ export enum ActionEnum {
 
 export interface Notification {
   action: ActionEnum;
-  annotationType: AnnotationType;
+  annotationType: AnBodyType;
   annotationIRI: string;
 }
 
 export function anNotify(config: ConfRec, action: ActionEnum, an: Annotation): void {
   const n: Notification = {
     action,
-    annotationType: getAnType(an),
+    annotationType: getAnBodyType(an.body),
     annotationIRI: config.apiServerUrl + config.apiPath + anModel.annotationsUrl + "/" + getAnId(an)
   };
   parent.postMessage(n, "*");

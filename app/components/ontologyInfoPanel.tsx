@@ -1,7 +1,8 @@
-import * as _ from "lodash";
+import _ from "lodash";
+import type { AppContext } from "app/context";
 import * as React from "react";
 import type { OntologyTerm } from "core/ontologyRegister";
-import * as oApi from "../api/ontologies";
+import * as oApi from "../api/ontologyRegister";
 import Paginator from "./paginator";
 import SpinningWheel from "./spinningWheel";
 
@@ -11,7 +12,7 @@ export interface OntologyInfoRequest {
 }
 
 interface Props {
-  solrUrl: string;
+  appContext: AppContext;
   infoRequest: OntologyInfoRequest;
   closeFn(): void;
 }
@@ -24,7 +25,7 @@ export default function OntologyInfoPanel(props: Props): React.FunctionComponent
   React.useEffect(
     () => {
       setLoading(true);
-      oApi.loadOntologiesInfo(props.solrUrl, props.infoRequest.uris).then(
+      oApi.loadOntologiesInfo(props.appContext, props.infoRequest.uris).then(
         res => {
           setOntologyInfos(res);
           setLoading(false);
@@ -80,8 +81,8 @@ export default function OntologyInfoPanel(props: Props): React.FunctionComponent
       return (
         <div className="mb-2" style={{fontSize: "85%"}}>
           <div className={rowCls}>
-            <div className={lblStyle}>Descriptions:</div>
-            {renderList(info.descriptions)}
+            <div className={lblStyle}>Description:</div>
+            {info.description}
           </div>
           <div className={rowCls}>
             <div className={lblStyle}>Short Form:</div>

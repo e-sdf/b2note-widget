@@ -1,12 +1,11 @@
 import type { ConfRec } from "app/config";
 import { endpointUrl } from "app/config";
-import type { Context, AuthUser } from "app/context";
-import type { AuthErrAction } from "./http";
-import { get, post, patch, del } from "./http";
+import type { Target, SysContext, AppContext, AuthUser } from "app/context";
+import type { AuthErrAction } from "core/http";
+import { get, post, patch, del } from "core/http";
 import * as anModel from "core/annotationsModel";
 import * as formats from "core/formats";
-import * as qModel from "core/anQueryModel";
-import * as context from "app/context";
+import * as qModel from "core/apiModels/anQueryModel";
 import { mkTarget } from "app/target";
 import * as sModel from "core/searchModel";
 import * as searchQueryParser from "core/searchQueryParser";
@@ -40,9 +39,9 @@ type Query = Record<string, any>;
 function mkTypeFilter(f: Filters): Query {
   return {
     type: [
-    ...(f.type.semantic ? [anModel.AnnotationType.SEMANTIC]: []),
-    ...(f.type.keyword ? [anModel.AnnotationType.KEYWORD]: []),
-    ...(f.type.comment ? [anModel.AnnotationType.COMMENT]: []),
+    ...(f.type.semantic ? [anModel.AnBodyType.SEMANTIC]: []),
+    ...(f.type.keyword ? [anModel.AnBodyType.KEYWORD]: []),
+    ...(f.type.comment ? [anModel.AnBodyType.COMMENT]: [])
     ]
   };
 }
@@ -51,7 +50,7 @@ function mkCreatorFilter(user: AuthUser, f: Filters): Query {
   return !f.creator.others ? { creator: user.profile.id } : {};
 }
 
-function mkTargetFilter(target: context.Target, f: Filters): Query {
+function mkTargetFilter(target: Target, f: Filters): Query {
   return (
     !f.allFiles ? {
       "target-id": target.pid,
@@ -65,7 +64,7 @@ function mkValueFilter(f: Filters): Query {
   return f.value ? { value: f.value } : {};
 }
 
-function mkQuery(f: Filters, mbUser: AuthUser|null, mbTarget: context.Target|null, format: formats.FormatType, download: boolean): Query {
+function mkQuery(f: Filters, mbUser: AuthUser|null, mbTarget: Target|null, format: formats.FormatType, download: boolean): Query {
   const creatorFilter = mbUser ? mkCreatorFilter(mbUser, f) : {};
   const targetFilter = mbTarget ? mkTargetFilter(mbTarget, f) : {};
   return {
@@ -78,13 +77,15 @@ function mkQuery(f: Filters, mbUser: AuthUser|null, mbTarget: context.Target|nul
   };
 }
 
-export function getAnnotationsJSON(context: Context, f: Filters, mbTarget: context.Target|null = null, download = false): Promise<Array<anModel.Annotation>> {
-  const params = mkQuery(f, context.mbUser, mbTarget, formats.FormatType.JSONLD, download);
+export function getAnnotationsJSON(sysContext: SysContext, appContext: AppContext, f: Filters, download = false): Promise<Array<anModel.Annotation>> {
+  const mbUser = appContext.mbUser;
+  const mbTarget = sysContext.mbTarget;
+  const params = mkQuery(f, mbUser, mbTarget, formats.FormatType.JSONLD, download);
   return new Promise((resolve, reject) => {
     get<Array<anModel.Annotation>>(annotationsUrl, params).then(
       data => {
         const cleaned = !f.creator.mine ?
-          data.filter((r: anModel.Annotation) => anModel.getCreatorId(r) !== context.mbUser?.profile.id)
+          data.filter((r: anModel.Annotation) => anModel.getCreatorId(r) !== mbUser?.profile.id)
         : data;
         resolve(cleaned);
       },
@@ -93,38 +94,42 @@ export function getAnnotationsJSON(context: Context, f: Filters, mbTarget: conte
   });
 }
 
-export function getAnnotationsRDF(f: Filters, mbUser: AuthUser|null = null, mbTarget: context.Target|null = null): Promise<string> {
-  const params = mkQuery(f, mbUser, mbTarget, formats.FormatType.RDF, true);
+export function getAnnotationsRDF(sysContext: SysContext, appContext: AppContext, f: Filters): Promise<string> {
+  const params = mkQuery(f, appContext.mbUser, sysContext.mbTarget, formats.FormatType.RDF, true);
   return get(annotationsUrl, params);
 }
 
 // Creating annotations {{{1
 
-export interface AnnotationPostInfo {
-  target: context.Target;
+export interface AnnotationPostRecord {
+  target: Target;
   user: AuthUser;
   visibility: anModel.VisibilityEnum;
   authErrAction: AuthErrAction;
 }
 
-export interface SematicAnnotationPostInfo extends AnnotationPostInfo {
+export interface SematicAnnotationPostRecord extends AnnotationPostRecord {
   uris: string[];
   value: string;
 }
 
-export interface KeywordAnnotationPostInfo extends AnnotationPostInfo {
+export interface KeywordAnnotationPostRecord extends AnnotationPostRecord {
   value: string;
 }
 
-export interface CommentAnnotationPostInfo extends AnnotationPostInfo {
+export interface CommentAnnotationPostRecord extends AnnotationPostRecord {
   comment: string;
+}
+
+export interface TripleAnnotationPostRecord extends AnnotationPostRecord {
+  triple: anModel.Triple;
 }
 
 function postAnnotation(annotation: anModel.Annotation, user: AuthUser, authErrAction: AuthErrAction): Promise<any> {
   return post<anModel.Annotation>(annotationsUrl, annotation, { token: user.token, authErrAction });
 }
 
-export async function postAnnotationSemantic(config: ConfRec, {target, user, uris, value, visibility, authErrAction}: SematicAnnotationPostInfo): Promise<any> {
+export async function postAnnotationSemantic(config: ConfRec, {target, user, uris, value, visibility, authErrAction}: SematicAnnotationPostRecord): Promise<any> {
   const anTarget = mkTarget(target);
   const body = anModel.mkSemanticAnBody(uris, value);
   const generator = anModel.mkGenerator(config.name, config.version, config.homepage);
@@ -133,7 +138,7 @@ export async function postAnnotationSemantic(config: ConfRec, {target, user, uri
   return postAnnotation(req, user, authErrAction);
 }
 
-export async function postAnnotationKeyword(config: ConfRec, {target, user, value, visibility, authErrAction}: KeywordAnnotationPostInfo): Promise<any> {
+export async function postAnnotationKeyword(config: ConfRec, {target, user, value, visibility, authErrAction}: KeywordAnnotationPostRecord): Promise<any> {
   const anTarget = mkTarget(target);
   const body = anModel.mkKeywordAnBody(value);
   const creator = anModel.mkCreator({id: user.profile.id});
@@ -142,7 +147,7 @@ export async function postAnnotationKeyword(config: ConfRec, {target, user, valu
   return postAnnotation(req, user, authErrAction);
 }
 
-export async function postAnnotationComment(config: ConfRec, {target, user, comment, visibility, authErrAction}: CommentAnnotationPostInfo): Promise<any> {
+export async function postAnnotationComment(config: ConfRec, {target, user, comment, visibility, authErrAction}: CommentAnnotationPostRecord): Promise<any> {
   const anTarget = mkTarget(target);
   const body = anModel.mkCommentAnBody(comment);
   const creator = anModel.mkCreator({id: user.profile.id});
@@ -150,6 +155,7 @@ export async function postAnnotationComment(config: ConfRec, {target, user, comm
   const req = anModel.mkAnnotation(body, anTarget, creator, generator, anModel.PurposeType.COMMENTING, visibility);
   return postAnnotation(req, user, authErrAction);
 }
+
 
 // Changing annotatations {{{1
 
@@ -179,7 +185,7 @@ export function searchAnnotations(expression: qModel.SearchQuery): Promise<Array
   const res = searchQueryParser.parse(expression);
   return (
     res.error ?
-      Promise.reject("Query expression parse error: " + res.error)
+      Promise.reject("Query expression parse error: " + res.error.message)
     : get(searchUrl, { expression })
   );
 }

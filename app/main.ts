@@ -15,7 +15,7 @@ $(document).ready(() => {
       if (!sourceDOM || !sourceDOM.value) {
         console.error(`<input type="hidden" id="${sourceInputElemId}" value="..."> element not found in DOM`);
       } else {
-        widget.renderWidget({ config, authStorage, mbUser: null, mbTarget: { pid: pidDOM.value, source: sourceDOM.value } });
+        widget.renderWidget({ config, authStorage, mbTarget: { pid: pidDOM.value, source: sourceDOM.value } });
       }
     }
   }

@@ -1,7 +1,6 @@
 import * as icons from "react-icons/fa";
 
 export const AnnotateIcon = icons.FaEdit;
-export const TripleIcon = icons.FaProjectDiagram;
 export const AnnotationsIcon = icons.FaList;
 export const SearchIcon = icons.FaSearch;
 export const HelpIcon = icons.FaQuestionCircle;
@@ -41,6 +40,7 @@ export const DeleteIcon = icons.FaTrashAlt;
 export const OKIcon = icons.FaCheck;
 export const CancelIcon = icons.FaTimes;
 export const ErrorIcon = icons.FaExclamation;
+export const BugIcon = icons.FaExclamationCircle;
 
 export const LeftIcon = icons.FaCaretLeft;
 export const RightIcon = icons.FaCaretRight;

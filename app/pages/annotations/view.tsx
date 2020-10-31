@@ -1,10 +1,15 @@
 import * as React from "react";
 import * as anModel from "core/annotationsModel";
-import type { ApiComponent } from "app/components/defs";
+import type { SysContext, AppContext } from "app/context";
 import AnList from "app/components/anList";
 import { LoaderFilter } from "./loaderFilter";
 
-export default function AnnotationsPage(props: ApiComponent): React.FunctionComponentElement<ApiComponent> {
+interface Props {
+  sysContext: SysContext;
+  appContext: AppContext;
+}
+
+export default function AnnotationsPage(props: Props): React.FunctionComponentElement<Props> {
   const loaderRef = React.useRef(null as any);
   const [showFilter, setShowFilter] = React.useState(true);
   const [annotations, setAnnotations] = React.useState(null as Array<anModel.Annotation>|null);
@@ -19,18 +24,19 @@ export default function AnnotationsPage(props: ApiComponent): React.FunctionComp
         <div className="container-fluid bg-light border-bottom pb-2">
           <LoaderFilter
             ref={loaderRef}
-            context={props.context}
+            sysContext={props.sysContext}
+            appContext={props.appContext}
             annotationsLoadedHandler={setAnnotations}/>
         </div>
       : <></>}
       <div className="anl-table pt-1" style={showFilter ? {} : { height: "460px" }}>
         {annotations ?
           <AnList
-            context={props.context}
+            sysContext={props.sysContext}
+            appContext={props.appContext}
             annotations={annotations}
             changedHandler={reload}
-            ontologyInfoHandler={(visible) => setShowFilter(!visible)}
-            authErrAction={props.authErrAction}/>
+            ontologyInfoHandler={(visible) => setShowFilter(!visible)}/>
           : <span className="font-italic">No annotations matching the filters</span>}
       </div>
     </>

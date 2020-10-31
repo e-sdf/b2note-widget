@@ -1,16 +1,20 @@
 import * as React from "react";
-import type { ApiComponent } from "app/components/defs";
+import type { SysContext, AppContext } from "app/context";
+import OntologySourcesPanel from "app/components/ontologySourcesPanel";
+import VisibilitySwitcher from "app/components/visibilitySwitcher";
 import SpinningWheel from "app/components/spinningWheel";
 import Alert from "app/components/alert";
-import VisibilitySwitcher from "app/components/visibilitySwitcher";
 import type { OntologyInfoRequest } from "app/components/ontologyInfoPanel";
 import * as anModel from "core/annotationsModel";
+import { defaultOntologySources } from "core/apiModels/ontologyQueryModel";
 import * as ac from "app/components/autocomplete";
 import * as api from "app/api/annotations";
 import * as icons from "app/components/icons";
 import { ActionEnum, anNotify } from "app/notify";
 
-interface Props extends ApiComponent {
+interface Props {
+  sysContext: SysContext;
+  appContext: AppContext;
   suggestion: ac.Suggestion|null;
   setSuggestionHandler(suggestion: ac.Suggestion|null): void;
   showInfoHandler(oir: OntologyInfoRequest): void;
@@ -20,13 +24,15 @@ export default function Semantic(props: Props): React.FunctionComponentElement<P
   const [suggestion, setSuggestion] = React.useState(props.suggestion);
   const [uris, setUris] = React.useState([] as Array<string>);
   const [value, setValue] = React.useState("");
+  const [sources, setSources] = React.useState(defaultOntologySources);
   const [visibility, setVisibility] = React.useState(anModel.VisibilityEnum.PRIVATE);
   const [successMessage, setSuccessMessage] = React.useState(null as string|null);
   const [errorMessage, setErrorMessage] = React.useState(null as string|null);
   const [isNew, setIsNew] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
-  const target = props.context.mbTarget;
-  const user = props.context.mbUser;
+  const mbTarget = props.sysContext.mbTarget;
+  const mbUser = props.appContext.mbUser;
+  const authErrAction = props.appContext.authErrAction;
 
   const inputRef = React.useRef(null as any);
 
@@ -58,26 +64,27 @@ export default function Semantic(props: Props): React.FunctionComponentElement<P
   }
 
   function postAnnotationAsSemantic(): void {
-    if (target && user) {
+    if (mbTarget && mbUser) {
       setLoading(true);
-      api.postAnnotationSemantic(props.context.config, { target, user, uris, value, visibility, authErrAction: props.authErrAction }).then(
+      api.postAnnotationSemantic(props.sysContext.config, { target: mbTarget, user: mbUser, uris, value, visibility, authErrAction }).then(
         newAn => {
           setLoading(false);
           setSuccessMessage("Sematic annotation created");
-          anNotify(props.context.config, ActionEnum.CREATE, newAn);
+          if (inputRef?.current) { inputRef.current.clear(); }
+          anNotify(props.sysContext.config, ActionEnum.CREATE, newAn);
         },
         (err) => { setLoading(false); setErrorMessage(err); }
       );
     }
   }
 
-  function postAnnotationAsKeyword(): void {
-    if (target && user) {
-      api.postAnnotationKeyword(props.context.config, { target, user, value, visibility, authErrAction: props.authErrAction }).then(
+ function postAnnotationAsKeyword(): void {
+    if (mbTarget && mbUser) {
+      api.postAnnotationKeyword(props.sysContext.config, { target: mbTarget, user: mbUser, value, visibility, authErrAction }).then(
         newAn => {
           setSuccessMessage("Keyword annotation created");
           setSuggestion(null);
-          anNotify(props.context.config, ActionEnum.CREATE, newAn);
+          anNotify(props.sysContext.config, ActionEnum.CREATE, newAn);
         },
         (err) => { setLoading(false); setErrorMessage(err); }
       );
@@ -120,41 +127,36 @@ export default function Semantic(props: Props): React.FunctionComponentElement<P
         <icons.SemanticIcon className="mr-1"/>
         <div style={{width: 350}}>
           <ac.SemanticAutocomplete
+            appContext={props.appContext}
             id="annotate-semantic-autocomplete"
+            sources={sources}
             ref={inputRef}
-            solrUrl={props.context.config.solrUrl}
             defaultInputValue={suggestion?.labelOrig || ""}
             allowNew={true}
-            onChange={gotSuggestion}/>
+            onChange={gotSuggestion}
+            onSubmit={postAnnotationAsSemantic}/>
         </div>
+        <button type="button" className="btn btn-info ml-2"
+          data-toggle="tooltip" data-placement="bottom" title="Show ontology details"
+          disabled={value.length === 0 || loading}
+          onClick={() => props.showInfoHandler({label: value, uris})}>
+          <icons.HelpIcon/>
+        </button>
       </div>
     );
   }
 
 
   function renderActionRow(): React.ReactElement {
-    const disabled = value.length === 0 || !props.context.mbUser || loading;
-
     return (
-      <div className="d-flex flex-row justify-content-between" style={{margin: "10px 10px 10px 30px"}}>
-        <button type="button" className="btn btn-info"
-          data-toggle="tooltip" data-placement="bottom" title="Show ontology details"
-          disabled={disabled}
-          onClick={() => props.showInfoHandler({label: value, uris})}>
-          <icons.HelpIcon/>
+      <div className="d-flex flex-row justify-content-end" style={{margin: "10px 10px 10px 30px"}}>
+        <VisibilitySwitcher text={true} visibility={visibility} setVisibility={setVisibility}/>
+        <button type="button" className="btn btn-primary ml-4"
+          data-toggle="tooltip" data-placement="bottom" title={mbUser ? "Create semantic annotation" : "Not logged in"}
+          disabled={value.length === 0 || !mbUser || loading}
+          onClick={postAnnotationAsSemantic}>
+          <icons.CreateIcon />
         </button>
-        <div>
-          <VisibilitySwitcher text={false} visibility={visibility} setVisibility={setVisibility}/>
-          <button type="button" className="btn btn-primary ml-2"
-            data-toggle="tooltip" data-placement="bottom" title={props.context.mbUser ? "Create semantic annotation" : "Not logged in"}
-            disabled={disabled}
-            onClick={() => {
-              postAnnotationAsSemantic();
-              if (inputRef?.current) { inputRef.current.clear(); }
-            }}>
-            <icons.CreateIcon/>
-          </button>
-        </div>
       </div>
     );
   }
@@ -162,6 +164,10 @@ export default function Semantic(props: Props): React.FunctionComponentElement<P
   return (
     <>
       {renderInput()}
+      <div className="ml-2 mr-2">
+        <OntologySourcesPanel sysContext={props.sysContext} appContext={props.appContext}
+          sourcesSelectedHandler={setSources}/>
+      </div>
       {renderActionRow()}
       <div className="d-flex flex-row justify-content-center mt-2">
         <SpinningWheel show={loading}/>

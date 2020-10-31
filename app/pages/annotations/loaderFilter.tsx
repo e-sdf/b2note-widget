@@ -2,13 +2,14 @@ import * as React from "react";
 import * as icons from "app/components/icons";
 import * as anModel from "core/annotationsModel";
 import * as api from "app/api/annotations";
-import type { Context } from "app/context";
+import type { SysContext, AppContext } from "app/context";
 import AnDownloadButton from "app/components/anDownloader";
 import SpinningWheel from "app/components/spinningWheel";
 import Alert from "app/components/alert";
 
 interface LoaderProps {
-  context: Context;
+  sysContext: SysContext;
+  appContext: AppContext;
   annotationsLoadedHandler: (anl: Array<anModel.Annotation>) => void;
 }
 
@@ -18,8 +19,10 @@ export interface LoaderInputHandles {
 
 // eslint-disable-next-line react/display-name
 export const LoaderFilter = React.forwardRef((props: LoaderProps, ref: React.Ref<LoaderInputHandles>) => {
-  const logged: boolean = props.context.mbUser !== null;
-  const hasTarget: boolean = props.context.mbTarget !== null;
+  const mbTarget = props.sysContext.mbTarget;
+  const mbUser = props.appContext.mbUser;
+  const logged: boolean = mbUser !== null;
+  const hasTarget: boolean = mbTarget !== null;
   const [allFilesFilter, setAllFilesFilter] = React.useState(hasTarget ? false : true);
   const [mineFilter, setMineFilter] = React.useState(logged ? true : false);
   const [othersFilter, setOthersFilter] = React.useState(logged ? false : true);
@@ -38,7 +41,7 @@ export const LoaderFilter = React.forwardRef((props: LoaderProps, ref: React.Ref
   React.useEffect(() => {
     setMineFilter(logged ? true : false);
     setOthersFilter(logged ? false : true);
-  }, [props.context.mbUser]);
+  }, [mbUser]);
 
   const allFilters = [allFilesFilter, mineFilter, othersFilter, semanticFilter, keywordFilter, commentFilter];
 
@@ -69,16 +72,16 @@ export const LoaderFilter = React.forwardRef((props: LoaderProps, ref: React.Ref
       props.annotationsLoadedHandler([]);
     } else {
       setLoading(true);
-      api.getAnnotationsJSON(props.context, mbFilters, props.context.mbTarget).then(
+      api.getAnnotationsJSON(props.sysContext, props.appContext, mbFilters).then(
         anl => {
           setLoading(false);
           setAnnotations(anl);
           props.annotationsLoadedHandler(anl);
-          setNoOfMine(anl.filter(a => anModel.getCreatorId(a) === (props.context.mbUser?.profile.id || "")).length);
-          setNoOfOthers(anl.filter(a => anModel.getCreatorId(a) !== (props.context.mbUser?.profile.id || "")).length);
-          setNoOfSemantic(anl.filter(anModel.isSemantic).length);
-          setNoOfKeyword(anl.filter(anModel.isKeyword).length);
-          setNoOfComment(anl.filter(anModel.isComment).length);
+          setNoOfMine(anl.filter(a => anModel.getCreatorId(a) === (mbUser?.profile.id || "")).length);
+          setNoOfOthers(anl.filter(a => anModel.getCreatorId(a) !== (mbUser?.profile.id || "")).length);
+          setNoOfSemantic(anl.filter(a => anModel.isSemanticAnBody(a.body)).length);
+          setNoOfKeyword(anl.filter(a => anModel.isKeywordAnBody(a.body)).length);
+          setNoOfComment(anl.filter(a => anModel.isCommentAnBody(a.body)).length);
         },
         (err) => { setLoading(false); setErrorMessage(err); }
       );
@@ -181,7 +184,7 @@ export const LoaderFilter = React.forwardRef((props: LoaderProps, ref: React.Ref
               {renderTypeSelection()}
             </div>
             <div className="">
-              <AnDownloadButton config={props.context.config} annotations={annotations}/>
+              <AnDownloadButton config={props.sysContext.config} annotations={annotations}/>
             </div>
           </div>
         </div>

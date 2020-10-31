@@ -1,10 +1,11 @@
 import type { PID } from "core/annotationsModel";
 import type { ConfRec } from "./config";
 import { StorageI } from "app/storage/defs";
-import type { Token } from "./api/http";
+import type { Token, AuthErrAction } from "core/http";
 import type { UserProfile } from "core/user";
 import type { StoredAuth } from "app/api/auth/defs";
 import { usersUrl } from "core/user";
+import type { SelectionSnapshot } from "./selection";
 
 export interface AuthUser {
   token: Token;
@@ -14,23 +15,28 @@ export interface AuthUser {
 export interface Target {
   pid: PID; // URI of the landing page
   source?: string; // The resource URI
+  selection?: SelectionSnapshot; // A selection on the landing page
 }
 
-export interface Context {
+export interface SysContext {
   config: ConfRec;
   authStorage: StorageI<StoredAuth>;
-  mbUser: AuthUser|null;
   mbTarget: Target|null;
 }
 
-export function isViewMode(context: Context): boolean {
-  return context.mbTarget != null && context.mbTarget.source != null;
+export interface AppContext {
+  mbUser: AuthUser|null;
+  authErrAction: AuthErrAction;
 }
 
-export function loggedUserPID(context: Context): PID|null {
+export function isViewMode(sysContext: SysContext): boolean {
+  return sysContext.mbTarget != null && (sysContext.mbTarget.source != null || sysContext.mbTarget.selection != null);
+}
+
+export function loggedUserPID(sysContext: SysContext, appContext: AppContext): PID|null {
   return (
-    context.mbUser
-      ? context.config.apiServerUrl + context.config.apiPath + usersUrl + "/" + context.mbUser.profile.id
+    appContext.mbUser
+      ? sysContext.config.apiServerUrl + sysContext.config.apiPath + usersUrl + "/" + appContext.mbUser.profile.id
       : null
   );
 }

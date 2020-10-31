@@ -1,105 +1,24 @@
 import _ from "lodash";
 import { matchSwitch } from "@babakness/exhaustive-type-checking";
 import * as React from "react";
-import { Context } from "app/context";
+import type { AppContext } from "app/context";
 import * as icons from "app/components/icons";
 import type { Annotation } from "core/annotationsModel";
-import type { SearchQuery } from "core/anQueryModel";
-import * as ac from "app/components/autocomplete";
+import type { SearchQuery } from "core/apiModels/anQueryModel";
 import { SearchType, BiOperatorType } from "core/searchModel";
 import * as queryParser from "core/searchQueryParser";
 import * as api from "app/api/annotations";
+import type { TermCompType } from "./termComp";
+import TermComp from "./termComp";
 import SpinningWheel from "app/components/spinningWheel";
 import Alert from "app/components/alert";
-
-interface TermCompProps {
-  solrUrl: string;
-  isFirst: boolean;
-  updateAnTypeHandle(sType: SearchType): void;
-  updateValueHandle(value: string): void;
-  updateSynonymsHandle(flag: boolean): void;
-  deleteHandle?(): void;
-  submitHandle(): void;
-}
-
-type TermComp = React.FunctionComponentElement<TermCompProps>;
-
-function TermComp(props: TermCompProps): TermComp {
-  const [inputType, setInputType] = React.useState(SearchType.REGEX);
-  const [value, setValue] = React.useState("");
-  const [includeSynonyms, setIncludeSynonyms] = React.useState(false);
-
-  function gotSuggestion(suggestions: ac.Suggestion[]): void {
-    const val = suggestions[0]?.labelOrig || "";
-    props.updateValueHandle(val);
-  }
-
-  return (
-    <div className="form-group">
-      <select className="form-control"
-        value={inputType}
-        onChange={(ev) => {
-          const val = ev.target.value as SearchType;
-          setInputType(val);
-          props.updateAnTypeHandle(val);
-          if (val === SearchType.SEMANTIC) {
-            setValue("");
-            props.updateValueHandle("");
-          }
-        }}>
-        <option value={SearchType.REGEX}>All types (regular expression)</option>
-        <option value={SearchType.SEMANTIC}>Semantic tag</option>
-        <option value={SearchType.KEYWORD}>Free-text keyword</option>
-        <option value={SearchType.COMMENT}>Comment</option>
-      </select>
-      {inputType === SearchType.SEMANTIC ?
-        <>
-          <ac.SemanticAutocomplete
-            id="basicSearch-semantic-autocomplete"
-            solrUrl={props.solrUrl}
-            onChange={gotSuggestion}
-           />
-          <div className="form-group">
-            <div className="form-check">
-              <input className="form-check-input" type="checkbox"
-                checked={includeSynonyms}
-                onChange={ev => {
-                  const val = ev.target.checked;
-                  setIncludeSynonyms(val);
-                  props.updateSynonymsHandle(val);
-                }}
-              />
-              <label className="form-check-label">
-                Include synonym matches
-              </label>
-            </div>
-          </div>
-        </>
-        : <input type="text" className="form-control"
-          value={value}
-          // onKeyPress={(ev) => { if (ev.charCode == 13) { props.submitHandle(); } }}
-          onChange={ev => {
-            const val: string = ev.target.value;
-            setValue(val);
-            props.updateValueHandle(val);
-          }}/>
-      }
-      {props.isFirst ? <></> :
-        <button type="button" className="btn btn-sm btn-danger"
-          onClick={() => { if (props.deleteHandle) { props.deleteHandle(); } }}>
-          <icons.DeleteIcon/>
-        </button>
-      }
-    </div>
-  );
-}
 
 interface TermItem {
   id: number;
   sType: SearchType;
   value: string;
   includeSynonyms: boolean; //Relevant just for SEMANTIC
-  termComp: TermComp;
+  termComp: TermCompType;
 }
 
 enum TermsActionType {
@@ -112,25 +31,6 @@ enum TermsActionType {
 
 function mkTermId(): number {
   return Date.now();
-}
-
-function mkTermItem(solrUrl: string, id: number, isFirst: boolean, dispatch: React.Dispatch<TermsAction>, submitFn: () => void): TermItem {
-  return {
-    id,
-    sType: SearchType.REGEX,
-    value: "",
-    includeSynonyms: false,
-    termComp:
-      <TermComp
-        key={id}
-        solrUrl={solrUrl}
-        isFirst={isFirst}
-        updateAnTypeHandle={(sType: SearchType): void => dispatch({ type: TermsActionType.UPDATE_STYPE, termId: id, sType })}
-        updateValueHandle={(value: string): void => dispatch({ type: TermsActionType.UPDATE_VALUE, termId: id, value })}
-        updateSynonymsHandle={(flag: boolean): void => dispatch({ type: TermsActionType.UPDATE_SYNONYMS_FLAG, termId: id, includeSynonyms: flag })}
-        deleteHandle={() => dispatch({ type: TermsActionType.DELETE, termId: id })}
-        submitHandle={submitFn}/>
-  };
 }
 
 interface TermsActionBase {
@@ -169,7 +69,7 @@ function reducer(terms: Array<TermItem>, action: TermsAction): Array<TermItem> {
 }
 
 export interface BasicSearchProps {
-  context: Context;
+  appContext: AppContext;
   resultsHandle(results: Array<Annotation>): void;
 }
 
@@ -180,10 +80,11 @@ export function BasicSearch(props: BasicSearchProps): React.FunctionComponentEle
   const [nonEmptyTerms, setNonEmptyTerms] = React.useState([] as Array<TermItem>);
   const [mode, setMode] = React.useState(SearchMode.ANY);
   const [searching, setSearching] = React.useState(false);
+  const [submitRequest, setSubmitRequest] = React.useState(false);
   const [errorMessage, setErrorMessage] = React.useState(null as string|null);
 
   React.useEffect(() => {
-    const firstTerm = mkTermItem(props.context.config.solrUrl, 0, true, dispatch, submitQuery);
+    const firstTerm = mkTermItem(0, true, dispatch, submitQuery);
     dispatch({ type: TermsActionType.ADD, termId: firstTerm.id, newTerm: firstTerm });
   }, []);
 
@@ -191,11 +92,40 @@ export function BasicSearch(props: BasicSearchProps): React.FunctionComponentEle
     setNonEmptyTerms(terms.filter(t => t.value.length > 0));
   }, [terms]);
 
-  //const nonEmptyTerms: () => Array<TermItem> = () => terms.filter(t => t.value.length > 1);
+  React.useEffect(
+    () => {
+      if (submitRequest) {
+        if (nonEmptyTerms.length > 0) {submitQuery();}
+        setSubmitRequest(false);
+      }
+    },
+    [submitRequest]
+  );
+
+  // React.useEffect(() => console.log(nonEmptyTerms), [nonEmptyTerms]);
+
+  function mkTermItem(id: number, isFirst: boolean, dispatch: React.Dispatch<TermsAction>, submitFn: () => void): TermItem {
+    return {
+      id,
+      sType: SearchType.REGEX,
+      value: "",
+      includeSynonyms: false,
+      termComp:
+        <TermComp
+          appContext={props.appContext}
+          key={id}
+          isFirst={isFirst}
+          updateAnTypeHandle={(sType: SearchType): void => dispatch({ type: TermsActionType.UPDATE_STYPE, termId: id, sType })}
+          updateValueHandle={(value: string): void => dispatch({ type: TermsActionType.UPDATE_VALUE, termId: id, value })}
+          updateSynonymsHandle={(flag: boolean): void => dispatch({ type: TermsActionType.UPDATE_SYNONYMS_FLAG, termId: id, includeSynonyms: flag })}
+          deleteHandle={() => dispatch({ type: TermsActionType.DELETE, termId: id })}
+          submitHandle={() => setSubmitRequest(true)}/>
+    };
+  }
 
   function addTerm(): void {
     const termId = mkTermId();
-    const newTerm = mkTermItem(props.context.config.solrUrl, termId, false, dispatch, submitQuery);
+    const newTerm = mkTermItem(termId, false, dispatch, submitQuery);
     dispatch({
       type: TermsActionType.ADD,
       termId,
@@ -227,7 +157,7 @@ export function BasicSearch(props: BasicSearchProps): React.FunctionComponentEle
         setSearching(false);
         props.resultsHandle(anl);
       },
-      () => { setSearching(false); setErrorMessage("Search failed due to error"); }
+      err => { setSearching(false); setErrorMessage(err); }
     );
   }
 
@@ -251,7 +181,7 @@ export function BasicSearch(props: BasicSearchProps): React.FunctionComponentEle
   }
 
   return (
-    <div className="container-fluid mt-2">
+    <div className="container-fluid mt-2" style={{width: "90%"}}>
       {terms.map((term: TermItem) => term.termComp)}
       {terms.length > 1 ? renderModeSelection() : <></>}
       <div className="form-group">

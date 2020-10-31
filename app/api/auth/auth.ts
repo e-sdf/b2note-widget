@@ -1,14 +1,14 @@
-import type { Token } from "../http";
-import { get } from "../http";
+import type { Token } from "core/http";
+import { get } from "core/http";
 import { AuthProvidersEnum } from "./defs";
-import type { Context } from "app/context";
+import type { SysContext } from "app/context";
 import { endpointUrl } from "app/config";
 
-export function invalidateLoginPm(context: Context): Promise<void> {
+export function invalidateLoginPm(context: SysContext): Promise<void> {
   return context.authStorage.delete();
 }
 
-export function takeLoginPm(context: Context, provider: AuthProvidersEnum, servicesToken: Token): Promise<Token> {
+export function takeLoginPm(context: SysContext, provider: AuthProvidersEnum, servicesToken: Token): Promise<Token> {
   return new Promise((resolve, reject) =>
     get<Token>(endpointUrl + `/${provider}/take-login`, { token: servicesToken }).then(
       token =>
@@ -21,7 +21,7 @@ export function takeLoginPm(context: Context, provider: AuthProvidersEnum, servi
   );
 }
 
-export function loginPm(context: Context, provider: AuthProvidersEnum, cancelHandler?: () => void): Promise<Token> {
+export function loginPm(context: SysContext, provider: AuthProvidersEnum, cancelHandler?: () => void): Promise<Token> {
   return new Promise((resolve, reject) => {
     let popup: Window|null = null;
 

@@ -1,19 +1,23 @@
 import { matchSwitch } from "@babakness/exhaustive-type-checking";
+import type { AppContext } from "app/context";
 import * as React from "react";
 import * as icons from "./icons";
 import * as anModel from "core/annotationsModel";
 import * as ac from "./autocomplete";
 
 export interface TagEditorProps {
-  solrUrl: string;
-  annotation: anModel.Annotation;
+  appContext: AppContext;
   cancelledHandler(): void;
+}
+
+export interface AnBodyTagEditorProps extends TagEditorProps {
+  anBody: anModel.AnBody;
   updateHandler(newBody: anModel.AnBody): void;
 }
 
-export default function TagEditor(props: TagEditorProps): React.FunctionComponentElement<TagEditorProps> {
+export function AnBodyTagEditor(props: AnBodyTagEditorProps): React.FunctionComponentElement<AnBodyTagEditorProps> {
   const [uris, setUris] = React.useState([] as Array<string>);
-  const [label, setLabel] = React.useState(anModel.getLabel(props.annotation));
+  const [label, setLabel] = React.useState(anModel.getLabelFromBody(props.anBody));
 
   const inputRef = React.useRef(null as any);
 
@@ -23,11 +27,17 @@ export default function TagEditor(props: TagEditorProps): React.FunctionComponen
   }
 
   function finish(): void {
-    const anBody: anModel.AnBody =
-      anModel.isSemantic(props.annotation) ? anModel.mkSemanticAnBody(uris, label)
-      : anModel.isKeyword(props.annotation) ? anModel.mkKeywordAnBody(label)
-      : anModel.mkCommentAnBody(label);
-    props.updateHandler(anBody);
+    const b = props.anBody;
+    const newBody: anModel.AnBody|null =
+     anModel.isSemanticAnBody(b) ? anModel.mkSemanticAnBody(uris, label)
+     : anModel.isKeywordAnBody(b) ? anModel.mkKeywordAnBody(label)
+     : anModel.isCommentAnBody(b) ? anModel.mkCommentAnBody(label)
+     : null;
+      if (newBody) {
+        props.updateHandler(newBody);
+      } else {
+        console.error("Update error: BodyTagEditor cannot update " + anModel.getAnBodyType(props.anBody));
+      }
   }
 
   React.useEffect(() => {
@@ -35,27 +45,27 @@ export default function TagEditor(props: TagEditorProps): React.FunctionComponen
   }, [inputRef]);
 
   function renderInput(): React.ReactElement {
-    return matchSwitch(anModel.getAnType(props.annotation), {
-      [anModel.AnnotationType.SEMANTIC]: () =>
+    return matchSwitch(anModel.getAnBodyType(props.anBody), {
+      [anModel.AnBodyType.SEMANTIC]: () =>
         <ac.SemanticAutocomplete
           ref={inputRef}
-          id="annotations-semantic-autocomplete"
-          solrUrl={props.solrUrl}
+          appContext={props.appContext}
+          id="anBodys-semantic-autocomplete"
           defaultInputValue={label}
           onChange={gotSuggestion}
         />,
-      [anModel.AnnotationType.KEYWORD]: () =>
+      [anModel.AnBodyType.KEYWORD]: () =>
         <input type="text" className="form-control"
           value={label}
           onChange={ev => setLabel(ev.target.value)}
         />,
-      [anModel.AnnotationType.COMMENT]: () =>
+      [anModel.AnBodyType.COMMENT]: () =>
         <textarea className="form-control"
           value={label}
           onChange={ev => setLabel(ev.target.value)}
         />,
-        [anModel.AnnotationType.TRIPLE]: () => <></>,
-        [anModel.AnnotationType.UNKNOWN]: () => <></>
+        [anModel.AnBodyType.TRIPLE]: () => <></>,
+        [anModel.AnBodyType.UNKNOWN]: () => <></>
     });
   }
 

@@ -1,12 +1,12 @@
 import { matchSwitch } from '@babakness/exhaustive-type-checking';
 import * as React from "react";
 import * as ReactDOM from "react-dom";
-import { config } from "../config";
-import type { Token } from "app/api/http";
+import { config } from "app/config";
+import type { SysContext, AppContext } from "app/context";
+import type { Token } from "core/http";
 import { AuthProvidersEnum } from "app/api/auth/defs";
 import * as auth from "app/api/auth/auth";
 import * as profileApi from "app/api/profile";
-import { Context } from "app/context";
 import * as icons from "app/components/icons";
 import { PagesEnum } from "../pages/pages";
 import AnnotatePage from "../pages/annotate/view";
@@ -15,6 +15,7 @@ import SearchPage from "../pages/search/view";
 import AuthProviderSelectionPage from "../pages/login";
 import ProfilePage from "../pages/profile/view";
 import HelpPage from "../pages/help/view";
+import ReportBugPage from "../pages/reportBug";
 import { HelpSection } from "../pages/help/defs";
 import { notifyLoaded } from "app/components/notify";
 import { shorten } from "app/components/utils";
@@ -37,30 +38,32 @@ function pageToHelp(page: PagesEnum): HelpSection {
     [PagesEnum.SEARCH]: () => HelpSection.SEARCH,
     [PagesEnum.LOGIN]: () => HelpSection.LOGIN,
     [PagesEnum.PROFILE]: () => HelpSection.PROFILE,
-    [PagesEnum.HELP]: () => HelpSection.TOC // just for type exahaustivness, not used actually
+    [PagesEnum.HELP]: () => HelpSection.TOC, // just for type exahaustivness, not used actually
+    [PagesEnum.REPORT_BUG]: () => HelpSection.TOC // just for type exahaustivness, not used actually
   });
 }
 
 enum LoginStateEnum { NOT_LOGGED, LOGGING, LOGGED, ERROR }
 
 interface Props {
-  context: Context;
+  sysContext: SysContext;
 }
 
 function Widget(props: Props): React.FunctionComponentElement<Props> {
-  const [page, setPage] = React.useState(props.context.mbTarget ? PagesEnum.ANNOTATE : PagesEnum.ANNOTATIONS);
+  const mbTarget = props.sysContext.mbTarget;
+  const [page, setPage] = React.useState(mbTarget ? PagesEnum.ANNOTATE : PagesEnum.ANNOTATIONS);
   const [helpPage, setHelpPage] = React.useState(PagesEnum.ANNOTATE);
-  const [context, setContext] = React.useState(props.context);
+  const [appContext, setAppContext] = React.useState({ mbUser: null, authErrAction: loginPm } as AppContext);
   const [authProvider, setAuthProvider] = React.useState(null as null|AuthProvidersEnum);
   const [chosenAuthProvider, setChosenAuthProvider] = React.useState(null as null | AuthProvidersEnum);
   const [loginState, setLoginState] = React.useState(LoginStateEnum.NOT_LOGGED);
 
   function retrieveProfile(provider: AuthProvidersEnum|null, token: Token|null): void {
     if (provider && token) {
-      profileApi.getUserProfilePm(config, token, () => auth.loginPm(context, provider)).then(
+      profileApi.getUserProfilePm(config, token, () => auth.loginPm(props.sysContext, provider)).then(
         profile => {
           setLoginState(LoginStateEnum.LOGGED);
-          setContext({ ...context, mbUser: { token, profile }});
+          setAppContext({ ...appContext, mbUser: { token, profile }});
         },
         err => {
           setLoginState(LoginStateEnum.ERROR);
@@ -77,7 +80,7 @@ function Widget(props: Props): React.FunctionComponentElement<Props> {
       if (servicesToken && loginState !== LoginStateEnum.LOGGING) {
         const provider = AuthProvidersEnum.OPEN_AIRE;
         setLoginState(LoginStateEnum.LOGGING);
-        auth.takeLoginPm(context, provider, servicesToken).then(
+        auth.takeLoginPm(props.sysContext, provider, servicesToken).then(
           token => {
             setAuthProvider(provider);
             retrieveProfile(provider, token);
@@ -98,7 +101,7 @@ function Widget(props: Props): React.FunctionComponentElement<Props> {
 
       setLoginState(LoginStateEnum.LOGGING);
       if (chosenAuthProvider) {
-        auth.loginPm(props.context, chosenAuthProvider, cancel).then(
+        auth.loginPm(props.sysContext, chosenAuthProvider, cancel).then(
           token => {
             retrieveProfile(chosenAuthProvider, token);
             resolve(token);
@@ -117,7 +120,7 @@ function Widget(props: Props): React.FunctionComponentElement<Props> {
   }
 
   function firstLogin(): void {
-    context.authStorage.retrieve().then(
+    props.sysContext.authStorage.retrieve().then(
       sAuth => {
         setLoginState(LoginStateEnum.LOGGING);
         setAuthProvider(sAuth.provider);
@@ -128,9 +131,9 @@ function Widget(props: Props): React.FunctionComponentElement<Props> {
   }
 
   function logout(): void {
-    context.authStorage.delete().then(
+    props.sysContext.authStorage.delete().then(
       () => {
-      setContext({ ...context, mbUser: null });
+      setAppContext({ ...appContext, mbUser: null });
       setLoginState(LoginStateEnum.NOT_LOGGED);
       setAuthProvider(null);
       setChosenAuthProvider(null);
@@ -143,7 +146,7 @@ function Widget(props: Props): React.FunctionComponentElement<Props> {
     notifyLoaded(); // Notify the hosting service that the widget has been loaded and is ready to possibly receive a login token
     setTimeout(
       () => { // Wait 500ms and then check if we should not login ourselves.
-        if (context.mbTarget && loginState === LoginStateEnum.NOT_LOGGED) {
+        if (props.sysContext.mbTarget && loginState === LoginStateEnum.NOT_LOGGED) {
           firstLogin();
         }
       },
@@ -165,17 +168,18 @@ function Widget(props: Props): React.FunctionComponentElement<Props> {
 
   function pageComp(): React.ReactElement {
     return matchSwitch(page, {
-      [PagesEnum.ANNOTATE]: () => <AnnotatePage context={context} authErrAction={() => loginPm()}/>,
-      [PagesEnum.ANNOTATIONS]: () => <AnnotationsPage context={context} authErrAction={() => loginPm()}/>,
-      [PagesEnum.SEARCH]: () => <SearchPage context={context} authErrAction={() => loginPm()}/>,
+      [PagesEnum.ANNOTATE]: () => <AnnotatePage sysContext={props.sysContext} appContext={appContext}/>,
+      [PagesEnum.ANNOTATIONS]: () => <AnnotationsPage sysContext={props.sysContext} appContext={appContext}/>,
+      [PagesEnum.SEARCH]: () => <SearchPage sysContext={props.sysContext} appContext={appContext}/>,
       [PagesEnum.LOGIN]: () => <AuthProviderSelectionPage config={config} selectedHandler={(p) => setChosenAuthProvider(p)}/>,
-      [PagesEnum.PROFILE]: () => context.mbUser ?
+      [PagesEnum.PROFILE]: () => appContext.mbUser ?
         <ProfilePage
-          config={props.context.config}
-          user={context.mbUser}
-          updateProfileFn={() => retrieveProfile(authProvider, context.mbUser?.token ? context.mbUser.token : null)} authErrAction={() => loginPm()}/>
+          config={props.sysContext.config}
+          user={appContext.mbUser}
+          updateProfileFn={() => retrieveProfile(authProvider, appContext.mbUser?.token ? appContext.mbUser.token : null)} authErrAction={() => loginPm()}/>
       : <></>,
-      [PagesEnum.HELP]: () => <HelpPage section={pageToHelp(helpPage)}/>
+      [PagesEnum.HELP]: () => <HelpPage section={pageToHelp(helpPage)}/>,
+      [PagesEnum.REPORT_BUG]: () => <ReportBugPage/>
     });
   }
 
@@ -210,15 +214,21 @@ function Widget(props: Props): React.FunctionComponentElement<Props> {
             </a>
           </li>
           <li className="nav-item">
-            <a className={"nav-link" + activeFlag(PagesEnum.HELP)} href="#"data-toggle="tooltip"
-               data-placement="bottom" title="Context Help"
+            <a className={"nav-link" + activeFlag(PagesEnum.HELP)} href="#"
+              data-toggle="tooltip" data-placement="bottom" title="Context Help"
               onClick={() => setPage(PagesEnum.HELP)}
             ><icons.HelpIcon/></a>
+          </li>
+          <li className="nav-item">
+            <a className={"nav-link" + activeFlag(PagesEnum.REPORT_BUG)} href="#"
+              data-toggle="tooltip" data-placement="bottom" title="Report Bug"
+              onClick={() => setPage(PagesEnum.REPORT_BUG)}
+            ><icons.BugIcon/></a>
           </li>
           <li className="nav-item ml-auto">
             <a
               className={"nav-link" + activeFlag(PagesEnum.PROFILE)} href="#"
-              data-toggle="tooltip" data-placement="bottom" title={context.mbUser ? context.mbUser.profile.email : "Login"}
+              data-toggle="tooltip" data-placement="bottom" title={appContext.mbUser ? appContext.mbUser.profile.email : "Login"}
               onClick={() =>
                 matchSwitch(loginState, {
                   [LoginStateEnum.NOT_LOGGED]: () => firstLogin(),
@@ -230,7 +240,7 @@ function Widget(props: Props): React.FunctionComponentElement<Props> {
                 [LoginStateEnum.NOT_LOGGED]: () => <icons.LoginIcon/>,
                 [LoginStateEnum.LOGGING]: () => <span>Logging in...</span>,
                 [LoginStateEnum.LOGGED]:
-                  () => <span><icons.UserIcon/> {shorten(context.mbUser?.profile.personName || "", 13)}</span>,
+                  () => <span><icons.UserIcon/> {shorten(appContext.mbUser?.profile.personName || "", 13)}</span>,
                 [LoginStateEnum.ERROR]:
                   () => <span style={{fontSize: "90%"}}>Login error, try again</span>
               })}
@@ -255,7 +265,7 @@ function Widget(props: Props): React.FunctionComponentElement<Props> {
     <div>
       <img src="img/logo.png" style={{width: "100%"}}/>
       <div id="widget-version">
-        <a href="https://github.com/e-sdf/b2note-reactjs/releases" target="_blank" rel="noopener noreferrer">
+        <a href="https://github.com/e-sdf/b2note-widget/releases" target="_blank" rel="noopener noreferrer">
           {config.version}
         </a>
       </div>
@@ -282,12 +292,12 @@ export function renderWidgetInfo(): void {
   }
 }
 
-export function renderWidget(context: Context): void {
+export function renderWidget(sysContext: SysContext): void {
   const container = document.getElementById("b2note-widget");
   if (container) {
-    ReactDOM.render(<Widget context={context}/>, container);
-    if (context.mbTarget) {
-      console.log(`[B2NOTE] Annotating pid="${context.mbTarget.pid}" source="${context.mbTarget.source}"`);
+    ReactDOM.render(<Widget sysContext={sysContext}/>, container);
+    if (sysContext.mbTarget) {
+      console.log(`[B2NOTE] Annotating pid="${sysContext.mbTarget.pid}" source="${sysContext.mbTarget.source}" selection="${sysContext.mbTarget.selection}"`);
     } else {
       console.log("[B2NOTE] No target, will be in the view more");
     }
@@ -295,3 +305,4 @@ export function renderWidget(context: Context): void {
     console.error("[B2NOTE]widget DOM element missing");
   }
 }
+

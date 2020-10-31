@@ -1,9 +1,4 @@
-import type { Context } from "../context";
-import type { AuthErrAction } from "../api/http";
+import type { SysContext, AppContext } from "app/context";
+import { AuthErrAction } from "core/http";
 
 export const b2noteBlue = "#1C418F";
-
-export interface ApiComponent {
-  context: Context;
-  authErrAction: AuthErrAction;
-}
