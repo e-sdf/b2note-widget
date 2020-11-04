@@ -1,4 +1,3 @@
-import _ from "lodash";
 import * as React from "react";
 import type { SysContext, AppContext } from "app/context";
 import * as anModel from "core/annotationsModel";

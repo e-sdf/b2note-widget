@@ -2,4 +2,5 @@
 
 ./scripts/utils/clean.sh
 ./scripts/updateVersion.sh
-webpack --progress --config webpack.prod.js
+cp -rv ./server ./dist/
+npx webpack --progress --config webpack.prod.js

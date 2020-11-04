@@ -101,7 +101,7 @@ export default function AnList(props: Props): React.FunctionComponentElement<Pro
                 return (
                     <div key={an.id} className="bg-light mb-1">
                     {!currentTarget(an) ? 
-                      <a href={an.target.id} target="_blank">{an.target.id}</a>
+                      <a href={an.target.id} target="_blank" rel="noreferrer">{an.target.id}</a>
                     : <></>}
                   </div>
                 );
@@ -129,10 +129,10 @@ export default function AnList(props: Props): React.FunctionComponentElement<Pro
 
       function renderAnnotations(): React.ReactElement {
         return (
-          <div className="mb-0 pb-2">
+          <div className="mb-0">
             {tagRecord.annotations.map(
               an =>
-                <div key={an.id} className="pt-2">
+                <div key={an.id}>
                   <AnView
                     sysContext={props.sysContext}
                     appContext={props.appContext}

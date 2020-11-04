@@ -62,6 +62,5 @@ typings/
 
 .vscode
 b2note-core/
-server/public/widget/js/app.js
-server/public/widget/css/bundle.css
+server/
 

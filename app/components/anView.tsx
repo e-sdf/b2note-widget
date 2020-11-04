@@ -88,20 +88,25 @@ export default function AnView(props: Props): React.FunctionComponentElement<Pro
   }
 
   function renderTarget(): React.ReactElement {
-    function renderTargetPart(part: "URL"|"Link"|"Selection", url?: string, thisPart?: boolean): React.ReactElement {
+
+    type Params = 
+      { part: "Page"; url: string; thisPart: boolean } |
+      { part: "Link"; url: string; thisPart: boolean } |
+      { part: "Selection"; selection: string }
+    
+    function renderTargetPart(params: Params): React.ReactElement {
       return (
-        <div>
-          {thisPart ?
-            <span className="badge badge-info"
-              data-toggle="tooltip" data-placement="bottom" title={"Currently annotated Target " + part}>
-              {part}
+        <div className="mr-2 mb-2">
+          {(params.part === "Page" || params.part === "Link") && params.thisPart ?
+            <span className="badge badge-secondary">
+              This {params.part}
             </span>
           :
-            <a href="#"
-              onClick={() => { if (part === "Selection") { window.alert("Not yet implemented"); } else { window.open(url, "_blank"); }}}>
+            <a href="#">
               <span className="badge badge-info"
-                data-toggle="tooltip" data-placement="bottom" title={part === "Selection" ? "Show selection" : "Open Target " + part + " URL"}>
-                <icons.ArrowRightIcon/> {part}
+                data-toggle="tooltip" data-placement="bottom" 
+                title={params.part === "Selection" ? params.selection : params.url}>
+                {params.part}
               </span>
             </a>
           }
@@ -110,22 +115,11 @@ export default function AnView(props: Props): React.FunctionComponentElement<Pro
     }
 
     return (
-      <div>
-        {renderTargetPart("URL", target.id, thisId)}
-        {target.source ? renderTargetPart("Link", target.source, thisSource) : <></>}
-        {target.selector ? renderTargetPart("Selection") : <></>}
+      <div className="d-flex flex-row">
+        {renderTargetPart({ part: "Page", url: target.id, thisPart: thisId })}
+        {target.source ? renderTargetPart({ part: "Link", url: target.source, thisPart: thisSource }) : <></>}
+        {target.selector ? renderTargetPart({ part: "Selection", selection: target.selector.selection}) : <></>}
       </div>
-    );
-  }
-
-  function renderOwner(): React.ReactElement {
-    return (
-      mbUserPID ?
-        anModel.isMine(annotation, mbUserPID) ?
-          <></>
-        : <icons.OthersIcon className="text-secondary"
-            data-toggle="tooltip" data-placement="bottom" title="Other's annotation"/>
-      : <></>
     );
   }
 
@@ -134,13 +128,11 @@ export default function AnView(props: Props): React.FunctionComponentElement<Pro
   function renderAnActions(): React.ReactElement {
     return (
       <>
-        <div style={padded}>
-          <VisibilitySwitcher
-            text={false}
-            small={true}
-            visibility={annotation.visibility}
-            setVisibility={updateVisibility}/>
-        </div>
+        <VisibilitySwitcher
+          text={false}
+          small={true}
+          visibility={annotation.visibility}
+          setVisibility={updateVisibility}/>
         <div className="btn-group" style={padded}>
           <button type="button"
             className={actionBtnStyle}
@@ -153,43 +145,45 @@ export default function AnView(props: Props): React.FunctionComponentElement<Pro
     );
   }
 
-  function renderAnnotationView(): React.ReactElement {
-    return (
-      <AnTagView
-        sysContext={props.sysContext}
-        appContext={props.appContext}
-        annotation={annotation}
-        anChangedHandler={an => { if (props.anChangedHandler) { props.anChangedHandler(an); } }}
-      />
-    );
-  }
-
   function renderView(): React.ReactElement {
+    const isMine = anModel.isMine(annotation, mbUserPID);
+
     return (
-      <>
-       {renderAnnotationView()}
-        <div className="d-flex flex-row">
-          <div style={{...padded, marginRight: "10px"}}>
-            {renderTarget()}
-          </div>
-          <div style={padded}>
-            {renderOwner()}
-          </div>
-          {anModel.isMine(annotation, mbUserPID) ? renderAnActions() : <></>}
+      <div className="ml-2 pb-2 border-bottom">
+        {renderTarget()}
+        {isMine ?
+          <AnTagView
+            sysContext={props.sysContext}
+            appContext={props.appContext}
+            annotation={annotation}
+            anChangedHandler={an => { if (props.anChangedHandler) { props.anChangedHandler(an); } }}
+          />
+        : <></>
+        }
+        <div className="mt-2 d-flex flex-row">
+          {isMine ? 
+            renderAnActions()
+          :
+            <icons.OthersIcon className="text-secondary"
+              data-toggle="tooltip" data-placement="bottom" title="Other's annotation"/>
+          }
         </div>
-      </>
+      </div>
     );
   }
 
   return (
-    <div className="mr-2">
+    <div className="mt-2 mr-2">
       {pendingDelete ?
         renderDeleteConfirmation()
       : renderView()}
-      <div className="row mt-2 justify-content-center">
-        <SpinningWheel show={loading}/>
-        <Alert type="danger" message={errorMessage} closedHandler={() => setErrorMessage(null)}/>
-      </div>
+      {errorMessage || loading ?
+        <div className="row mt-2 justify-content-center">
+          <SpinningWheel show={loading}/>
+          <Alert type="danger" message={errorMessage} closedHandler={() => setErrorMessage(null)}/>
+        </div>
+      : <></>
+      }
     </div>
   );
 }

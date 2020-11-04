@@ -3,7 +3,7 @@ import * as widget from "./widget/view";
 import { pidInputElemId, sourceInputElemId } from "core/widgetDefs";
 import authStorage from "app/api/auth/storage-window";
 
-$(document).ready(() => {
+$(() => {
   if (widget.canRenderWidgetInfo()) {
     widget.renderWidgetInfo();
   } else if (widget.canRenderWidget()) {
@@ -12,6 +12,7 @@ $(document).ready(() => {
       console.error(`<input type="hidden" id="${pidInputElemId}" value="..."> element not found in DOM`);
     } else {
       const sourceDOM = document.getElementById(sourceInputElemId) as HTMLInputElement;
+      // const selectionDOM = document.getElementById(sourceInputElemId) as HTMLInputElement;
       if (!sourceDOM || !sourceDOM.value) {
         console.error(`<input type="hidden" id="${sourceInputElemId}" value="..."> element not found in DOM`);
       } else {

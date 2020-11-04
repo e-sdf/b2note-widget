@@ -49,15 +49,18 @@ export default function AnTagView(props: Props): React.FunctionComponentElement<
       :
         <button type="button"
           className="btn btn-sm btn-outline-primary"
-          data-toggle="tooltip" data-placement="bottom" title="Edit label of this annotation"
+          data-toggle="tooltip" data-placement="bottom" title="Change annotation"
           onClick={() => setEdited(true)}>
-          <icons.EditIcon/> Edit label
+          <icons.EditIcon/> Change annotation
         </button>
       }
-      <div className="row mt-2 justify-content-center">
-        <SpinningWheel show={loading}/>
-        <Alert type="danger" message={errorMessage} closedHandler={() => setErrorMessage(null)}/>
-      </div>
+      {errorMessage || loading ?
+        <div className="row mt-2 justify-content-center">
+          <SpinningWheel show={loading}/>
+          <Alert type="danger" message={errorMessage} closedHandler={() => setErrorMessage(null)}/>
+        </div>
+      : <></>
+      }
     </>
   );
 }
