@@ -263,7 +263,7 @@ function Widget(props: Props): React.FunctionComponentElement<Props> {
 
   return (
     <div>
-      <img src="img/logo.png" style={{width: "100%"}}/>
+      <img src={config.widgetServerUrl + config.imgPath + "logo.png"} style={{width: "100%"}}/>
       <div id="widget-version">
         <a href="https://github.com/e-sdf/b2note-widget/releases" target="_blank" rel="noopener noreferrer">
           {config.version}
