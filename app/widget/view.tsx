@@ -248,9 +248,8 @@ function Widget(props: Props): React.FunctionComponentElement<Props> {
           </li>
           {loginState === LoginStateEnum.LOGGED ?
             <li className="nav-item">
-              <a className="nav-link" style={{paddingLeft: 0}}
-                href="#"data-toggle="tooltip"
-                data-placement="bottom" title="Logout"
+              <a className="nav-link" style={{paddingLeft: 0}} href="#"
+                data-toggle="tooltip" data-placement="bottom" title="Logout"
                 onClick={logout}
               ><icons.LogoutIcon/></a>
             </li>

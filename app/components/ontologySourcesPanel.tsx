@@ -6,6 +6,7 @@ import { defaultOntologySources } from "core/apiModels/ontologyQueryModel";
 import { getCustomOntologiesPm } from "app/api/profile";
 import SpinningWheel from "app/components/spinningWheel";
 import Alert from "app/components/alert";
+import * as icons from "app/components/icons";
 
 interface Props {
   sysContext: SysContext;
@@ -52,7 +53,7 @@ export default function OntologySourcesPanel(props: Props): React.FunctionCompon
               ...sources,
               solr: ev.target.checked
             })}/>
-          SOLR index
+          Central index
         </div>
         {customOntologies.map(o => 
           <div key={o.id}>
@@ -75,6 +76,11 @@ export default function OntologySourcesPanel(props: Props): React.FunctionCompon
     <div className="card">
       <div className="card-header p-2">
         Ontologies used
+        <a href="https://b2note.bsc.es/app" target="_blank" rel="noreferrer"
+          className="ml-2"
+          data-toggle="tooltip" data-placement="bottom" title="Manage custom ontologies">
+          <icons.ConfigureIcon/>
+        </a>
       </div>
       <div className="card-body p-2" style={{height: 120, overflowY: "auto"}}>
         { loading ?

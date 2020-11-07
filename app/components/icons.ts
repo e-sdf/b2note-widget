@@ -46,3 +46,5 @@ export const LeftIcon = icons.FaCaretLeft;
 export const RightIcon = icons.FaCaretRight;
 
 export const ArrowRightIcon = icons.FaArrowRight;
+
+export const ConfigureIcon = icons.FaCog;
