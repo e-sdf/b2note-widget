@@ -154,6 +154,7 @@ export default function AnList(props: Props): React.FunctionComponentElement<Pro
               <div style={{verticalAlign: "middle", whiteSpace: "nowrap"}}>
                 <AnTagDisplay
                   anBody={an.body}
+                  maxLen={37}
                   onClick={() => openOntologiesInfo({ label: anModel.getLabel(an), uris: anModel.getSourcesFromAnBody(an.body) })}
                 />
               </div>
