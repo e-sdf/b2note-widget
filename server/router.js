@@ -10,16 +10,16 @@ router.get("/widget", (req, resp) => {
 
 // Return widget; from historical reasons, loading a widget with a Target is POST
 router.post("/widget", (req, resp) => {
-  if (!req.body.pid_tofeed) {
+  const pid = req.body.pid_tofeed;
+  if (!pid) {
     responses.clientErr(resp, { error: "pid_tofeed missing in body" });
   } else {
-    const pid = req.body.pid_tofeed;
-    if (!req.body.subject_tofeed)  {
-      responses.clientErr(resp, { error: "subject_tofeed missing in the body" });
-    } else {
-      const source = req.body.subject_tofeed;
-      resp.render("widget", { pid, source });
-    }
+    const source = req.body.subject_tofeed;
+    const xPath = req.body.xpath_tofeed;
+    const textContent = req.body.textContent_tofeed;
+    const startOffset = req.body.startOffset_tofeed;
+    const endOffset = req.body.endOffset_tofeed;
+    resp.render("widget", { pid, source, xPath, textContent, startOffset, endOffset });
   }
 });
 
