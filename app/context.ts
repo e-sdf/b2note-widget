@@ -1,21 +1,44 @@
 import type { PID } from "core/annotationsModel";
 import type { ConfRec } from "./config";
 import { StorageI } from "app/storage/defs";
+import type { AnTarget } from "core/annotationsModel";
+import { AnBodyItemType } from "core/annotationsModel";
 import type { Token, AuthErrAction } from "core/http";
 import type { UserProfile } from "core/user";
 import type { StoredAuth } from "app/api/auth/defs";
 import { usersUrl } from "core/user";
-import type { SelectionSnapshot } from "./selection";
+
+export interface SelectionSnapshot {
+  xPath: string;
+  textContent: string;
+  startOffset: number;
+  endOffset: number;
+}
+
+export function ssToString(ss: SelectionSnapshot): string {
+  return ss.textContent.substring(ss.startOffset, ss.endOffset);
+}
+
+export interface Target {
+  pid: string; // URI of the landing page
+  source?: string; // The resource URI
+  selection?: SelectionSnapshot; // A selection on the landing page
+}
+
+export function mkTarget(target: Target): AnTarget {
+  const id = target.pid;
+  const source = target.source;
+
+  return {
+    id,
+    ... source ? { source } : {},
+    type: AnBodyItemType.SPECIFIC_RESOURCE
+  };
+}
 
 export interface AuthUser {
   token: Token;
   profile: UserProfile;
-}
-
-export interface Target {
-  pid: PID; // URI of the landing page
-  source?: string; // The resource URI
-  selection?: SelectionSnapshot; // A selection on the landing page
 }
 
 export interface SysContext {

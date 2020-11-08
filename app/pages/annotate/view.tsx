@@ -1,7 +1,7 @@
 import * as React from "react";
 import type { SysContext, AppContext } from "app/context";
+import { ssToString } from "app/context";
 import * as ac from "app/components/autocomplete";
-import * as sel from "app/selection";
 import { Tabs, Tab } from "app/components/ui";
 import type { OntologyInfoRequest } from "app/components/ontologyInfoPanel";
 import OntologyInfoPanel from "app/components/ontologyInfoPanel";
@@ -36,10 +36,10 @@ export default function AnnotatePage(props: Props): React.FunctionComponentEleme
           <div className="card-body" style={{padding: "10px"}}>
             <>
               {t.source ?
-                <a href={t.source} target="_blank">{t.source}</a>
+                <a href={t.source} target="_blank" rel="noreferrer">{t.source}</a>
               : <></>}
               {t.selection ?
-                <span style={{backgroundColor: "yellow", fontSize: "90%"}}>{sel.toString(t.selection)}</span>
+                <span style={{backgroundColor: "yellow", fontSize: "90%"}}>{ssToString(t.selection)}</span>
               :<></>}
             </>
           </div>

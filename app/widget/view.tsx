@@ -296,7 +296,7 @@ export function renderWidget(sysContext: SysContext): void {
   if (container) {
     ReactDOM.render(<Widget sysContext={sysContext}/>, container);
     if (sysContext.mbTarget) {
-      console.log(`[B2NOTE] Annotating pid="${sysContext.mbTarget.pid}" source="${sysContext.mbTarget.source}" selection="${sysContext.mbTarget.selection}"`);
+      console.log(`[B2NOTE] Annotating pid="${sysContext.mbTarget.pid}" source="${sysContext.mbTarget.source}" selection=${JSON.stringify(sysContext.mbTarget.selection)}`);
     } else {
       console.log("[B2NOTE] No target, will be in the view more");
     }

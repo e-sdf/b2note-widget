@@ -1,12 +1,12 @@
 import type { ConfRec } from "app/config";
 import { endpointUrl } from "app/config";
 import type { Target, SysContext, AppContext, AuthUser } from "app/context";
+import { mkTarget } from "app/context";
 import type { AuthErrAction } from "core/http";
 import { get, post, patch, del } from "core/http";
 import * as anModel from "core/annotationsModel";
 import * as formats from "core/formats";
 import * as qModel from "core/apiModels/anQueryModel";
-import { mkTarget } from "app/target";
 import * as sModel from "core/searchModel";
 import * as searchQueryParser from "core/searchQueryParser";
 
