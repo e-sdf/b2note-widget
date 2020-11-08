@@ -15,7 +15,7 @@ router.post("/widget", (req, resp) => {
     responses.clientErr(resp, { error: "pid_tofeed missing in body" });
   } else {
     const source = req.body.subject_tofeed;
-    const xPath = req.body.xpath_tofeed;
+    const xPath = req.body.xPath_tofeed;
     const textContent = req.body.textContent_tofeed;
     const startOffset = req.body.startOffset_tofeed;
     const endOffset = req.body.endOffset_tofeed;
