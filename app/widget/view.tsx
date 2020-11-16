@@ -8,16 +8,16 @@ import { AuthProvidersEnum } from "app/api/auth/defs";
 import * as auth from "app/api/auth/auth";
 import * as profileApi from "app/api/profile";
 import * as icons from "app/components/icons";
-import { PagesEnum } from "../pages/pages";
-import AnnotatePage from "../pages/annotate/view";
-import AnnotationsPage from "../pages/annotations/view";
-import SearchPage from "../pages/search/view";
+import { PagesEnum } from "app/pages/pages";
+import AnnotatePage from "app/pages/annotate/view";
+import AnnotationsPage from "app/pages/annotations/view";
+import SearchPage from "app/pages/search/view";
 import AuthProviderSelectionPage from "../pages/login";
 import ProfilePage from "../pages/profile/view";
 import HelpPage from "../pages/help/view";
 import ReportBugPage from "../pages/reportBug";
 import { HelpSection } from "../pages/help/defs";
-import { notifyLoaded } from "app/components/notify";
+import { notifyLoaded, notifyToken } from "app/notify";
 import { shorten } from "app/components/utils";
 
 function WidgetInfo(): React.ReactElement {
@@ -84,6 +84,7 @@ function Widget(props: Props): React.FunctionComponentElement<Props> {
           token => {
             setAuthProvider(provider);
             retrieveProfile(provider, token);
+            notifyToken(token);
           },
           err => setLoginState(LoginStateEnum.NOT_LOGGED)
         );

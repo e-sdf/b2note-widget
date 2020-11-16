@@ -27,3 +27,7 @@ export function anNotify(config: ConfRec, action: ActionEnum, an: Annotation): v
 export function notifyLoaded(): void {
   parent.postMessage("B2NOTE loaded", "*");
 }
+
+export function notifyToken(token: string): void {
+  parent.postMessage({ token }, "*");
+}
