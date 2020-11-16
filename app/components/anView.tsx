@@ -102,7 +102,9 @@ export default function AnView(props: Props): React.FunctionComponentElement<Pro
               This {params.part}
             </span>
           :
-            <a href="#">
+            <a 
+            href={params.part === "Page" || params.part === "Link" ? params.url : "#"}
+            target="_blank" rel="noreferrer">
               <span className="badge badge-info"
                 data-toggle="tooltip" data-placement="bottom" 
                 title={params.part === "Selection" ? params.selection : params.url}>
