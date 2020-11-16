@@ -1,9 +1,9 @@
 import type { Token, AuthErrAction } from "core/http";
-import { get, post, patch } from "core/http";
+import { get, patch } from "core/http";
 import type { ConfRec } from "app/config";
 import type { UserProfile } from "core/user";
 import { usersUrl, customOntologyUrl } from "core/user";
-import { Ontology, OntologyFormat } from "core/ontologyRegister";
+import { OntologyMeta } from "core/ontologyRegister";
 
 function getProfileUrl(config: ConfRec): string {
   return config.apiServerUrl + config.apiPath + usersUrl;
@@ -21,6 +21,6 @@ export function patchUserProfilePm(config: ConfRec, changes: Record<string, any>
   return patch<UserProfile>(getProfileUrl(config), { ...changes }, { token, authErrAction });
 }
 
-export function getCustomOntologiesPm(config: ConfRec, token: Token, authErrAction: AuthErrAction): Promise<Array<Ontology>> {
-  return get<Array<Ontology>>(getCustomOntologyUrl(config), {}, { token, authErrAction });
+export function getCustomOntologiesMetasPm(config: ConfRec, token: Token, authErrAction: AuthErrAction): Promise<Array<OntologyMeta>> {
+  return get(getCustomOntologyUrl(config), {}, { token, authErrAction });
 }

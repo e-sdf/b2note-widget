@@ -1,9 +1,9 @@
 import * as React from "react";
 import type { SysContext, AppContext } from "app/context";
-import type { Ontology } from "core/ontologyRegister";
+import type { OntologyMeta } from "core/ontologyRegister";
 import type { OntologySources } from "core/apiModels/ontologyQueryModel";
 import { defaultOntologySources } from "core/apiModels/ontologyQueryModel";
-import { getCustomOntologiesPm } from "app/api/profile";
+import { getCustomOntologiesMetasPm } from "app/api/profile";
 import SpinningWheel from "app/components/spinningWheel";
 import Alert from "app/components/alert";
 import * as icons from "app/components/icons";
@@ -15,7 +15,7 @@ interface Props {
 }
 
 export default function OntologySourcesPanel(props: Props): React.FunctionComponentElement<Props> {
-  const [customOntologies, setCustomOntologies] = React.useState([] as Array<Ontology>);
+  const [customOntologies, setCustomOntologies] = React.useState([] as Array<OntologyMeta>);
   const [sources, setSources] = React.useState(defaultOntologySources);
   const [loading, setLoading] = React.useState(false);
   const [errorMessage, setErrorMessage] = React.useState(null as string|null);
@@ -27,9 +27,9 @@ export default function OntologySourcesPanel(props: Props): React.FunctionCompon
     () => {
       if (mbUser) {
         setLoading(true);
-        getCustomOntologiesPm(props.sysContext.config, mbUser.token, props.appContext.authErrAction).then(
-          ontologies => {
-            setCustomOntologies(ontologies);
+        getCustomOntologiesMetasPm(props.sysContext.config, mbUser.token, props.appContext.authErrAction).then(
+          ontologiesMetas => {
+            setCustomOntologies(ontologiesMetas);
             setLoading(false);
           },
           err => { setLoading(false); setErrorMessage(err); }
