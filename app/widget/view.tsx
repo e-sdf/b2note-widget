@@ -12,11 +12,11 @@ import { PagesEnum } from "app/pages/pages";
 import AnnotatePage from "app/pages/annotate/view";
 import AnnotationsPage from "app/pages/annotations/view";
 import SearchPage from "app/pages/search/view";
-import AuthProviderSelectionPage from "../pages/login";
-import ProfilePage from "../pages/profile/view";
-import HelpPage from "../pages/help/view";
-import ReportBugPage from "../pages/reportBug";
-import { HelpSection } from "../pages/help/defs";
+import AuthProviderSelectionPage from "app/pages/login";
+import ProfilePage from "app/pages/profile/view";
+import HelpPage from "app/pages/help/view";
+import ReportBugPage from "app/pages/reportBug";
+import { HelpSection } from "app/pages/help/defs";
 import { notifyLoaded, notifyToken } from "app/notify";
 import { shorten } from "app/components/utils";
 
