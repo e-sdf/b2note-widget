@@ -2,6 +2,7 @@ const logging = require("./logging");
 
 const config = {
   port: process.env.PORT || "",
+  serverBinding: process.env.SERVER_BINDING || "",
 };
 
 // Check if all env variables were present

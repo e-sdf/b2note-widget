@@ -7,7 +7,7 @@ const app = require("./app");
 console.log(config);
 
 function onListening() {
-  const addr = server.address();
+  const addr = config.serverBinding;
   const bind = typeof addr === "string"
     ? "pipe " + addr
     : "port " + (addr ? addr.port : "");
