@@ -1,4 +1,4 @@
-import { matchSwitch } from '@babakness/exhaustive-type-checking';
+import { matchSwitch } from "@babakness/exhaustive-type-checking";
 import * as React from "react";
 
 interface AlertProps {

@@ -1,7 +1,7 @@
 import type { ConfRec } from "app/config";
 import { endpointUrl } from "app/config";
-import type { Target, SysContext, AppContext, AuthUser } from "app/context";
-import { mkTarget } from "app/context";
+import type { SysContext, AppContext, AuthUser } from "app/context";
+import * as targets from "app/targets";
 import type { AuthErrAction } from "core/http";
 import { get, post, patch, del } from "core/http";
 import * as anModel from "core/annotationsModel";
@@ -50,11 +50,11 @@ function mkCreatorFilter(user: AuthUser, f: Filters): Query {
   return !f.creator.others ? { creator: user.profile.id } : {};
 }
 
-function mkTargetFilter(target: Target, f: Filters): Query {
+function mkTargetFilter(target: targets.Target, f: Filters): Query {
   return (
     !f.allFiles ? {
       "target-id": target.pid,
-      ... target.source ? { "target-source": target.source } : {}
+      ... (target.type === "LinkTarget" || target.type === "ImageOnPageSelectionTarget") && target.source ? { "target-source": target.source } : {}
     }
     : {}
   );
@@ -64,7 +64,7 @@ function mkValueFilter(f: Filters): Query {
   return f.value ? { value: f.value } : {};
 }
 
-function mkQuery(f: Filters, mbUser: AuthUser|null, mbTarget: Target|null, format: formats.FormatType, download: boolean): Query {
+function mkQuery(f: Filters, mbUser: AuthUser|null, mbTarget: targets.Target|null, format: formats.FormatType, download: boolean): Query {
   const creatorFilter = mbUser ? mkCreatorFilter(mbUser, f) : {};
   const targetFilter = mbTarget ? mkTargetFilter(mbTarget, f) : {};
   return {
@@ -102,7 +102,7 @@ export function getAnnotationsRDF(sysContext: SysContext, appContext: AppContext
 // Creating annotations {{{1
 
 export interface AnnotationPostRecord {
-  target: Target;
+  target: targets.Target;
   user: AuthUser;
   visibility: anModel.VisibilityEnum;
   authErrAction: AuthErrAction;
@@ -130,7 +130,7 @@ function postAnnotation(annotation: anModel.Annotation, user: AuthUser, authErrA
 }
 
 export async function postAnnotationSemantic(config: ConfRec, {target, user, uris, value, visibility, authErrAction}: SematicAnnotationPostRecord): Promise<any> {
-  const anTarget = mkTarget(target);
+  const anTarget = targets.mkTarget(target);
   const body = anModel.mkSemanticAnBody(uris, value);
   const generator = anModel.mkGenerator(config.name, config.version, config.homepage);
   const creator = anModel.mkCreator({id: user.profile.id});
@@ -139,7 +139,7 @@ export async function postAnnotationSemantic(config: ConfRec, {target, user, uri
 }
 
 export async function postAnnotationKeyword(config: ConfRec, {target, user, value, visibility, authErrAction}: KeywordAnnotationPostRecord): Promise<any> {
-  const anTarget = mkTarget(target);
+  const anTarget = targets.mkTarget(target);
   const body = anModel.mkKeywordAnBody(value);
   const creator = anModel.mkCreator({id: user.profile.id});
   const generator = anModel.mkGenerator(config.name, config.version, config.homepage);
@@ -148,7 +148,7 @@ export async function postAnnotationKeyword(config: ConfRec, {target, user, valu
 }
 
 export async function postAnnotationComment(config: ConfRec, {target, user, comment, visibility, authErrAction}: CommentAnnotationPostRecord): Promise<any> {
-  const anTarget = mkTarget(target);
+  const anTarget = targets.mkTarget(target);
   const body = anModel.mkCommentAnBody(comment);
   const creator = anModel.mkCreator({id: user.profile.id});
   const generator = anModel.mkGenerator(config.name, config.version, config.homepage);

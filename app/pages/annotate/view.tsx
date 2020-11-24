@@ -1,6 +1,7 @@
+import { matchSwitch } from "@babakness/exhaustive-type-checking";
 import * as React from "react";
 import type { SysContext, AppContext } from "app/context";
-import { ssToString } from "app/context";
+import * as targets from "app/targets";
 import * as ac from "app/components/autocomplete";
 import { Tabs, Tab } from "app/components/ui";
 import type { OntologyInfoRequest } from "app/components/ontologyInfoPanel";
@@ -25,24 +26,31 @@ export default function AnnotatePage(props: Props): React.FunctionComponentEleme
 
   function renderTargetInfo(): React.ReactElement {
     const t = mbTarget;
+  const source = (t as targets.LinkTarget).source;
+  const ts = (t as targets.TextSelectionTarget).textSelection;
     return (
       <div className="card mt-2">
         <div className="card-header" style={{padding: "5px 10px"}}>
           <span>Annotation Target: </span>
-          {t && !t?.source && !t?.selection ? <span className="text-info">Whole page</span> : <></>}
-          {!t ? <span className="text-danger">None</span> : <></>}
+          {!t ?
+             <span className="text-danger">None</span> 
+          : matchSwitch(t.type, {
+              ["PageTarget"]: () => <span className="text-info">Whole page</span>,
+              ["LinkTarget"]: () => <span className="text-info">Resource on page</span>,
+              ["TextSelectionTarget"]: () => <span className="text-info">Text selection on page</span>,
+              ["ImageSelectionTarget"]: () => <span className="text-info">Image</span>,
+              ["ImageOnPageSelectionTarget"]: () => <span className="text-info">Image on page</span>,
+            })
+          }
         </div>
-        { t && (t.source || t.selection) ?
-          <div className="card-body" style={{padding: "10px"}}>
-            <>
-              {t.source ?
-                <a href={t.source} target="_blank" rel="noreferrer">{t.source}</a>
-              : <></>}
-              {t.selection ?
-                <span style={{backgroundColor: "yellow", fontSize: "90%"}}>{ssToString(t.selection)}</span>
-              :<></>}
-            </>
-          </div>
+        {t ? 
+          matchSwitch(t.type, {
+            ["PageTarget"]: () => <></>,
+            ["LinkTarget"]: () => <a href={source} target="_blank" rel="noreferrer">{source}</a>,
+            ["TextSelectionTarget"]: () => <span style={{backgroundColor: "yellow", fontSize: "90%"}}>{ts}</span>,
+            ["ImageSelectionTarget"]: () => <></>,
+            ["ImageOnPageSelectionTarget"]: () => <a href={source} target="_blank" rel="noreferrer">{source}</a>
+          })
         : <></>}
       </div>
     );

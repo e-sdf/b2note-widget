@@ -1,4 +1,5 @@
 import * as React from "react";
+import { matchSwitch } from "@babakness/exhaustive-type-checking";
 import type { SysContext, AppContext } from "app/context";
 import * as icons from "./icons";
 import { loggedUserPID } from "app/context";
@@ -24,8 +25,9 @@ export default function AnView(props: Props): React.FunctionComponentElement<Pro
   const [errorMessage, setErrorMessage] = React.useState(null as string|null);
   const annotation = props.annotation;
   const target = annotation.target;
-  const thisId = target.id === props.sysContext.mbTarget?.pid;
-  const thisSource = target.source === props.sysContext.mbTarget?.source;
+  const annotatedTarget = props.sysContext.mbTarget;
+  const thisId = target.id === annotatedTarget?.pid;
+  const thisSource = (annotatedTarget?.type === "LinkTarget" || annotatedTarget?.type === "ImageOnPageSelectionTarget") && target.source === annotatedTarget.source;
   const mbUser = props.appContext.mbUser;
   const mbUserPID = loggedUserPID(props.sysContext, props.appContext);
   const actionBtnStyle = "btn btn-sm btn-outline-primary";
@@ -92,7 +94,8 @@ export default function AnView(props: Props): React.FunctionComponentElement<Pro
     type Params = 
       { part: "Page"; url: string; thisPart: boolean } |
       { part: "Link"; url: string; thisPart: boolean } |
-      { part: "Selection"; selection: string }
+      { part: "Text Selection"; selectedText: string } |
+      { part: "SVG Selection" }
     
     function renderTargetPart(params: Params): React.ReactElement {
       return (
@@ -107,7 +110,12 @@ export default function AnView(props: Props): React.FunctionComponentElement<Pro
             target="_blank" rel="noreferrer">
               <span className="badge badge-info"
                 data-toggle="tooltip" data-placement="bottom" 
-                title={params.part === "Selection" ? params.selection : params.url}>
+                title={matchSwitch(params.part, {
+                  ["Page"]: () => (params as any).url,
+                  ["Link"]: () => (params as any).url,
+                  ["Text Selection"]: () => (params as any).selectedText,
+                  ["SVG Selection"]: () => "Image"
+                })}>
                 {params.part}
               </span>
             </a>
@@ -120,7 +128,10 @@ export default function AnView(props: Props): React.FunctionComponentElement<Pro
       <div className="d-flex flex-row">
         {renderTargetPart({ part: "Page", url: target.id, thisPart: thisId })}
         {target.source ? renderTargetPart({ part: "Link", url: target.source, thisPart: thisSource }) : <></>}
-        {target.selector ? renderTargetPart({ part: "Selection", selection: target.selector.selection}) : <></>}
+        {target.selector?.type === "XPathSelector" ?
+          renderTargetPart({ part: "Text Selection", selectedText: target.selector.selectedText}) : <></>}
+        {target.selector?.type === "SvgSelector" ?
+          renderTargetPart({ part: "SVG Selection" }) : <></>}
       </div>
     );
   }

@@ -19,7 +19,8 @@ router.post("/widget", (req, resp) => {
     const textContent = req.body.textContent_tofeed;
     const startOffset = req.body.startOffset_tofeed;
     const endOffset = req.body.endOffset_tofeed;
-    resp.render("widget", { pid, source, xPath, textContent, startOffset, endOffset });
+    const svgSelector = req.body.svgSelector_tofeed;
+    resp.render("widget", { pid, source, xPath, textContent, startOffset, endOffset, svgSelector });
   }
 });
 
