@@ -11,4 +11,4 @@ echo -n "window.b2note = { widgetServerUrl: '"$JS_WIDGET_SERVER_URL"', apiServer
 echo "$C created"
 echo "Starting the server..."
 
-npm run start
+cd dist/server; node server
