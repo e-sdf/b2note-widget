@@ -20,7 +20,6 @@ router.post("/widget", (req, resp) => {
   const endOffset = req.body.endOffset_tofeed;
   const svgSelector = req.body.svgSelector_tofeed;
   resp.render("widget", { pid, pidName, source, sourceName, xPath, textContent, startOffset, endOffset, svgSelector });
-  }
 });
 
 module.exports = router;
