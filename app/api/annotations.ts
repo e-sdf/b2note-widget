@@ -53,8 +53,8 @@ function mkCreatorFilter(user: AuthUser, f: Filters): Query {
 function mkTargetFilter(target: targets.Target, f: Filters): Query {
   return (
     !f.allFiles ? {
-      "target-id": target.pid,
-      ... (target.type === "LinkTarget" || target.type === "ImageOnPageSelectionTarget") && target.source ? { "target-source": target.source } : {}
+      "target-id": [target.pid],
+      ... (target.type === "LinkTarget" || target.type === "ImageOnPageSelectionTarget") && target.source ? { "target-source": [target.source] } : {}
     }
     : {}
   );

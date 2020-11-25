@@ -92,8 +92,8 @@ export default function AnView(props: Props): React.FunctionComponentElement<Pro
   function renderTarget(): React.ReactElement {
 
     type Params = 
-      { part: "Page"; url: string; thisPart: boolean } |
-      { part: "Link"; url: string; thisPart: boolean } |
+      { part: "Page"; url: string; name: string|undefined; thisPart: boolean } |
+      { part: "Link"; url: string; name: string|undefined; thisPart: boolean } |
       { part: "Text Selection"; selectedText: string } |
       { part: "SVG Selection" }
     
@@ -106,13 +106,13 @@ export default function AnView(props: Props): React.FunctionComponentElement<Pro
             </span>
           :
             <a 
-            href={params.part === "Page" || params.part === "Link" ? params.url : "#"}
+            href={params.part === "Page" || params.part === "Link" ? (params.name || params.url) : "#"}
             target="_blank" rel="noreferrer">
               <span className="badge badge-info"
                 data-toggle="tooltip" data-placement="bottom" 
                 title={matchSwitch(params.part, {
-                  ["Page"]: () => (params as any).url,
-                  ["Link"]: () => (params as any).url,
+                  ["Page"]: () => (params as any).name || (params as any).url,
+                  ["Link"]: () => (params as any).name || (params as any).url,
                   ["Text Selection"]: () => (params as any).selectedText,
                   ["SVG Selection"]: () => "Image"
                 })}>
@@ -126,8 +126,8 @@ export default function AnView(props: Props): React.FunctionComponentElement<Pro
 
     return (
       <div className="d-flex flex-row">
-        {renderTargetPart({ part: "Page", url: target.id, thisPart: thisId })}
-        {target.source ? renderTargetPart({ part: "Link", url: target.source, thisPart: thisSource }) : <></>}
+        {renderTargetPart({ part: "Page", url: target.id, name: target.idName, thisPart: thisId })}
+        {target.source ? renderTargetPart({ part: "Link", url: target.source, name: target.sourceName, thisPart: thisSource }) : <></>}
         {target.selector?.type === "XPathSelector" ?
           renderTargetPart({ part: "Text Selection", selectedText: target.selector.selectedText}) : <></>}
         {target.selector?.type === "SvgSelector" ?

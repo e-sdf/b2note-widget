@@ -4,7 +4,9 @@ import * as widget from "./widget/view";
 import authStorage from "app/api/auth/storage-window";
 
 const pidInputElemId = "pid-input";
+const pidNameInputElemId = "pid-name-input";
 const sourceInputElemId = "source-input";
+const sourceNameInputElemId = "source-name-input";
 const svgSelectionInputElemId = "svg-selector-input";
 
 function getInputItem(elemId: string): string|undefined {
@@ -30,10 +32,12 @@ $(() => {
     widget.renderWidgetInfo();
   } else if (widget.canRenderWidget()) {
     const pid = getInputItem(pidInputElemId);
+    const pidName = getInputItem(pidNameInputElemId);
     const source = getInputItem(sourceInputElemId);
+    const sourceName = getInputItem(sourceNameInputElemId);
     const textSelection = mkTextSelection();
     const svgSelection = getInputItem(svgSelectionInputElemId);
-    const mbTarget = targets.guessTarget({ pid, source, textSelection, svgSelection });
+    const mbTarget = targets.guessTarget({ pid, pidName, source, sourceName, textSelection, svgSelection });
     widget.renderWidget({
       config,
       authStorage,

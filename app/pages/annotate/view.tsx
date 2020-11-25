@@ -27,9 +27,10 @@ export default function AnnotatePage(props: Props): React.FunctionComponentEleme
   function renderTargetInfo(): React.ReactElement {
     const t = mbTarget;
   const source = (t as targets.LinkTarget).source;
+  const sourceName = (t as targets.LinkTarget).sourceName;
   const ts = (t as targets.TextSelectionTarget).textSelection;
     return (
-      <div className="card mt-2">
+      <div className="card mt-2 ml-1 mr-1">
         <div className="card-header" style={{padding: "5px 10px"}}>
           <span>Annotation Target: </span>
           {!t ?
@@ -44,13 +45,15 @@ export default function AnnotatePage(props: Props): React.FunctionComponentEleme
           }
         </div>
         {t ? 
-          matchSwitch(t.type, {
-            ["PageTarget"]: () => <></>,
-            ["LinkTarget"]: () => <a href={source} target="_blank" rel="noreferrer">{source}</a>,
-            ["TextSelectionTarget"]: () => <span style={{backgroundColor: "yellow", fontSize: "90%"}}>{ts}</span>,
-            ["ImageSelectionTarget"]: () => <></>,
-            ["ImageOnPageSelectionTarget"]: () => <a href={source} target="_blank" rel="noreferrer">{source}</a>
-          })
+          <div className="card-body" style={{padding: "5px 10px"}}>
+            {matchSwitch(t.type, {
+              ["PageTarget"]: () => <></>,
+              ["LinkTarget"]: () => <a href={source} target="_blank" rel="noreferrer">{sourceName || source}</a>,
+              ["TextSelectionTarget"]: () => <span style={{backgroundColor: "yellow", fontSize: "90%"}}>{ts}</span>,
+              ["ImageSelectionTarget"]: () => <></>,
+              ["ImageOnPageSelectionTarget"]: () => <a href={source} target="_blank" rel="noreferrer">{sourceName || source}</a>
+            })}
+          </div>
         : <></>}
       </div>
     );
