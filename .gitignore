@@ -62,5 +62,5 @@ typings/
 
 .vscode
 b2note-core/
-server/
+dist/
 
