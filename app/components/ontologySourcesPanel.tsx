@@ -65,7 +65,7 @@ export default function OntologySourcesPanel(props: Props): React.FunctionCompon
                 : { ...sources, custom: sources.custom.filter(o1 => o1.id !== o.id) }
                 )
               }/>
-            {o.uri}
+            {o.name || o.uri}
           </div>
         )}
       </>
