@@ -49,7 +49,7 @@ export default function AnnotatePage(props: Props): React.FunctionComponentEleme
             {matchSwitch(t.type, {
               ["PageTarget"]: () => <></>,
               ["LinkTarget"]: () => <a href={source} target="_blank" rel="noreferrer">{sourceName || source}</a>,
-              ["TextSelectionTarget"]: () => <span style={{backgroundColor: "yellow", fontSize: "90%"}}>{ts}</span>,
+              ["TextSelectionTarget"]: () => <span style={{backgroundColor: "yellow", fontSize: "90%"}}>{ts.selectedText}</span>,
               ["ImageSelectionTarget"]: () => <></>,
               ["ImageOnPageSelectionTarget"]: () => <a href={source} target="_blank" rel="noreferrer">{sourceName || source}</a>
             })}
