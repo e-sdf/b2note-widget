@@ -5,7 +5,17 @@ const router = express.Router();
 
 // Get the widget info version
 router.get("/widget", (req, resp) => {
-  resp.render("widgetInfo");
+  const pid = req.query.pid_tofeed;
+  const pidName = req.query.pidName_tofeed;
+  const source = req.query.subject_tofeed;
+  const sourceName = req.query.subjectName_tofeed;
+  const xPath = req.query.xPath_tofeed;
+  const textContent = req.query.textContent_tofeed;
+  const startOffset = req.query.startOffset_tofeed;
+  const endOffset = req.query.endOffset_tofeed;
+  const svgSelector = req.query.svgSelector_tofeed;
+  resp.render("widget", { pid, pidName, source, sourceName, xPath, textContent, startOffset, endOffset, svgSelector });
+  // resp.render("widgetInfo");
 });
 
 // Return widget; from historical reasons, loading a widget with a Target is POST
