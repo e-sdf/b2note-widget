@@ -264,7 +264,7 @@ function Widget(props: Props): React.FunctionComponentElement<Props> {
   return (
     <div>
       <img src={config.widgetServerUrl + config.imgPath + "logo.png"} style={{width: "100%"}}/>
-      <div id="widget-version">
+      <div id="widget-version" className="text-white">
         {config.version}
       </div>
       {renderNavbar()}
