@@ -164,10 +164,12 @@ export default function Semantic(props: Props): React.FunctionComponentElement<P
   return (
     <>
       {renderInput()}
-      <div className="ml-2 mr-2">
-        <OntologySourcesPanel sysContext={props.sysContext} appContext={props.appContext}
-          sourcesSelectedHandler={setSources}/>
-      </div>
+      {props.sysContext.config.customOntologies ?
+        <div className="ml-2 mr-2">
+          <OntologySourcesPanel sysContext={props.sysContext} appContext={props.appContext}
+            sourcesSelectedHandler={setSources}/>
+        </div>
+      : <></>}
       {renderActionRow()}
       <div className="d-flex flex-row justify-content-center mt-2">
         <SpinningWheel show={loading}/>

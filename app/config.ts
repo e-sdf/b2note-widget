@@ -6,6 +6,7 @@ export interface ConfRec {
   name: string;
   version: string;
   homepage: string;
+  customOntologies: boolean;
 }
 
 const confRec = (window as any).b2note as ConfRec|undefined;
@@ -16,8 +17,9 @@ export const config: ConfRec = {
   apiPath: confRec?.apiPath ? confRec.apiPath : "/api",
   imgPath: "/img/",
   name: "B2NOTE",
-  version: "v3.9.0",
-  homepage: "https://b2note.bsc.es"
+  version: "v3.9.1",
+  homepage: "https://b2note.bsc.es",
+  customOntologies: confRec?.customOntologies ? true : false
 };
 
 export const endpointUrl = config.apiServerUrl + config.apiPath;
