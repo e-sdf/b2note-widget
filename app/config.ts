@@ -17,9 +17,11 @@ export const config: ConfRec = {
   apiPath: confRec?.apiPath ? confRec.apiPath : "/api",
   imgPath: "/img/",
   name: "B2NOTE",
-  version: "v3.9.1",
+  version: "v3.9.3",
   homepage: "https://b2note.bsc.es",
-  customOntologies: confRec?.customOntologies ? true : false
+  customOntologies: confRec?.customOntologies ? confRec.customOntologies : false
 };
+
+console.log(config);
 
 export const endpointUrl = config.apiServerUrl + config.apiPath;
