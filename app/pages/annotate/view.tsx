@@ -26,9 +26,9 @@ export default function AnnotatePage(props: Props): React.FunctionComponentEleme
 
   function renderTargetInfo(): React.ReactElement {
     const t = mbTarget;
-  const source = (t as targets.LinkTarget).source;
-  const sourceName = (t as targets.LinkTarget).sourceName;
-  const ts = (t as targets.TextSelectionTarget).textSelection;
+    const source = (t as targets.LinkTarget).source;
+    const sourceName = (t as targets.LinkTarget).sourceName;
+    const ts = (t as targets.TextSelectionTarget).textSelection;
     return (
       <div className="card mt-2 ml-1 mr-1">
         <div className="card-header" style={{padding: "5px 10px"}}>
