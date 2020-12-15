@@ -241,7 +241,7 @@ function Widget(props: Props): React.FunctionComponentElement<Props> {
                 [LoginStateEnum.NOT_LOGGED]: () => <icons.LoginIcon/>,
                 [LoginStateEnum.LOGGING]: () => <span>Logging in...</span>,
                 [LoginStateEnum.LOGGED]:
-                  () => <span><icons.UserIcon/> {shorten(appContext.mbUser?.profile.personName || "", 13)}</span>,
+                  () => <span><icons.UserIcon/> {shorten(appContext.mbUser?.profile.personName || "", 11)}</span>,
                 [LoginStateEnum.ERROR]:
                   () => <span style={{fontSize: "90%"}}>Login error, try again</span>
               })}
