@@ -79,10 +79,11 @@ function mkQuery(f: Filters, mbUser: AuthUser|null, mbTarget: targets.Target|nul
 
 export function getAnnotationsJSON(sysContext: SysContext, appContext: AppContext, f: Filters, download = false): Promise<Array<anModel.Annotation>> {
   const mbUser = appContext.mbUser;
+  const mbToken = appContext.mbUser?.token;
   const mbTarget = sysContext.mbTarget;
   const params = mkQuery(f, mbUser, mbTarget, formats.FormatType.JSONLD, download);
   return new Promise((resolve, reject) => {
-    get<Array<anModel.Annotation>>(annotationsUrl, params).then(
+    get<Array<anModel.Annotation>>(annotationsUrl, params, mbToken ? { token: mbToken } : undefined).then(
       data => {
         const cleaned = !f.creator.mine ?
           data.filter((r: anModel.Annotation) => anModel.getCreatorId(r) !== mbUser?.profile.id)
