@@ -30,7 +30,6 @@ export default function AnView(props: Props): React.FunctionComponentElement<Pro
   const thisSource = (annotatedTarget?.type === "LinkTarget" || annotatedTarget?.type === "ImageOnPageSelectionTarget") && target.source === annotatedTarget.source;
   const mbUser = props.appContext.mbUser;
   const mbUserPID = loggedUserPID(props.sysContext, props.appContext);
-  const actionBtnStyle = "btn btn-sm btn-outline-primary";
 
   function updateVisibility(visibility: anModel.VisibilityEnum): void {
     if (mbUser) {
@@ -148,7 +147,7 @@ export default function AnView(props: Props): React.FunctionComponentElement<Pro
           setVisibility={updateVisibility}/>
         <div className="btn-group" style={padded}>
           <button type="button"
-            className={actionBtnStyle}
+            className="btn btn-sm btn-outline-danger"
             data-toggle="tooltip" data-placement="bottom" title="Delete this annotation"
             onClick={() => setPendingDelete(true)}>
             <icons.DeleteIcon/>
