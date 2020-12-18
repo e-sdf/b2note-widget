@@ -1,7 +1,9 @@
 import { matchSwitch } from "@babakness/exhaustive-type-checking";
 import * as React from "react";
+import { printTableRange } from "core/annotationsModel";
+import type { TargetInput, TextSelectionTargetInput, ImageRegionOnPageTargetInput, TableTargetInput, PdfTargetInput, LinkTargetInput } from "core/targetInput";
+import { TargetInputType as TIT, printTargetInputType } from "core/targetInput";
 import type { SysContext, AppContext } from "app/context";
-import * as targets from "app/targets";
 import * as ac from "app/components/autocomplete";
 import { Tabs, Tab } from "app/components/ui";
 import type { OntologyInfoRequest } from "app/components/ontologyInfoPanel";
@@ -25,34 +27,53 @@ export default function AnnotatePage(props: Props): React.FunctionComponentEleme
   const mbUser = props.appContext.mbUser;
 
   function renderTargetInfo(): React.ReactElement {
-    const t = mbTarget;
-    const source = (t as targets.LinkTarget).source;
-    const sourceName = (t as targets.LinkTarget).sourceName;
-    const ts = (t as targets.TextSelectionTarget).textSelection;
+
+    function renderTargetDetail(targetInput: TargetInput) {
+      return matchSwitch(targetInput.type, {
+        [TIT.PAGE]: () => <></>,
+        [TIT.LINK]: () => {
+          const t = targetInput as LinkTargetInput; 
+          return <a href={t.source} target="_blank" rel="noreferrer">{t.sourceName || t.source}</a>;
+        },
+        [TIT.TEXT_SELECTION]: () => {
+          const t = targetInput as TextSelectionTargetInput;
+          return <span style={{ backgroundColor: "yellow", fontSize: "90%" }}>{t.selectedText}</span>;
+        },
+        [TIT.IMAGE_REGION]: () => <></>,
+        [TIT.IMAGE_REGION_ON_PAGE]: () => {
+          const t = targetInput as ImageRegionOnPageTargetInput;
+          return <a href={t.source} target="_blank" rel="noreferrer">{t.sourceName || t.source}</a>;
+        },
+        [TIT.TABLE]: () => {
+          const t = targetInput as TableTargetInput;
+          return (
+            <>
+              <span>Sheet: </span><span className="text-info">{t.sheet}</span><br/>
+              {t.range ?
+                <><span>Range: </span><span className="text-info">{printTableRange(t.range)}</span></>
+              : <></>}
+            </>
+          );
+        },
+        [TIT.PDF]: () => {
+          const t = targetInput as PdfTargetInput;
+          return <><span>Page #: </span><span className="text-info">${t.pageNumber}</span></>;
+        }
+      });
+    }
+    
     return (
       <div className="card mt-2 ml-1 mr-1">
         <div className="card-header" style={{padding: "5px 10px"}}>
           <span>Annotation Target: </span>
-          {!t ?
+          {!mbTarget ?
              <span className="text-danger">None</span> 
-          : matchSwitch(t.type, {
-              ["PageTarget"]: () => <span className="text-info">Whole page</span>,
-              ["LinkTarget"]: () => <span className="text-info">Resource on page</span>,
-              ["TextSelectionTarget"]: () => <span className="text-info">Text selection on page</span>,
-              ["ImageSelectionTarget"]: () => <span className="text-info">Image</span>,
-              ["ImageOnPageSelectionTarget"]: () => <span className="text-info">Image on page</span>,
-            })
+           : <span className="text-info">{printTargetInputType(mbTarget)}</span>
           }
         </div>
-        {t ? 
+        {mbTarget ? 
           <div className="card-body" style={{padding: "5px 10px"}}>
-            {matchSwitch(t.type, {
-              ["PageTarget"]: () => <></>,
-              ["LinkTarget"]: () => <a href={source} target="_blank" rel="noreferrer">{sourceName || source}</a>,
-              ["TextSelectionTarget"]: () => <span style={{backgroundColor: "yellow", fontSize: "90%"}}>{ts.selectedText}</span>,
-              ["ImageSelectionTarget"]: () => <></>,
-              ["ImageOnPageSelectionTarget"]: () => <a href={source} target="_blank" rel="noreferrer">{sourceName || source}</a>
-            })}
+          {renderTargetDetail(mbTarget)}
           </div>
         : <></>}
       </div>

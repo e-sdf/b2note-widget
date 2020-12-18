@@ -1,7 +1,7 @@
 import type { PID } from "core/annotationsModel";
 import type { ConfRec } from "./config";
 import { StorageI } from "app/storage/defs";
-import type { Target } from "./targets";
+import type { TargetInput } from "core/targetInput";
 import type { Token, AuthErrAction } from "core/http";
 import type { UserProfile } from "core/user";
 import type { StoredAuth } from "app/api/auth/defs";
@@ -15,7 +15,7 @@ export interface AuthUser {
 export interface SysContext {
   config: ConfRec;
   authStorage: StorageI<StoredAuth>;
-  mbTarget: Target|null;
+  mbTarget: TargetInput|null;
 }
 
 export interface AppContext {

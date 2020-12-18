@@ -27,7 +27,7 @@ export default function AnView(props: Props): React.FunctionComponentElement<Pro
   const target = annotation.target;
   const annotatedTarget = props.sysContext.mbTarget;
   const thisId = target.id === annotatedTarget?.pid;
-  const thisSource = (annotatedTarget?.type === "LinkTarget" || annotatedTarget?.type === "ImageOnPageSelectionTarget") && target.source === annotatedTarget.source;
+  const thisSource = (target as any).source === (annotatedTarget as any).source;
   const mbUser = props.appContext.mbUser;
   const mbUserPID = loggedUserPID(props.sysContext, props.appContext);
 

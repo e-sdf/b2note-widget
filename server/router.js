@@ -1,5 +1,4 @@
 const express = require("express");
-const responses = require("./responses");
 
 const router = express.Router();
 
@@ -14,12 +13,8 @@ router.post("/widget", (req, resp) => {
   const pidName = req.body.pidName_tofeed;
   const source = req.body.subject_tofeed;
   const sourceName = req.body.subjectName_tofeed;
-  const xPath = req.body.xPath_tofeed;
-  const textContent = req.body.textContent_tofeed;
-  const startOffset = req.body.startOffset_tofeed;
-  const endOffset = req.body.endOffset_tofeed;
-  const svgSelector = req.body.svgSelector_tofeed;
-  resp.render("widget", { pid, pidName, source, sourceName, xPath, textContent, startOffset, endOffset, svgSelector });
+  const target = req.body.target_tofeed;
+  resp.render("widget", { pid, pidName, source, sourceName, target });
 });
 
 module.exports = router;
