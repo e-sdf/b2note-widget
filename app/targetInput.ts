@@ -1,3 +1,4 @@
+import type { ErrorObject } from "ajv";
 import Ajv from "ajv";
 import { targetInputSchema } from "core/schemas/targetInput.schema";
 import type { PageTargetInput, LinkTargetInput, TargetInput } from "core/targetInput";
@@ -5,7 +6,7 @@ import type { PageTargetInput, LinkTargetInput, TargetInput } from "core/targetI
 const ajv = new Ajv();
 ajv.addSchema(targetInputSchema);
 
-export function validateTargetInput(targetInput: Record<string, any>): Array<Ajv.ErrorObject> | null | undefined {
+export function validateTargetInput(targetInput: Record<string, any>): Array<ErrorObject> | null | undefined {
   ajv.validate("targetInput#/definitions/TargetInput", targetInput);
   return ajv.errors;
 }
