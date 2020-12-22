@@ -10,6 +10,7 @@
     "start": "cd dist/server; node -r dotenv/config server",
     "build": "scripts/build.sh",
     "deploy": "scripts/git-tag.sh; scripts/docker-build.sh; scripts/docker-tag.sh; scripts/docker-push.sh",
+    "test": "jest",
     "clean": "npm cache clean --force"
   },
   "devDependencies": {

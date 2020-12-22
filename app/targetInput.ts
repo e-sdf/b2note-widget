@@ -1,7 +1,8 @@
 import type { ErrorObject } from "ajv";
 import Ajv from "ajv";
 import { targetInputSchema } from "core/schemas/targetInput.schema";
-import type { PageTargetInput, LinkTargetInput, TargetInput } from "core/targetInput";
+import type { TargetInput, PageTargetInput, LinkTargetInput } from "core/targetInput";
+import { TargetInputType as TIT } from "core/targetInput";
 
 const ajv = new Ajv();
 ajv.addSchema(targetInputSchema);
@@ -11,32 +12,36 @@ export function validateTargetInput(targetInput: Record<string, any>): Array<Err
   return ajv.errors;
 }
 
-function parseTargetString(targetString: string): TargetInput|string {
+export interface TargetInputError {
+  error: any;
+}
+
+function parseTargetString(targetString: string): TargetInput|TargetInputError {
   try {
     const targetInput = JSON.parse(targetString);
     const errors = validateTargetInput(targetInput);
-    return errors ? JSON.stringify(errors) : targetInput;
+    return errors ? { error: errors } : targetInput;
   } catch (error) {
-    return "Invalid JSON" + JSON.stringify(error);
+    return { error };
   }
 }
 
 export function processTargetInput(
 {pid, pidName, source, sourceName, targetString}: {
-   pid: string|undefined;
-   pidName: string|undefined;
-   source: string|undefined;
-   sourceName: string|undefined;
-   targetString: string|undefined;
-}): TargetInput|null|string {
+   pid?: string|undefined;
+   pidName?: string|undefined;
+   source?: string|undefined;
+   sourceName?: string|undefined;
+   targetString?: string|undefined;
+}): TargetInput|null|TargetInputError {
   return (
     targetString ? (() => {
       console.log("[B2NOTE] found `targetString` param, will use that");
       return parseTargetString(targetString); })()
     : pid && !source ?
-      { type: "PageTarget", pid, pidName } as PageTargetInput
+      { type: TIT.PAGE, pid, ...pidName ? { pidName } : {} } as PageTargetInput
     : pid && source ?
-      { type: "LinkTarget", pid, pidName, source, sourceName } as LinkTargetInput
+      { type: TIT.LINK, pid, ...pidName ? { pidName } : {}, source, ...sourceName ? { sourceName } : {} } as LinkTargetInput
     :  null
   );
 }
