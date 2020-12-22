@@ -1,4 +1,6 @@
 import { config } from "./config";
+import type { TargetInput } from "core/targetInput";
+import type { TargetInputError } from "./targetInput";
 import * as targets from "./targetInput";
 import * as widget from "./widget/view";
 import authStorage from "app/api/auth/storage-window";
@@ -22,14 +24,15 @@ $(() => {
     const source = getInputItem(sourceInputElemId);
     const sourceName = getInputItem(sourceNameInputElemId);
     const targetString = getInputItem(targetInputElemId);
-    const targetOrMsg = targets.processTargetInput({ pid, pidName, source, sourceName, targetString });
-    if (typeof targetOrMsg === "string") {
-      console.error("[B2NOTE] input parameters error: " + targetOrMsg);
+    const targetOrError = targets.processTargetInput({ pid, pidName, source, sourceName, targetString });
+    if ((targetOrError as TargetInputError).error) {
+      console.error("[B2NOTE] input parameters error: ");
+      console.error((targetOrError as TargetInputError).error);
     }  else {
       widget.renderWidget({
         config,
         authStorage,
-        mbTarget: targetOrMsg
+        mbTarget: targetOrError as TargetInput
       });
     }
   }
