@@ -182,12 +182,13 @@ export function getTargets(tag: string): Promise<Array<anModel.AnTarget>> {
 
 // Searching annotations {{{1
 
-export function searchAnnotations(expression: qModel.SearchQuery): Promise<Array<anModel.Annotation>> {
+export function searchAnnotations(appContext: AppContext, expression: qModel.SearchQuery): Promise<Array<anModel.Annotation>> {
+  const mbToken = appContext.mbUser?.token;
   const res = searchQueryParser.parse(expression);
   return (
     res.error ?
       Promise.reject("Query expression parse error: " + res.error.message)
-    : get(searchUrl, { expression })
+    : get(searchUrl, { expression }, mbToken ? { token: mbToken } : undefined)
   );
 }
 

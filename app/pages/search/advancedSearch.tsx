@@ -49,7 +49,7 @@ export function AdvancedSearch(props: SearchProps): React.FunctionComponentEleme
 
   function submitQuery(): void {
     setSearching(true);
-    api.searchAnnotations(_.trim(queryStr)).then(
+    api.searchAnnotations(props.appContext, _.trim(queryStr)).then(
       (anl: Array<anModel.Annotation>) => {
         setSearching(false);
         props.resultsHandle(anl);

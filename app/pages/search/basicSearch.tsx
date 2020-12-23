@@ -152,7 +152,7 @@ export function BasicSearch(props: BasicSearchProps): React.FunctionComponentEle
     const query: SearchQuery =
       nonEmptyTerms.length > 1 ? mkExpression(operator, nonEmptyTerms) : mkValue(nonEmptyTerms[0]);
     setSearching(true);
-    api.searchAnnotations(query).then(
+    api.searchAnnotations(props.appContext, query).then(
       (anl: Array<Annotation>) => {
         setSearching(false);
         props.resultsHandle(anl);
