@@ -24,16 +24,20 @@ $(() => {
     const source = getInputItem(sourceInputElemId);
     const sourceName = getInputItem(sourceNameInputElemId);
     const targetString = getInputItem(targetInputElemId);
-    const targetOrError = targets.processTargetInput({ pid, pidName, source, sourceName, targetString });
-    if ((targetOrError as TargetInputError).error) {
-      console.error("[B2NOTE] input parameters error: ");
-      console.error((targetOrError as TargetInputError).error);
-    }  else {
-      widget.renderWidget({
-        config,
-        authStorage,
-        mbTarget: targetOrError as TargetInput
-      });
+    const targetOrErrorOrNull = targets.processTargetInput({ pid, pidName, source, sourceName, targetString });
+    if (!targetOrErrorOrNull) {
+      console.log("[B2NOTE] no (allowed) input parameters");
+    } else {
+      if ((targetOrErrorOrNull as TargetInputError).error) {
+        console.error("[B2NOTE] input parameters error: ");
+        console.error((targetOrErrorOrNull as TargetInputError).error);
+      }  else {
+        widget.renderWidget({
+          config,
+          authStorage,
+          mbTarget: targetOrErrorOrNull as TargetInput
+        });
+      }
     }
   }
 });
