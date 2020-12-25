@@ -17,7 +17,7 @@ export const config: ConfRec = {
   apiPath: confRec?.apiPath ? confRec.apiPath : "/api",
   imgPath: "/img/",
   name: "B2NOTE",
-  version: "v3.9.15",
+  version: "v3.9.16",
   homepage: "https://b2note.eudat.eu",
   customOntologies: confRec?.customOntologies ? confRec.customOntologies : false
 };
