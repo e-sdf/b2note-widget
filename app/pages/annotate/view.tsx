@@ -32,7 +32,7 @@ export default function AnnotatePage(props: Props): React.FunctionComponentEleme
       return matchSwitch(targetInput.type, {
         [TIT.PAGE]: () => <></>,
         [TIT.LINK]: () => {
-          const t = targetInput as LinkTargetInput; 
+          const t = targetInput as LinkTargetInput;
           return <a href={t.source} target="_blank" rel="noreferrer">{t.sourceName || t.source}</a>;
         },
         [TIT.TEXT_SELECTION]: () => {
@@ -57,21 +57,21 @@ export default function AnnotatePage(props: Props): React.FunctionComponentEleme
         },
         [TIT.PDF]: () => {
           const t = targetInput as PdfTargetInput;
-          return <><span>Page #: </span><span className="text-info">${t.pageNumber}</span></>;
+          return <><span>Page #: </span><span className="text-info">{t.pageNumber}</span></>;
         }
       });
     }
-    
+
     return (
       <div className="card mt-2 ml-1 mr-1">
         <div className="card-header" style={{padding: "5px 10px"}}>
           <span>Annotation Target: </span>
           {!mbTarget ?
-             <span className="text-danger">None</span> 
+             <span className="text-danger">None</span>
            : <span className="text-info">{printTargetInputType(mbTarget)}</span>
           }
         </div>
-        {mbTarget ? 
+        {mbTarget ?
           <div className="card-body" style={{padding: "5px 10px"}}>
           {renderTargetDetail(mbTarget)}
           </div>
