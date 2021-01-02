@@ -15,3 +15,4 @@ if (configValues.length !== nonEmpty.length) {
 }
 
 module.exports = config;
+
