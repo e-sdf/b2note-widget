@@ -130,7 +130,7 @@ function postAnnotation(annotation: anModel.Annotation, user: AuthUser, authErrA
   return post<anModel.Annotation>(annotationsUrl, annotation, { token: user.token, authErrAction });
 }
 
-export async function postAnnotationSemantic(config: ConfRec, {target, user, uris, value, visibility, authErrAction}: SematicAnnotationPostRecord): Promise<any> {
+export function postAnnotationSemantic(config: ConfRec, {target, user, uris, value, visibility, authErrAction}: SematicAnnotationPostRecord): Promise<any> {
   const anTarget = ti.mkTarget(target);
   const body = anModel.mkSemanticAnBody(uris, value);
   const generator = anModel.mkGenerator(config.name, config.version, config.homepage);
@@ -139,7 +139,7 @@ export async function postAnnotationSemantic(config: ConfRec, {target, user, uri
   return postAnnotation(req, user, authErrAction);
 }
 
-export async function postAnnotationKeyword(config: ConfRec, {target, user, value, visibility, authErrAction}: KeywordAnnotationPostRecord): Promise<any> {
+export function postAnnotationKeyword(config: ConfRec, {target, user, value, visibility, authErrAction}: KeywordAnnotationPostRecord): Promise<any> {
   const anTarget = ti.mkTarget(target);
   const body = anModel.mkKeywordAnBody(value);
   const creator = anModel.mkCreator({id: user.profile.id});
@@ -148,7 +148,7 @@ export async function postAnnotationKeyword(config: ConfRec, {target, user, valu
   return postAnnotation(req, user, authErrAction);
 }
 
-export async function postAnnotationComment(config: ConfRec, {target, user, comment, visibility, authErrAction}: CommentAnnotationPostRecord): Promise<any> {
+export function postAnnotationComment(config: ConfRec, {target, user, comment, visibility, authErrAction}: CommentAnnotationPostRecord): Promise<any> {
   const anTarget = ti.mkTarget(target);
   const body = anModel.mkCommentAnBody(comment);
   const creator = anModel.mkCreator({id: user.profile.id});
@@ -156,7 +156,6 @@ export async function postAnnotationComment(config: ConfRec, {target, user, comm
   const req = anModel.mkAnnotation(body, anTarget, creator, generator, anModel.PurposeType.COMMENTING, visibility);
   return postAnnotation(req, user, authErrAction);
 }
-
 
 // Changing annotatations {{{1
 

@@ -12,6 +12,7 @@ interface Props {
   sysContext: SysContext;
   appContext: AppContext;
   annotation: anModel.Annotation;
+  editedHandler?: (edited: boolean) => void;
   anChangedHandler?: (newAn: anModel.Annotation) => void;
 }
 
@@ -21,6 +22,8 @@ export default function AnTagView(props: Props): React.FunctionComponentElement<
   const [errorMessage, setErrorMessage] = React.useState(null as string|null);
   const annotation = props.annotation;
   const mbUser = props.appContext.mbUser;
+
+  React.useEffect(() => props.editedHandler ? props.editedHandler(edited) : undefined, [edited]);
 
   function updateAn(newBody: anModel.AnBody): void {
     if (mbUser) {
@@ -51,7 +54,7 @@ export default function AnTagView(props: Props): React.FunctionComponentElement<
           className="btn btn-sm btn-outline-primary"
           data-toggle="tooltip" data-placement="bottom" title="Change annotation"
           onClick={() => setEdited(true)}>
-          <icons.EditIcon/> Change annotation
+          <icons.EditIcon/>
         </button>
       }
       {errorMessage || loading ?

@@ -3,13 +3,14 @@ import { matchSwitch } from "@babakness/exhaustive-type-checking";
 import type { SysContext, AppContext } from "app/context";
 import * as icons from "./icons";
 import { loggedUserPID } from "app/context";
+import { SelectorType } from "core/annotationsModel";
 import * as anModel from "core/annotationsModel";
 import * as anApi from "../api/annotations";
 import AnTagView from "./anTagView";
 import VisibilitySwitcher from "./visibilitySwitcher";
-import SpinningWheel from "./spinningWheel";
-import Alert from "./alert";
 import { ActionEnum, anNotify } from "app/notify";
+import Alert from "app/components/alert";
+import SpinningWheel from "app/components/spinningWheel";
 
 interface Props {
   sysContext: SysContext;
@@ -21,6 +22,7 @@ interface Props {
 
 export default function AnView(props: Props): React.FunctionComponentElement<Props> {
   const [pendingDelete, setPendingDelete] = React.useState(false);
+  const [edited, setEdited] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
   const [errorMessage, setErrorMessage] = React.useState(null as string|null);
   const annotation = props.annotation;
@@ -90,33 +92,29 @@ export default function AnView(props: Props): React.FunctionComponentElement<Pro
 
   function renderTarget(): React.ReactElement {
 
-    type Params = 
-      { part: "Page"; url: string; name: string|undefined; thisPart: boolean } |
-      { part: "Link"; url: string; name: string|undefined; thisPart: boolean } |
-      { part: "Text Selection"; selectedText: string } |
-      { part: "SVG Selection" }
-    
-    function renderTargetPart(params: Params): React.ReactElement {
+    interface UrlObject {
+      type: string;
+      name: string|undefined;
+      url: string;
+      thisUrl: boolean;
+    }
+
+    function renderUrlBadge(o: UrlObject): React.ReactElement {
+      const lbl = o.name || o.url;
       return (
-        <div className="mr-2 mb-2">
-          {(params.part === "Page" || params.part === "Link") && params.thisPart ?
-            <span className="badge badge-secondary">
-              This {params.part}
-            </span>
+        <div className="mr-2">
+          {o.thisUrl ?
+            <div className="badge badge-secondary">
+              This {o.type}
+            </div>
           :
-            <a 
-            href={params.part === "Page" || params.part === "Link" ? (params.name || params.url) : "#"}
+            <a
+            href={o.url}
             target="_blank" rel="noreferrer">
-              <span className="badge badge-info"
-                data-toggle="tooltip" data-placement="bottom" 
-                title={matchSwitch(params.part, {
-                  ["Page"]: () => (params as any).name || (params as any).url,
-                  ["Link"]: () => (params as any).name || (params as any).url,
-                  ["Text Selection"]: () => (params as any).selectedText,
-                  ["SVG Selection"]: () => "Image"
-                })}>
-                {params.part}
-              </span>
+              <div className="badge badge-info"
+                data-toggle="tooltip" data-placement="bottom" title={o.type}>
+                {lbl}
+              </div>
             </a>
           }
         </div>
@@ -124,13 +122,46 @@ export default function AnView(props: Props): React.FunctionComponentElement<Pro
     }
 
     return (
-      <div className="d-flex flex-row">
-        {renderTargetPart({ part: "Page", url: target.id, name: target.idName, thisPart: thisId })}
-        {target.source ? renderTargetPart({ part: "Link", url: target.source, name: target.sourceName, thisPart: thisSource }) : <></>}
-        {target.selector?.type === "XPathSelector" ?
-          renderTargetPart({ part: "Text Selection", selectedText: target.selector.selectedText}) : <></>}
-        {target.selector?.type === "SvgSelector" ?
-          renderTargetPart({ part: "SVG Selection" }) : <></>}
+      <div>
+        {renderUrlBadge({ type: "Page", name: target.idName, url: target.id, thisUrl: thisId })}
+        {target.source ?
+          renderUrlBadge({ type: "Link", name: target.sourceName, url: target.source, thisUrl: thisSource }) : <></>}
+        {target.selector ?
+          matchSwitch(target.selector.type, {
+            [SelectorType.XPATH]: () =>
+              <div className="badge badge-info"
+                data-toggle="tooltip" data-placement="bottom"
+                title={(target.selector as anModel.XPathTextSelector).selectedText}>
+                Text selection
+              </div>,
+            [SelectorType.SVG]: () =>
+              <div className="badge badge-info">
+                Image selection
+              </div>,
+            [SelectorType.PDF]: () => {
+              const s = target.selector as anModel.PdfSelector;
+              return (
+                <>
+                  <div className="badge badge-info">
+                    PDF page {s.pageNumber}
+                  </div>
+                  {s.selector ?
+                    <div className="badge badge-info ml-1">
+                      Selection
+                    </div>
+                  : <></>}
+                </>
+              );
+            },
+            [SelectorType.TABLE]: () => {
+              const s = target.selector as anModel.TableSelector;
+              return (
+                <div className="badge badge-info">
+                  Table {s.sheet} {s.range ? anModel.printTableRange(s.range) : ""}
+                </div>
+              );
+            }
+          }) : <></>}
       </div>
     );
   }
@@ -140,18 +171,28 @@ export default function AnView(props: Props): React.FunctionComponentElement<Pro
   function renderAnActions(): React.ReactElement {
     return (
       <>
-        <VisibilitySwitcher
-          text={false}
-          small={true}
-          visibility={annotation.visibility}
-          setVisibility={updateVisibility}/>
+        {!edited ?
+          <VisibilitySwitcher
+            text={false}
+            small={true}
+            visibility={annotation.visibility}
+            setVisibility={updateVisibility}/>
+        : <></>}
         <div className="btn-group" style={padded}>
-          <button type="button"
-            className="btn btn-sm btn-outline-danger"
-            data-toggle="tooltip" data-placement="bottom" title="Delete this annotation"
-            onClick={() => setPendingDelete(true)}>
-            <icons.DeleteIcon/>
-          </button>
+          <AnTagView
+            sysContext={props.sysContext}
+            appContext={props.appContext}
+            annotation={annotation}
+            editedHandler={setEdited}
+            anChangedHandler={an => { if (props.anChangedHandler) { props.anChangedHandler(an); } }}/>
+          {!edited ?
+            <button type="button"
+              className="btn btn-sm btn-outline-danger"
+              data-toggle="tooltip" data-placement="bottom" title="Delete this annotation"
+              onClick={() => setPendingDelete(true)}>
+              <icons.DeleteIcon/>
+            </button>
+          : <></>}
         </div>
       </>
     );
@@ -163,17 +204,8 @@ export default function AnView(props: Props): React.FunctionComponentElement<Pro
     return (
       <div className="ml-2 pb-2 border-bottom">
         {renderTarget()}
-        {isMine ?
-          <AnTagView
-            sysContext={props.sysContext}
-            appContext={props.appContext}
-            annotation={annotation}
-            anChangedHandler={an => { if (props.anChangedHandler) { props.anChangedHandler(an); } }}
-          />
-        : <></>
-        }
         <div className="mt-2 d-flex flex-row">
-          {isMine ? 
+          {isMine ?
             renderAnActions()
           :
             <icons.OthersIcon className="text-secondary"

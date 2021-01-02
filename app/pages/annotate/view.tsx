@@ -1,7 +1,7 @@
 import { matchSwitch } from "@babakness/exhaustive-type-checking";
 import * as React from "react";
 import { printTableRange } from "core/annotationsModel";
-import type { TargetInput, TextSelectionTargetInput, ImageRegionOnPageTargetInput, TableTargetInput, PdfTargetInput, LinkTargetInput } from "core/targetInput";
+import type { TargetInput, LinkTargetInput, TextSelectionTargetInput, ImageRegionOnPageTargetInput, TableTargetInput, PdfTargetInput } from "core/targetInput";
 import { TargetInputType as TIT, printTargetInputType } from "core/targetInput";
 import type { SysContext, AppContext } from "app/context";
 import * as ac from "app/components/autocomplete";
@@ -57,7 +57,13 @@ export default function AnnotatePage(props: Props): React.FunctionComponentEleme
         },
         [TIT.PDF]: () => {
           const t = targetInput as PdfTargetInput;
-          return <><span>Page #: </span><span className="text-info">{t.pageNumber}</span></>;
+          return (
+            <>
+              <span>Page# </span>
+              <span className="text-info">{t.pageNumber}</span>
+              {t.svgSelector ? <span className="text-info"> (selection)</span> : <></>}
+            </>
+          );
         }
       });
     }
