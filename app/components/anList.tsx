@@ -93,14 +93,14 @@ export default function AnList(props: Props): React.FunctionComponentElement<Pro
         const anl = tagRecord.annotations;
         return (
           <div className="ml-4">
-            {anl.some(currentTarget) ? 
+            {anl.some(currentTarget) ?
               <div className="bg-light mb-1 font-italic">this page</div>
             : <></>}
             {tagRecord.annotations.map(
               an => {
                 return (
                     <div key={an.id} className="bg-light mb-1">
-                    {!currentTarget(an) ? 
+                    {!currentTarget(an) ?
                       <a href={an.target.id} target="_blank" rel="noreferrer">{an.target.id}</a>
                     : <></>}
                   </div>
@@ -154,7 +154,7 @@ export default function AnList(props: Props): React.FunctionComponentElement<Pro
               <div style={{verticalAlign: "middle", whiteSpace: "nowrap"}}>
                 <AnTagDisplay
                   anBody={an.body}
-                  maxLen={34}
+                  maxLen={33}
                   onClick={() => openOntologiesInfo({ label: anModel.getLabel(an), uris: anModel.getSourcesFromAnBody(an.body) })}
                 />
               </div>
@@ -168,7 +168,7 @@ export default function AnList(props: Props): React.FunctionComponentElement<Pro
                   {renderAnnotations()}
                 </div>
               </div> : <></>}
-          {!tagRecord.showAnnotationsFlag && props.displayTargets ? renderTargets() : <></>} 
+          {!tagRecord.showAnnotationsFlag && props.displayTargets ? renderTargets() : <></>}
           </div>
         </div>
       );
