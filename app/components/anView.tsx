@@ -11,6 +11,7 @@ import VisibilitySwitcher from "./visibilitySwitcher";
 import { ActionEnum, anNotify } from "app/notify";
 import Alert from "app/components/alert";
 import SpinningWheel from "app/components/spinningWheel";
+import { notifyViewImage } from "app/notify";
 
 interface Props {
   sysContext: SysContext;
@@ -135,9 +136,14 @@ export default function AnView(props: Props): React.FunctionComponentElement<Pro
                 Text selection
               </div>,
             [SelectorType.SVG]: () =>
-              <div className="badge badge-info">
-                Image selection
-                <a href="#"><icons.LookIcon/></a>
+              <div>
+                <span className="badge badge-info">
+                  Image selection
+                </span>
+                <span> </span>
+                <a href="#"
+                  onClick={() => notifyViewImage(target.source || target.id, (target.selector as anModel.SvgSelector).value)}
+                ><icons.LookIcon/></a>
               </div>,
             [SelectorType.PDF]: () => {
               const s = target.selector as anModel.PdfSelector;

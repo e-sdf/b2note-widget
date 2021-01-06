@@ -31,3 +31,7 @@ export function notifyLoaded(): void {
 export function notifyToken(token: string): void {
   parent.postMessage({ token }, "*");
 }
+
+export function notifyViewImage(url: string, svg: string): void {
+  parent.postMessage({ url, svg }, "*");
+}
