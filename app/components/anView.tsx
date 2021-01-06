@@ -137,6 +137,7 @@ export default function AnView(props: Props): React.FunctionComponentElement<Pro
             [SelectorType.SVG]: () =>
               <div className="badge badge-info">
                 Image selection
+                <a href="#"><icons.LookIcon/></a>
               </div>,
             [SelectorType.PDF]: () => {
               const s = target.selector as anModel.PdfSelector;
