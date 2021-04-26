@@ -1,4 +1,4 @@
-import { matchSwitch } from '@babakness/exhaustive-type-checking';
+import { matchSwitch } from "@babakness/exhaustive-type-checking";
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 import { config } from "app/config";
@@ -304,4 +304,3 @@ export function renderWidget(sysContext: SysContext): void {
     console.error("[B2NOTE] Widget DOM element missing");
   }
 }
-

@@ -1,6 +1,7 @@
 import type { Token } from "core/http";
 
 export enum AuthProvidersEnum {
+  KEYCLOAK= "keycloak",
   B2ACCESS = "b2access",
   OPEN_AIRE = "openaire"
 }
