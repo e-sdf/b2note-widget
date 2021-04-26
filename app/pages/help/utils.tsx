@@ -2,7 +2,7 @@ import * as React from "react";
 import { config } from "../../config";
 import { b2noteBlue } from "app/components/defs";
 
-export const imgHelpPath = config.widgetServerUrl + config.imgPath + "help/";
+export const imgHelpPath = config.widgetUrl + config.imgPath + "help/";
 
 function renderButtonItemTr(icon: React.ReactElement, border: string, bgCol: string, text: string): React.ReactElement {
   return (

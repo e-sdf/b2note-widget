@@ -1,5 +1,5 @@
 export interface ConfRec {
-  widgetServerUrl: string;
+  widgetUrl: string;
   apiServerUrl: string;
   apiPath: string;
   imgPath: string;
@@ -12,7 +12,7 @@ export interface ConfRec {
 const confRec = (window as any).b2note as ConfRec|undefined;
 
 export const config: ConfRec = {
-  widgetServerUrl: confRec?.widgetServerUrl ? confRec.widgetServerUrl : "http://localhost:8080",
+  widgetUrl: confRec?.widgetUrl ? confRec.widgetUrl : "http://localhost:8080",
   apiServerUrl: confRec?.apiServerUrl ? confRec.apiServerUrl : "http://localhost:3060",
   apiPath: confRec?.apiPath ? confRec.apiPath : "/api",
   imgPath: "/widget/img/",

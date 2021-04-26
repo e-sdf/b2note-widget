@@ -14,7 +14,7 @@ export default function AuthProviderSelectionPage(props: Props): React.FunctionC
       <div className="row mt-3 d-flex flex-row justify-content-center">
         <button className="btn btn-outline-primary"
           onClick={() => props.selectedHandler(AuthProvidersEnum.KEYCLOAK)}>
-          <img src={props.config.widgetServerUrl + props.config.imgPath + "keycloak-logo.png"}/>
+          <img src={props.config.widgetUrl + props.config.imgPath + "keycloak-logo.png"}/>
         </button>
       </div>
     </div>
