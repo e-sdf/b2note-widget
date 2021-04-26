@@ -15,7 +15,7 @@ export const config: ConfRec = {
   widgetServerUrl: confRec?.widgetServerUrl ? confRec.widgetServerUrl : "http://localhost:8080",
   apiServerUrl: confRec?.apiServerUrl ? confRec.apiServerUrl : "http://localhost:3060",
   apiPath: confRec?.apiPath ? confRec.apiPath : "/api",
-  imgPath: "/img/",
+  imgPath: "/widget/img/",
   name: "B2NOTE",
   version: "v3.11.0",
   homepage: "https://b2note.eudat.eu",
